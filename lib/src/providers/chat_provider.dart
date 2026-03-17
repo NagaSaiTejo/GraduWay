@@ -48,7 +48,7 @@ class ChatProvider with ChangeNotifier {
   }
 
   void createSession(dynamic mentee) {
-    final chatId = \"chat_${mentee.id}\";
+    final chatId = "chat_${mentee.id}";
     if (!_messages.containsKey(chatId)) {
       _messages[chatId] = [];
       saveToLocal();

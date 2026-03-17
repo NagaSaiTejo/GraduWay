@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:alumini_screen/src/models/chat_model.dart';
+import 'package:alumini_screen/src/models/mentorship_model.dart';
 import 'package:alumini_screen/src/providers/chat_provider.dart';
 
 class ChatDetailPage extends StatefulWidget {

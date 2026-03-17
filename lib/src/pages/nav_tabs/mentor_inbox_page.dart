@@ -1,4 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:alumini_screen/src/models/mentorship_model.dart';
+import 'package:alumini_screen/src/widgets/mentorship_request_card.dart';
+import 'package:alumini_screen/src/pages/features/Chat/chat_detail_page.dart';
 import 'package:alumini_screen/src/providers/mentorship_provider.dart';
 
 class MentorInboxPage extends StatelessWidget {
@@ -219,25 +223,6 @@ class MentorInboxPage extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  void _updateStatus(String id, MentorshipStatus status) {
-    _service.updateRequestStatus(id, status);
-    
-    final message = status == MentorshipStatus.accepted 
-      ? "Request accepted! Chat is now enabled." 
-      : "Request rejected.";
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message), 
-        backgroundColor: status == MentorshipStatus.accepted 
-          ? Colors.green 
-          : Colors.red,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
