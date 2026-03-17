@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:alumini_screen/src/pages/features/professional_page.dart';
-import 'package:alumini_screen/src/pages/features/skills_page.dart';
-import 'package:alumini_screen/src/pages/features/mentorship_page.dart';
-import 'package:alumini_screen/src/pages/features/opportunities_page.dart';
-import 'package:alumini_screen/src/pages/features/achievements_page.dart';
-import 'package:alumini_screen/src/pages/features/activities_page.dart';
-import 'package:alumini_screen/src/pages/features/notes_page.dart';
-import 'package:alumini_screen/src/pages/features/contact_page.dart';
+import 'package:alumini_screen/src/pages/features/profile_pages/professional_page.dart';
+import 'package:alumini_screen/src/pages/features/profile_pages/skills_page.dart';
+import 'package:alumini_screen/src/pages/features/profile_pages/activities_page.dart';
+import 'package:alumini_screen/src/pages/features/profile_pages/notes_page.dart';
+import 'package:alumini_screen/src/pages/features/profile_pages/contact_page.dart';
 import 'package:alumini_screen/src/pages/features/detail_page.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -194,27 +191,11 @@ class ProfileScreen extends StatelessWidget {
         ),
         _buildDashboardCard(
           context,
-          "Mentorship",
-          "Guide Students",
-          Icons.school_outlined,
-          const Color(0xFFFFB74D),
-          const MentorshipPage(),
-        ),
-        _buildDashboardCard(
-          context,
-          "Opportunities",
-          "Job Posts",
-          Icons.work_outline,
-          const Color(0xFFBA68C8),
-          const OpportunitiesPage(),
-        ),
-        _buildDashboardCard(
-          context,
           "Achievements",
           "Awards, Certs",
           Icons.emoji_events_outlined,
           const Color(0xFFFFD54F),
-          const AchievementsPage(),
+          const DetailPage(title: "Achievements", icon: Icons.emoji_events_outlined, themeColor: Color(0xFFFFD54F)), // Use DetailPage as fallback
         ),
         _buildDashboardCard(
           context,
