@@ -44,37 +44,37 @@ class ContactPage extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 32),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.message_outlined),
-                label: const Text("Send Message", style: TextStyle(fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF06292),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                  elevation: 0,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton.icon(
-                onPressed: () {},
-                icon: const Icon(Icons.person_add_outlined),
-                label: const Text("Connect with Alex", style: TextStyle(fontWeight: FontWeight.bold)),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Color(0xFFF06292)),
-                  foregroundColor: const Color(0xFFF06292),
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                ),
-              ),
-            ),
+            // const SizedBox(height: 32),
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: ElevatedButton.icon(
+            //     onPressed: () {},
+            //     icon: const Icon(Icons.message_outlined),
+            //     label: const Text("Send Message", style: TextStyle(fontWeight: FontWeight.bold)),
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: const Color(0xFFF06292),
+            //       foregroundColor: Colors.white,
+            //       padding: const EdgeInsets.symmetric(vertical: 18),
+            //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            //       elevation: 0,
+            //     ),
+            //   ),
+            // ),
+            // const SizedBox(height: 16),
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: OutlinedButton.icon(
+            //     onPressed: () {},
+            //     icon: const Icon(Icons.person_add_outlined),
+            //     label: const Text("Connect with Alex", style: TextStyle(fontWeight: FontWeight.bold)),
+            //     style: OutlinedButton.styleFrom(
+            //       side: const BorderSide(color: Color(0xFFF06292)),
+            //       foregroundColor: const Color(0xFFF06292),
+            //       padding: const EdgeInsets.symmetric(vertical: 18),
+            //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

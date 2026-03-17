@@ -8,7 +8,7 @@ class SkillsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
-        title: const Text("Skills & Expertise"),
+        title: const Text("Mentoring Topics"),
         backgroundColor: const Color(0xFF81C784),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -17,9 +17,9 @@ class SkillsPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            _buildSkillSection("Primary Skills", ["Flutter", "Dart", "Firebase", "Android"]),
+            _buildSkillSection("Technical Guidance", ["Flutter Architecture", "Dart Advanced", "Firebase Scalability", "Android Performance"]),
             const SizedBox(height: 20),
-            _buildSkillSection("Secondary Skills", ["REST APIs", "System Design", "UI/UX", "Node.js"]),
+            _buildSkillSection("Career Coaching", ["Resume Review", "Mock Interviews", "System Design", "Leadership Skills"]),
             const SizedBox(height: 20),
             _buildSkillSection("Tools", ["Git", "Docker", "Figma", "VS Code", "Jenkins"]),
             const SizedBox(height: 20),

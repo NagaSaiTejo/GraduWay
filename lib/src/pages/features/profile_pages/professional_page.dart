@@ -8,7 +8,7 @@ class ProfessionalPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF0F4F8),
       appBar: AppBar(
-        title: const Text("Professional Details"),
+        title: const Text("Experience & Expertise"),
         backgroundColor: const Color(0xFF64B5F6),
         foregroundColor: Colors.white,
         elevation: 0,

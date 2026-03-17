@@ -4,7 +4,10 @@ import 'package:alumini_screen/src/pages/features/profile_pages/skills_page.dart
 import 'package:alumini_screen/src/pages/features/profile_pages/activities_page.dart';
 import 'package:alumini_screen/src/pages/features/profile_pages/notes_page.dart';
 import 'package:alumini_screen/src/pages/features/profile_pages/contact_page.dart';
+import 'package:alumini_screen/src/pages/features/Mentorship/alumni_requests_page.dart';
 import 'package:alumini_screen/src/pages/features/Common/detail_page.dart';
+import 'package:alumini_screen/src/services/mentorship_service.dart';
+import 'package:alumini_screen/src/models/mentorship_model.dart';
 
 class ProfileScreen extends StatelessWidget {
   final String userName;
@@ -33,15 +36,21 @@ class ProfileScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      "Dashboard",
+                      "Mentor Dashboard",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1A1A1A),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
+                    _buildMentoringBio(),
+                    const SizedBox(height: 24),
+                    _buildQuickActionButtons(context),
+                    const SizedBox(height: 24),
                     _buildGridDashboard(context),
+                    const SizedBox(height: 24),
+                    _buildActiveMenteesSection(context),
                     const SizedBox(height: 100), // Space for floating navbar
                   ],
                 ),
@@ -119,7 +128,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      "$techField • Google",
+                      "$techField • Senior Mentor",
                       style: TextStyle(
                         color: Colors.white.withOpacity(0.9),
                         fontSize: 14,
@@ -129,10 +138,10 @@ class ProfileScreen extends StatelessWidget {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Icon(Icons.school_outlined, color: Colors.white.withOpacity(0.7), size: 14),
+                        Icon(Icons.verified_user_outlined, color: Colors.white.withOpacity(0.7), size: 14),
                         const SizedBox(width: 4),
                         Text(
-                          "Batch 2022 • CS",
+                          "Google • 5+ YOE",
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.7),
                             fontSize: 12,
@@ -175,53 +184,208 @@ class ProfileScreen extends StatelessWidget {
       children: [
         _buildDashboardCard(
           context,
-          "Professional",
-          "Company, Role",
-          Icons.business_center_outlined,
+          "Experience",
+          "Expertise & History",
+          Icons.workspace_premium_outlined,
           const Color(0xFF64B5F6),
           const ProfessionalPage(),
         ),
         _buildDashboardCard(
           context,
-          "Skills",
-          "Tech Stack",
+          "Skillset",
+          "Mentoring Topics",
           Icons.psychology_outlined,
           const Color(0xFF81C784),
           const SkillsPage(),
         ),
         _buildDashboardCard(
           context,
-          "Achievements",
-          "Awards, Certs",
+          "Requests",
+          "Student Queries",
+          Icons.pending_actions_outlined,
+          const Color(0xFFFFB74D),
+          const AlumniRequestsPage(),
+        ),
+        _buildDashboardCard(
+          context,
+          "Sessions",
+          "Host Webinars",
+          Icons.video_camera_front_outlined,
+          const Color(0xFFBA68C8),
+          const DetailPage(title: "Upcoming Sessions", icon: Icons.video_camera_front_outlined, themeColor: Color(0xFFBA68C8)),
+        ),
+        _buildDashboardCard(
+          context,
+          "Awards",
+          "Recognition",
           Icons.emoji_events_outlined,
           const Color(0xFFFFD54F),
-          const DetailPage(title: "Achievements", icon: Icons.emoji_events_outlined, themeColor: Color(0xFFFFD54F)), // Use DetailPage as fallback
-        ),
-        _buildDashboardCard(
-          context,
-          "Activities",
-          "Events, Timeline",
-          Icons.event_note_outlined,
-          const Color(0xFF4DB6AC),
-          const ActivitiesPage(),
-        ),
-        _buildDashboardCard(
-          context,
-          "Notes",
-          "Personal Info",
-          Icons.description_outlined,
-          const Color(0xFF90A4AE),
-          const NotesPage(),
+          const DetailPage(title: "Mentor Awards", icon: Icons.emoji_events_outlined, themeColor: Color(0xFFFFD54F)),
         ),
         _buildDashboardCard(
           context,
           "Contact",
-          "Email, Socials",
+          "Office Hours",
           Icons.alternate_email_outlined,
           const Color(0xFFF06292),
           const ContactPage(),
         ),
       ],
+    );
+  }
+
+  Widget _buildMentoringBio() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.blueAccent.withOpacity(0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.format_quote, color: Colors.blueAccent, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                "Mentoring Philosophy",
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent.withOpacity(0.8),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            "I believe in building a strong foundation in core engineering principles. Happy to guide students on System Design, Flutter Architecture, and Career Growth.",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.black54,
+              fontStyle: FontStyle.italic,
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionButtons(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildActionButton(
+            context,
+            "Start Session",
+            Icons.add_circle_outline,
+            const Color(0xFF7B66FF),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildActionButton(
+            context,
+            "Manage Mentees",
+            Icons.people_outline,
+            Colors.white,
+            isOutlined: true,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, String label, IconData icon, Color color, {bool isOutlined = false}) {
+    return ElevatedButton.icon(
+      onPressed: () {},
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: isOutlined ? Colors.white : color,
+        foregroundColor: isOutlined ? const Color(0xFF7B66FF) : Colors.white,
+        elevation: isOutlined ? 0 : 2,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: isOutlined ? const BorderSide(color: Color(0xFF7B66FF)) : BorderSide.none,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveMenteesSection(BuildContext context) {
+    final MentorshipService service = MentorshipService();
+    final activeMentees = service.getRequests().where((r) => r.status == MentorshipStatus.accepted).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              "Active Mentees",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            TextButton(
+              onPressed: () {},
+              child: const Text("See All"),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        if (activeMentees.isEmpty)
+          Container(
+            padding: const EdgeInsets.all(20),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Center(
+              child: Text("Provide guidance to start seeing mentees here.", style: TextStyle(color: Colors.grey)),
+            ),
+          )
+        else
+          ...activeMentees.take(2).map((mentee) => _buildMenteeCard(mentee)),
+      ],
+    );
+  }
+
+  Widget _buildMenteeCard(MentorshipRequest mentee) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            backgroundColor: Colors.blueAccent.withOpacity(0.1),
+            child: Text(mentee.studentName[0], style: const TextStyle(color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(mentee.studentName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(mentee.topics.first, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+              ],
+            ),
+          ),
+          const Icon(Icons.chevron_right, color: Colors.grey),
+        ],
+      ),
     );
   }
 
