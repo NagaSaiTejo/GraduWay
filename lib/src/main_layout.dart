@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:alumini_screen/src/dashboard.dart';
 import 'package:alumini_screen/src/profile.dart';
+import 'package:alumini_screen/src/pages/mentor_inbox_page.dart';
 import 'package:alumini_screen/src/widgets/floating_navbar.dart';
 
 class MainLayout extends StatefulWidget {
@@ -28,7 +29,7 @@ class _MainLayoutState extends State<MainLayout> {
     _pages = [
       Dashboard(userName: widget.userName, techField: widget.techField),
       const PlaceholderScreen(title: "Alumni Directory", icon: Icons.people_alt_outlined),
-      const PlaceholderScreen(title: "Messages", icon: Icons.chat_bubble_outline),
+      const MentorInboxPage(),
       const PlaceholderScreen(title: "Notifications", icon: Icons.notifications_none),
       ProfileScreen(userName: widget.userName, techField: widget.techField),
     ];
@@ -93,7 +94,7 @@ class PlaceholderScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            "Coming Soon",
+            "Nothing",
             style: TextStyle(
               fontSize: 16,
               color: Colors.grey[400],

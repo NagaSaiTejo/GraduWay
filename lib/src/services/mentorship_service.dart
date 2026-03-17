@@ -1,0 +1,57 @@
+import 'dart:async';
+import 'package:alumini_screen/src/models/mentorship_model.dart';
+
+class MentorshipService {
+  static final MentorshipService _instance = MentorshipService._internal();
+  factory MentorshipService() => _instance;
+  MentorshipService._internal();
+
+  final List<MentorshipRequest> _requests = [];
+  final _controller = StreamController<List<MentorshipRequest>>.broadcast();
+
+  Stream<List<MentorshipRequest>> get requestsStream => _controller.stream;
+
+  void submitRequest(MentorshipRequest request) {
+    _requests.add(request);
+    _controller.add(List.unmodifiable(_requests));
+  }
+
+  void updateRequestStatus(String id, MentorshipStatus status) {
+    final index = _requests.indexWhere((r) => r.id == id);
+    if (index != -1) {
+      _requests[index] = _requests[index].copyWith(status: status);
+      _controller.add(List.unmodifiable(_requests));
+    }
+  }
+
+  void endMentorship(String id) {
+    updateRequestStatus(id, MentorshipStatus.ended);
+  }
+
+  List<MentorshipRequest> getRequests() => List.unmodifiable(_requests);
+  
+  // Mock AI Logic
+  List<String> getReplySuggestions(MentorshipRequest request) {
+    return [
+      "Hi ${request.studentName}, I'd love to help with your request on ${request.topics.first}!",
+      "Hello! Your background in ${request.studentSkills.first} looks great. Happy to mentor you.",
+      "I'm available during your preferred schedule. Let's connect!",
+    ];
+  }
+
+  // Seed data for demo
+  void seedData() {
+    if (_requests.isEmpty) {
+      submitRequest(MentorshipRequest(
+        id: "1",
+        studentName: "John Doe",
+        studentBranch: "Computer Science",
+        studentYear: "3rd Year",
+        studentSkills: ["Flutter", "Dart", "Firebase"],
+        reason: "I want to learn more about architecture patterns in Flutter.",
+        topics: ["Flutter Best Practices", "Resume & Portfolio Review"],
+        createdAt: DateTime.now().subtract(const Duration(days: 1)),
+      ));
+    }
+  }
+}

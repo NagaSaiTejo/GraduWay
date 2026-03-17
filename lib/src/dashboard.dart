@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:alumini_screen/src/pages/detail_page.dart';
+import 'package:alumini_screen/src/pages/alumni_requests_page.dart';
 
 class Dashboard extends StatelessWidget {
   final String userName;
@@ -29,7 +30,7 @@ class Dashboard extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildSectionTitle('Quick Actions'),
                   const SizedBox(height: 16),
-                  _buildQuickActions(),
+                  _buildQuickActions(context),
                   const SizedBox(height: 32),
                   _buildSectionTitle('Recent Activity'),
                   const SizedBox(height: 16),
@@ -241,25 +242,37 @@ class Dashboard extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: [
-          _buildActionButton("Post Job", Icons.add_circle_outline, Colors.blueAccent),
+          _buildActionButton(context, "Post Job", Icons.add_circle_outline, Colors.blueAccent),
           const SizedBox(width: 12),
-          _buildActionButton("Events", Icons.event_note, Colors.indigoAccent),
+          _buildActionButton(context, "Events", Icons.event_note, Colors.indigoAccent),
           const SizedBox(width: 12),
-          _buildActionButton("Requests", Icons.pending_actions, Colors.teal),
+          _buildActionButton(
+            context,
+            "Requests", 
+            Icons.pending_actions, 
+            Colors.teal,
+            hasNotification: true,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AlumniRequestsPage()),
+              );
+            },
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(String title, IconData icon, Color color) {
+  Widget _buildActionButton(BuildContext context, String title, IconData icon, Color color, {VoidCallback? onTap, bool hasNotification = false}) {
     return Builder(
       builder: (context) => InkWell(
-        onTap: () {
+        onTap: onTap ?? () {
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -282,7 +295,24 @@ class Dashboard extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 20),
+              Stack(
+                children: [
+                  Icon(icon, color: color, size: 20),
+                  if (hasNotification)
+                    Positioned(
+                      right: 0,
+                      top: 0,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
               const SizedBox(width: 8),
               Text(
                 title,
