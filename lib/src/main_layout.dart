@@ -29,7 +29,6 @@ class _MainLayoutState extends State<MainLayout> {
     super.initState();
     _pages = [
       Dashboard(userName: widget.userName, techField: widget.techField),
-      const PlaceholderScreen(title: "Alumni Directory", icon: Icons.people_alt_outlined),
       const MentorInboxPage(),
       const PlaceholderScreen(title: "Notifications", icon: Icons.notifications_none),
       ProfileScreen(userName: widget.userName, techField: widget.techField),
