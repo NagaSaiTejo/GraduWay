@@ -1,3 +1,4 @@
+// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -35,7 +36,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.isLoggedIn;
       final hasSeenOnboarding = ref.read(hasSeenOnboardingProvider);
-      final isPublic = _publicRoutes.any((r) => state.matchedLocation.startsWith(r));
+      final isPublic =
+          _publicRoutes.any((r) => state.matchedLocation.startsWith(r));
 
       // 1. If not logged in and not on a public route, go to splash or login
       if (!isLoggedIn && !isPublic) return '/login';
@@ -46,7 +48,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
 
       // 3. If logged in and on login/onboarding, go to role-specific home
-      if (isLoggedIn && (state.matchedLocation == '/login' || state.matchedLocation == '/onboarding')) {
+      if (isLoggedIn &&
+          (state.matchedLocation == '/login' ||
+              state.matchedLocation == '/onboarding')) {
         if (authState.role == UserRole.student) return '/home';
         if (authState.role == UserRole.alumni) return '/alumni-home';
         if (authState.role == UserRole.admin) return '/admin-home';
@@ -55,7 +59,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/splash', builder: (_, __) => const SplashScreen()),
-      GoRoute(path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
+      GoRoute(
+          path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
 
       // ─── Student Shell ──────────────────────────────────────────────────
@@ -63,7 +68,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => StudentShell(child: child),
         routes: [
           GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
-          GoRoute(path: '/alumni', builder: (_, __) => const AlumniListScreen()),
+          GoRoute(
+              path: '/alumni', builder: (_, __) => const AlumniListScreen()),
           GoRoute(path: '/qa', builder: (_, __) => const QAScreen()),
           GoRoute(path: '/roadmap', builder: (_, __) => const RoadmapScreen()),
           GoRoute(path: '/badges', builder: (_, __) => const BadgesScreen()),
@@ -74,9 +80,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => AlumniShell(child: child),
         routes: [
-          GoRoute(path: '/alumni-home', builder: (_, __) => const AlumniHomeScreen()),
-          GoRoute(path: '/alumni-questions', builder: (_, __) => const StudentQuestionsScreen()),
-          GoRoute(path: '/alumni-profile', builder: (_, __) => const ProfileScreen()), // reuse profile for now
+          GoRoute(
+              path: '/alumni-home',
+              builder: (_, __) => const AlumniHomeScreen()),
+          GoRoute(
+              path: '/alumni-questions',
+              builder: (_, __) => const StudentQuestionsScreen()),
+          GoRoute(
+              path: '/alumni-profile',
+              builder: (_, __) =>
+                  const ProfileScreen()), // reuse profile for now
         ],
       ),
 
@@ -84,9 +97,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => AdminShell(child: child),
         routes: [
-          GoRoute(path: '/admin-home', builder: (_, __) => const AdminOverviewScreen()),
-          GoRoute(path: '/admin-users', builder: (_, __) => const AdminUsersScreen()),
-          GoRoute(path: '/admin-profile', builder: (_, __) => const ProfileScreen()), // reuse profile
+          GoRoute(
+              path: '/admin-home',
+              builder: (_, __) => const AdminOverviewScreen()),
+          GoRoute(
+              path: '/admin-users',
+              builder: (_, __) => const AdminUsersScreen()),
+          GoRoute(
+              path: '/admin-profile',
+              builder: (_, __) => const ProfileScreen()), // reuse profile
         ],
       ),
 
@@ -99,8 +118,12 @@ final routerProvider = Provider<GoRouter>((ref) {
         },
       ),
       GoRoute(path: '/events', builder: (_, __) => const EventsScreen()),
-      GoRoute(path: '/placement', builder: (_, __) => const PlacementRealityScreen()),
-      GoRoute(path: '/skill-package', builder: (_, __) => const SkillPackageScreen()),
+      GoRoute(
+          path: '/placement',
+          builder: (_, __) => const PlacementRealityScreen()),
+      GoRoute(
+          path: '/skill-package',
+          builder: (_, __) => const SkillPackageScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
     ],
   );

@@ -2,11 +2,11 @@
 
 **GraduWay** is a premier Alumni-Student Guidance Platform tailored for Aditya Engineering College. It serves as a digital bridge connecting ambitious students with experienced alumni to foster mentorship, professional growth, and networking within the college ecosystem.
 
-## 🚀 Purpose
+## Purpose
 
 The primary goal of GraduWay is to facilitate meaningful interactions between current students and alumni. By leveraging the expertise of graduates, students gain invaluable industrial insights, career guidance, and technical mentorship that textbooks alone cannot provide.
 
-## ✨ Key Features
+## Key Features
 
 - **Role-Based Access**: Specialized interfaces for Students, Alumni, and Admins.
 - **Mentorship Hub**: Connect with alumni based on industry, expertise, and department.
@@ -15,7 +15,7 @@ The primary goal of GraduWay is to facilitate meaningful interactions between cu
 - **Event Networking**: Stay updated on webinars, workshops, and industrial visits.
 - **Interactive Roadmaps**: Visualize career journeys in various technical fields.
 
-## 🛠 Tech Stack
+## Tech Stack
 
 - **Framework**: Flutter (Dart)
 - **State Management**: Riverpod
@@ -23,7 +23,7 @@ The primary goal of GraduWay is to facilitate meaningful interactions between cu
 - **Animations**: Flutter Animate, Shimmer
 - **UI Design**: Modern, Responsive, and User-Centric
 
-## 📥 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -49,7 +49,7 @@ The primary goal of GraduWay is to facilitate meaningful interactions between cu
    flutter run
    ```
 
-## 👥 Roles & Permissions
+## Roles & Permissions
 
 - **Students**: Can search alumni, ask questions, view roadmaps, and participate in events.
 - **Alumni**: Can mentor students, share experiences, and guide future graduates.

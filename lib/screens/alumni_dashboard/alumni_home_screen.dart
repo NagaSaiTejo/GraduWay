@@ -1,3 +1,4 @@
+// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,7 +15,9 @@ class AlumniHomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authProvider);
     final alumni = authState.alumni;
-    final displayName = authState.loginName.isNotEmpty ? authState.loginName : (alumni?.name ?? 'Alumni');
+    final displayName = authState.loginName.isNotEmpty
+        ? authState.loginName
+        : (alumni?.name ?? 'Alumni');
     final unansweredCount = ref.watch(unansweredQAProvider).length;
 
     return Scaffold(
@@ -25,7 +28,8 @@ class AlumniHomeScreen extends ConsumerWidget {
           IconButton(
             icon: CircleAvatar(
               radius: 16,
-              backgroundImage: NetworkImage(alumni?.photoUrl ?? 'https://i.pravatar.cc/150'),
+              backgroundImage:
+                  NetworkImage(alumni?.photoUrl ?? 'https://i.pravatar.cc/150'),
             ),
             onPressed: () => context.go('/alumni-profile'),
           ),
@@ -39,28 +43,48 @@ class AlumniHomeScreen extends ConsumerWidget {
           children: [
             Text(
               'Welcome back,\n${displayName.split(' ').first}! 👋',
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(fontSize: 24),
+              style: Theme.of(context)
+                  .textTheme
+                  .displaySmall
+                  ?.copyWith(fontSize: 24),
             ).animate().fadeIn().slideX(begin: -0.1),
             const SizedBox(height: 8),
             Text(
               '${alumni?.role ?? "SDE"} @ ${alumni?.company ?? "Aditya College"}',
-              style: const TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontWeight: FontWeight.w500),
             ).animate().fadeIn(delay: 200.ms),
-            
+
             const SizedBox(height: 28),
-            
+
             // Impact Stats
-            const Text('Your Impact', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const Text('Your Impact',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             Row(
               children: [
-                _ImpactCard(label: 'Mentees', value: '${alumni?.menteeCount ?? 0}', icon: Icons.people_outline, color: AppColors.primary),
+                _ImpactCard(
+                    label: 'Mentees',
+                    value: '${alumni?.menteeCount ?? 0}',
+                    icon: Icons.people_outline,
+                    color: AppColors.primary),
                 const SizedBox(width: 12),
-                _ImpactCard(label: 'Answers', value: '42', icon: Icons.question_answer_outlined, color: AppColors.alumni),
+                _ImpactCard(
+                    label: 'Answers',
+                    value: '42',
+                    icon: Icons.question_answer_outlined,
+                    color: AppColors.alumni),
                 const SizedBox(width: 12),
-                _ImpactCard(label: 'Views', value: '1.2k', icon: Icons.remove_red_eye_outlined, color: AppColors.secondary),
+                _ImpactCard(
+                    label: 'Views',
+                    value: '1.2k',
+                    icon: Icons.remove_red_eye_outlined,
+                    color: AppColors.secondary),
               ],
-            ).animate().fadeIn(delay: 400.ms).scale(begin: const Offset(0.9, 0.9)),
+            )
+                .animate()
+                .fadeIn(delay: 400.ms)
+                .scale(begin: const Offset(0.9, 0.9)),
 
             const SizedBox(height: 32),
 
@@ -71,7 +95,10 @@ class AlumniHomeScreen extends ConsumerWidget {
                 gradient: AppColors.alumniGradient,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
-                  BoxShadow(color: AppColors.alumni.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))
+                  BoxShadow(
+                      color: AppColors.alumni.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10))
                 ],
               ),
               child: Row(
@@ -80,16 +107,22 @@ class AlumniHomeScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Help a Student!', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                        const Text('Help a Student!',
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800)),
                         const SizedBox(height: 4),
                         Text(
                           'There are $unansweredCount pending questions in your expertise.',
-                          style: const TextStyle(color: Colors.white70, fontSize: 13),
+                          style: const TextStyle(
+                              color: Colors.white70, fontSize: 13),
                         ),
                         const SizedBox(height: 16),
                         ElevatedButton(
                           onPressed: () {
-                            ref.read(alumniNavIndexProvider.notifier).state = 1; // Go to Questions tab
+                            ref.read(alumniNavIndexProvider.notifier).state =
+                                1; // Go to Questions tab
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
@@ -101,31 +134,33 @@ class AlumniHomeScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const Icon(Icons.psychology_outlined, size: 80, color: Colors.white24),
+                  const Icon(Icons.psychology_outlined,
+                      size: 80, color: Colors.white24),
                 ],
               ),
             ).animate().fadeIn(delay: 600.ms).slideY(begin: 0.2),
 
             const SizedBox(height: 32),
-            
-            const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+
+            const Text('Quick Actions',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             _QuickActionTile(
-              icon: Icons.edit_note_rounded, 
-              title: 'Post a Placement Tip', 
+              icon: Icons.edit_note_rounded,
+              title: 'Post a Placement Tip',
               subtitle: 'Share your interview secrets',
               color: AppColors.admin,
               onTap: () => _showPostTipSheet(context),
             ),
             const SizedBox(height: 12),
             _QuickActionTile(
-              icon: Icons.calendar_month_rounded, 
-              title: 'Host a Webinar', 
+              icon: Icons.calendar_month_rounded,
+              title: 'Host a Webinar',
               subtitle: 'Schedule a session with juniors',
               color: AppColors.alumni,
               onTap: () => _showHostWebinarSheet(context),
             ),
-            
+
             const SizedBox(height: 40),
           ],
         ),
@@ -140,7 +175,8 @@ class AlumniHomeScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx).viewInsets.bottom),
+        padding:
+            EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
@@ -153,22 +189,30 @@ class AlumniHomeScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Text('Post a Placement Tip', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  const Text('Post a Placement Tip',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                   const Spacer(),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx)),
                 ],
               ),
               const SizedBox(height: 8),
-              const Text('Your experience will help juniors prepare better!', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+              const Text('Your experience will help juniors prepare better!',
+                  style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
               const SizedBox(height: 20),
               TextField(
                 controller: ctrl,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  hintText: 'Share a tip, trick, or key insight from your placement journey...',
+                  hintText:
+                      'Share a tip, trick, or key insight from your placement journey...',
                   fillColor: AppColors.bgPage,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 24),
@@ -178,7 +222,8 @@ class AlumniHomeScreen extends ConsumerWidget {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('📌 Tip posted! Students will find it helpful.'),
+                      content:
+                          Text('📌 Tip posted! Students will find it helpful.'),
                       backgroundColor: AppColors.success,
                     ),
                   );
@@ -186,9 +231,12 @@ class AlumniHomeScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.admin,
                   minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Post Tip', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                child: const Text('Post Tip',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -207,7 +255,8 @@ class AlumniHomeScreen extends ConsumerWidget {
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx2, setModalState) => Padding(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx2).viewInsets.bottom),
+          padding: EdgeInsets.fromLTRB(
+              0, 0, 0, MediaQuery.of(ctx2).viewInsets.bottom),
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: const BoxDecoration(
@@ -220,9 +269,13 @@ class AlumniHomeScreen extends ConsumerWidget {
               children: [
                 Row(
                   children: [
-                    const Text('Host a Webinar', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                    const Text('Host a Webinar',
+                        style: TextStyle(
+                            fontSize: 20, fontWeight: FontWeight.w800)),
                     const Spacer(),
-                    IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx2)),
+                    IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Navigator.pop(ctx2)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -233,7 +286,9 @@ class AlumniHomeScreen extends ConsumerWidget {
                     prefixIcon: const Icon(Icons.title_rounded),
                     fillColor: AppColors.bgPage,
                     filled: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
                 ),
                 const SizedBox(height: 14),
@@ -245,22 +300,31 @@ class AlumniHomeScreen extends ConsumerWidget {
                       firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(const Duration(days: 90)),
                     );
-                    if (picked != null) setModalState(() => selectedDate = picked);
+                    if (picked != null)
+                      setModalState(() => selectedDate = picked);
                   },
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    decoration: BoxDecoration(color: AppColors.bgPage, borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 16),
+                    decoration: BoxDecoration(
+                        color: AppColors.bgPage,
+                        borderRadius: BorderRadius.circular(12)),
                     child: Row(
                       children: [
-                        const Icon(Icons.calendar_today_rounded, color: AppColors.alumni, size: 20),
+                        const Icon(Icons.calendar_today_rounded,
+                            color: AppColors.alumni, size: 20),
                         const SizedBox(width: 12),
                         Text(
                           selectedDate == null
                               ? 'Select Date'
                               : '${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}',
                           style: TextStyle(
-                            color: selectedDate == null ? AppColors.textMuted : AppColors.textPrimary,
-                            fontWeight: selectedDate == null ? FontWeight.normal : FontWeight.w600,
+                            color: selectedDate == null
+                                ? AppColors.textMuted
+                                : AppColors.textPrimary,
+                            fontWeight: selectedDate == null
+                                ? FontWeight.normal
+                                : FontWeight.w600,
                           ),
                         ),
                       ],
@@ -276,7 +340,9 @@ class AlumniHomeScreen extends ConsumerWidget {
                     prefixIcon: const Icon(Icons.notes_rounded),
                     fillColor: AppColors.bgPage,
                     filled: true,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -286,7 +352,8 @@ class AlumniHomeScreen extends ConsumerWidget {
                     Navigator.pop(ctx2);
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('📅 Webinar scheduled! Students will be notified.'),
+                        content: Text(
+                            '📅 Webinar scheduled! Students will be notified.'),
                         backgroundColor: AppColors.alumni,
                       ),
                     );
@@ -294,9 +361,12 @@ class AlumniHomeScreen extends ConsumerWidget {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.alumni,
                     minimumSize: const Size(double.infinity, 52),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Schedule Webinar', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  child: const Text('Schedule Webinar',
+                      style:
+                          TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
@@ -311,7 +381,11 @@ class _ImpactCard extends StatelessWidget {
   final String label, value;
   final IconData icon;
   final Color color;
-  const _ImpactCard({required this.label, required this.value, required this.icon, required this.color});
+  const _ImpactCard(
+      {required this.label,
+      required this.value,
+      required this.icon,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -327,9 +401,13 @@ class _ImpactCard extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 24),
             const SizedBox(height: 12),
-            Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: color)),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.w800, color: color)),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+            Text(label,
+                style:
+                    const TextStyle(fontSize: 11, color: AppColors.textMuted)),
           ],
         ),
       ),
@@ -342,7 +420,12 @@ class _QuickActionTile extends StatelessWidget {
   final String title, subtitle;
   final Color color;
   final VoidCallback onTap;
-  const _QuickActionTile({required this.icon, required this.title, required this.subtitle, required this.color, required this.onTap});
+  const _QuickActionTile(
+      {required this.icon,
+      required this.title,
+      required this.subtitle,
+      required this.color,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -360,7 +443,9 @@ class _QuickActionTile extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(12)),
+              decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12)),
               child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(width: 16),
@@ -368,9 +453,13 @@ class _QuickActionTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  Text(title,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 15)),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: const TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                  Text(subtitle,
+                      style: const TextStyle(
+                          color: AppColors.textMuted, fontSize: 12)),
                 ],
               ),
             ),

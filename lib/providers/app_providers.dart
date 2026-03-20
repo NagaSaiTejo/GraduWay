@@ -164,7 +164,10 @@ class StudentProgressState {
   });
 
   int get careerScore {
-    final base = (questionsAsked * 5) + (eventsAttended * 10) + (mentorSessions * 15) + (earnedBadgeIds.length * 8);
+    final base = (questionsAsked * 5) +
+        (eventsAttended * 10) +
+        (mentorSessions * 15) +
+        (earnedBadgeIds.length * 8);
     return base.clamp(0, 100);
   }
 
@@ -190,7 +193,8 @@ class StudentProgressState {
       viewedAlumniIds: viewedAlumniIds ?? this.viewedAlumniIds,
       earnedBadgeIds: earnedBadgeIds ?? this.earnedBadgeIds,
       pendingNotifications: pendingNotifications ?? this.pendingNotifications,
-      localPhotoPath: clearPhoto ? null : (localPhotoPath ?? this.localPhotoPath),
+      localPhotoPath:
+          clearPhoto ? null : (localPhotoPath ?? this.localPhotoPath),
       displayName: displayName ?? this.displayName,
       bio: bio ?? this.bio,
       targetCareer: targetCareer ?? this.targetCareer,
@@ -213,9 +217,11 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
     final newCount = state.questionsAsked + 1;
     var newState = state.copyWith(questionsAsked: newCount);
     // Award badge: first question
-    if (newCount == 1) newState = _awardBadge(newState, 'b002', 'Curious Mind', '❓');
+    if (newCount == 1)
+      newState = _awardBadge(newState, 'b002', 'Curious Mind', '❓');
     // Award badge: 5 questions
-    if (newCount == 5) newState = _awardBadge(newState, 'b008', 'Community Hero', '💬');
+    if (newCount == 5)
+      newState = _awardBadge(newState, 'b008', 'Community Hero', '💬');
     state = newState;
   }
 
@@ -223,7 +229,8 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
   void attendEvent() {
     final newCount = state.eventsAttended + 1;
     var newState = state.copyWith(eventsAttended: newCount);
-    if (newCount == 1) newState = _awardBadge(newState, 'b004', 'Event Goer', '🎓');
+    if (newCount == 1)
+      newState = _awardBadge(newState, 'b004', 'Event Goer', '🎓');
     state = newState;
   }
 
@@ -235,8 +242,10 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
       alumniProfilesViewed: newIds.length,
       viewedAlumniIds: newIds,
     );
-    if (newIds.length == 1) newState = _awardBadge(newState, 'b001', 'First Connect', '🤝');
-    if (newIds.length == 5) newState = _awardBadge(newState, 'b007', 'Network Builder', '🌐');
+    if (newIds.length == 1)
+      newState = _awardBadge(newState, 'b001', 'First Connect', '🤝');
+    if (newIds.length == 5)
+      newState = _awardBadge(newState, 'b007', 'Network Builder', '🌐');
     state = newState;
   }
 
@@ -258,7 +267,9 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
 
   void updateProfile(String name, String bio) {
     state = state.copyWith(displayName: name, bio: bio);
-    if (name.isNotEmpty && bio.isNotEmpty && !state.earnedBadgeIds.contains('b009')) {
+    if (name.isNotEmpty &&
+        bio.isNotEmpty &&
+        !state.earnedBadgeIds.contains('b009')) {
       state = _awardBadge(state, 'b009', 'Goal Setter', '🏁');
     }
   }
@@ -273,25 +284,33 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
 
   void clearNotification(String badgeId) {
     state = state.copyWith(
-      pendingNotifications: state.pendingNotifications.where((n) => n.badgeId != badgeId).toList(),
+      pendingNotifications: state.pendingNotifications
+          .where((n) => n.badgeId != badgeId)
+          .toList(),
     );
   }
 
-  StudentProgressState _awardBadge(StudentProgressState s, String id, String title, String emoji) {
+  StudentProgressState _awardBadge(
+      StudentProgressState s, String id, String title, String emoji) {
     if (s.earnedBadgeIds.contains(id)) return s;
     return s.copyWith(
       earnedBadgeIds: [...s.earnedBadgeIds, id],
-      pendingNotifications: [...s.pendingNotifications, _BadgeNotification(id, title, emoji)],
+      pendingNotifications: [
+        ...s.pendingNotifications,
+        _BadgeNotification(id, title, emoji)
+      ],
     );
   }
 }
 
-final studentProgressProvider = StateNotifierProvider<StudentProgressNotifier, StudentProgressState>(
+final studentProgressProvider =
+    StateNotifierProvider<StudentProgressNotifier, StudentProgressState>(
   (ref) => StudentProgressNotifier(),
 );
 
 // Convenience derived
-final careerScoreProvider = Provider<int>((ref) => ref.watch(studentProgressProvider).careerScore);
+final careerScoreProvider =
+    Provider<int>((ref) => ref.watch(studentProgressProvider).careerScore);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared Q&A State
@@ -308,9 +327,15 @@ class QANotifier extends StateNotifier<List<QAModel>> {
     state = state.map((q) {
       if (q.id == questionId) {
         return QAModel(
-          id: q.id, question: q.question, askedBy: q.askedBy,
-          askedById: q.askedById, timestamp: q.timestamp,
-          upvotes: q.upvotes + 1, tags: q.tags, answers: q.answers, isAnswered: q.isAnswered,
+          id: q.id,
+          question: q.question,
+          askedBy: q.askedBy,
+          askedById: q.askedById,
+          timestamp: q.timestamp,
+          upvotes: q.upvotes + 1,
+          tags: q.tags,
+          answers: q.answers,
+          isAnswered: q.isAnswered,
         );
       }
       return q;
@@ -321,10 +346,15 @@ class QANotifier extends StateNotifier<List<QAModel>> {
     state = state.map((q) {
       if (q.id == questionId) {
         return QAModel(
-          id: q.id, question: q.question, askedBy: q.askedBy,
-          askedById: q.askedById, timestamp: q.timestamp,
-          upvotes: q.upvotes, tags: q.tags,
-          answers: [...q.answers, answer], isAnswered: true,
+          id: q.id,
+          question: q.question,
+          askedBy: q.askedBy,
+          askedById: q.askedById,
+          timestamp: q.timestamp,
+          upvotes: q.upvotes,
+          tags: q.tags,
+          answers: [...q.answers, answer],
+          isAnswered: true,
         );
       }
       return q;
@@ -377,8 +407,8 @@ final careerGoalProvider = StateProvider<String>((ref) => '');
 // ─────────────────────────────────────────────────────────────────────────────
 
 final studentNavIndexProvider = StateProvider<int>((ref) => 0);
-final alumniNavIndexProvider  = StateProvider<int>((ref) => 0);
-final adminNavIndexProvider   = StateProvider<int>((ref) => 0);
+final alumniNavIndexProvider = StateProvider<int>((ref) => 0);
+final adminNavIndexProvider = StateProvider<int>((ref) => 0);
 
 // Global flag to ensure onboarding is only seen once per app session/install
 final hasSeenOnboardingProvider = StateProvider<bool>((ref) => false);

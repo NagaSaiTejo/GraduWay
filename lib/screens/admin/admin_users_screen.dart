@@ -1,3 +1,4 @@
+// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,8 @@ class AdminUsersScreen extends ConsumerStatefulWidget {
   ConsumerState<AdminUsersScreen> createState() => _AdminUsersScreenState();
 }
 
-class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen> with SingleTickerProviderStateMixin {
+class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -88,30 +90,46 @@ class _UserListView extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       itemCount: 10, // Mock count
       itemBuilder: (context, i) {
-        final name = role == 'Student' ? 'Student ${i + 1}' : items[i % items.length].name;
-        final sub = role == 'Student' ? '21K81A050${i+1} • CSE' : items[i % items.length].company;
-        
+        final name = role == 'Student'
+            ? 'Student ${i + 1}'
+            : items[i % items.length].name;
+        final sub = role == 'Student'
+            ? '21K81A050${i + 1} • CSE'
+            : items[i % items.length].company;
+
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            contentPadding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             leading: CircleAvatar(
               backgroundColor: AppColors.primary.withOpacity(0.1),
-              child: Text(name[0], style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+              child: Text(name[0],
+                  style: const TextStyle(
+                      color: AppColors.primary, fontWeight: FontWeight.bold)),
             ),
-            title: Text(name, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-            subtitle: Text(sub, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            title: Text(name,
+                style:
+                    const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+            subtitle: Text(sub,
+                style:
+                    const TextStyle(fontSize: 12, color: AppColors.textMuted)),
             trailing: PopupMenuButton(
               icon: const Icon(Icons.more_vert_rounded),
               itemBuilder: (context) => [
                 const PopupMenuItem(child: Text('View Profile')),
                 const PopupMenuItem(child: Text('Edit Details')),
                 const PopupMenuItem(child: Text('Reset Password')),
-                const PopupMenuItem(child: Text('Ban User', style: TextStyle(color: AppColors.error))),
+                const PopupMenuItem(
+                    child: Text('Ban User',
+                        style: TextStyle(color: AppColors.error))),
               ],
             ),
           ),
-        ).animate().fadeIn(delay: Duration(milliseconds: i * 50)).slideY(begin: 0.1);
+        )
+            .animate()
+            .fadeIn(delay: Duration(milliseconds: i * 50))
+            .slideY(begin: 0.1);
       },
     );
   }
