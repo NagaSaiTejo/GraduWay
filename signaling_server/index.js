@@ -1,3 +1,4 @@
+// webrtc real-time signaling and chat session relay server
 const express = require('express');
 const app = express();
 const http = require('http').createServer(app);
@@ -23,19 +24,28 @@ io.on('connection', (socket) => {
 
   socket.on('offer', (data) => {
     // data: { offer: sdp, roomId: string, to: socketId }
+    console.log(`[OFFER] from ${socket.id} to ${data.to || 'room ' + data.roomId}`);
     if (data.to) {
       socket.to(data.to).emit('offer', { offer: data.offer, from: socket.id });
+    } else {
+      socket.to(data.roomId).emit('offer', { offer: data.offer, from: socket.id });
     }
   });
 
   socket.on('answer', (data) => {
     // data: { answer: sdp, to: socketId }
+    console.log(`[ANSWER] from ${socket.id} to ${data.to}`);
     socket.to(data.to).emit('answer', { answer: data.answer, from: socket.id });
   });
 
   socket.on('ice-candidate', (data) => {
     // data: { candidate: obj, to: socketId }
-    socket.to(data.to).emit('ice-candidate', { candidate: data.candidate, from: socket.id });
+    console.log(`[ICE] from ${socket.id} to ${data.to || 'room ' + data.roomId}`);
+    if (data.to) {
+      socket.to(data.to).emit('ice-candidate', { candidate: data.candidate, from: socket.id });
+    } else {
+      socket.to(data.roomId).emit('ice-candidate', { candidate: data.candidate, from: socket.id });
+    }
   });
 
   // --- General Interaction (Chat & Reactions) ---
@@ -44,8 +54,18 @@ io.on('connection', (socket) => {
     io.to(data.roomId).emit('new-message', data);
   });
 
+  socket.on('send-comment', (data) => {
+    // data: { text: string, roomId: string, userName: string }
+    io.to(data.roomId).emit('new-comment', data);
+  });
+
   socket.on('send-heart', (roomId) => {
     socket.to(roomId).emit('receive-heart');
+  });
+
+  socket.on('raise-hand', (data) => {
+    // data: { roomId: string, userName: string }
+    socket.to(data.roomId).emit('user-raised-hand', data);
   });
 
   socket.on('disconnecting', () => {

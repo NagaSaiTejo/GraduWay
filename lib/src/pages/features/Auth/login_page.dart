@@ -20,31 +20,29 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  /// Performs mock login logic.
-  /// 
-  /// Extracts the user's name from their email address, updates the [AuthProvider],
-  /// and navigates the user to the main application layout.
-  void _login() {
-    // In a real app, you would authenticate here.
-    String email = _emailController.text;
-    String name = email.split('@').first;
-    if (name.isEmpty) name = "Alex"; // Default
+  /// Performs login logic with the backend.
+  Future<void> _login() async {
+    final auth = context.read<AuthProvider>();
+    final success = await auth.login(_emailController.text, _passwordController.text);
 
-    // Capitalize first letter
-    name = "${name[0].toUpperCase()}${name.substring(1)}";
-
-    // Update global state
-    context.read<AuthProvider>().updateProfile(
-      name: name,
-      field: "Software Engineer",
-      company: "Google",
-      yoe: "5+",
-    );
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const MainLayout()),
-    );
+    if (success && mounted) {
+     
+        ScaffoldMessenger.of(context).showSnackBar(
+           SnackBar(
+            content: Text("Welcome ${_emailController.text}"),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainLayout()),
+      );
+    } else if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(auth.error ?? "Login failed"), backgroundColor: Colors.red),
+      );
+    }
   }
 
   @override
@@ -52,111 +50,108 @@ class _LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const SizedBox(height: 40),
-              // Logo or Icon
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.school, size: 60, color: Colors.blue),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const SizedBox(height: 40),
+            // Logo or Icon
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  shape: BoxShape.circle,
                 ),
+                child: const Icon(Icons.school, size: 60, color: Colors.blue),
               ),
-              const SizedBox(height: 32),
-              // Welcome Text
-              const Text(
-                "Welcome Back",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: -0.5,
-                ),
+            ),
+            const SizedBox(height: 32),
+            // Welcome Text
+            const Text(
+              "Welcome Back",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                letterSpacing: -0.5,
               ),
-              const SizedBox(height: 8),
-              Text(
-                "Sign in to access your alumni network",
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[600],
-                ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Sign in to access your alumni network",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[600],
               ),
-              const SizedBox(height: 48),
-              // Email Field
-              _buildTextField(
-                controller: _emailController,
-                hintText: "Email Address",
-                icon: Icons.email_outlined,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              const SizedBox(height: 16),
-              // Password Field
-              _buildTextField(
-                controller: _passwordController,
-                hintText: "Password",
-                icon: Icons.lock_outline,
-                obscureText: true,
-              ),
-              const SizedBox(height: 12),
-              // Forgot Password
-              Align(
-                alignment: Alignment.centerRight,
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    "Forgot Password?",
-                    style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-              // Login Button
-              ElevatedButton(
-                onPressed: _login,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  elevation: 0,
-                ),
+            ),
+            const SizedBox(height: 48),
+            // Email Field
+            _buildTextField(
+              controller: _emailController,
+              hintText: "Email Address",
+              icon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 16),
+            // Password Field
+            _buildTextField(
+              controller: _passwordController,
+              hintText: "Password",
+              icon: Icons.lock_outline,
+              obscureText: true,
+            ),
+            const SizedBox(height: 12),
+            // Forgot Password
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {},
                 child: const Text(
-                  "Login",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  "Forgot Password?",
+                  style: TextStyle(color: Colors.blue, fontWeight: FontWeight.w600),
                 ),
               ),
-              const SizedBox(height: 24),
-              // Sign Up Link
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text("Don't have an account?", style: TextStyle(color: Colors.grey[600])),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const SignupScreen()),
-                      );
-                    },
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
-                    ),
-                  ),
-                ],
+            ),
+            const SizedBox(height: 24),
+            // Login Button
+            ElevatedButton(
+              onPressed: _login,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
               ),
-            ],
-          ),
+              child: const Text(
+                "Login",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 24),
+            // Sign Up Link
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text("Don't have an account?", style: TextStyle(color: Colors.grey[600])),
+                TextButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SignupScreen()),
+                    );
+                  },
+                  child: const Text(
+                    "Sign Up",
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

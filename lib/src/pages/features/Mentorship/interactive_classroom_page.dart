@@ -1,3 +1,4 @@
+// webrtc multi-participant interactive video session with engagement tools
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:provider/provider.dart';
@@ -7,12 +8,10 @@ import 'package:alumini_screen/src/providers/notification_provider.dart';
 
 class InteractiveClassroomPage extends StatefulWidget {
   final String roomId;
-  final bool isMentor;
 
   const InteractiveClassroomPage({
     super.key, 
-    required this.roomId, 
-    this.isMentor = false,
+    required this.roomId,
   });
 
   @override
@@ -58,9 +57,23 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
     };
 
     _classroomService.onChatMessage = (from, message) {
-      setState(() {
-        _messages.add({'from': from, 'text': message});
-      });
+      if (mounted) {
+        setState(() {
+          _messages.add({'from': from, 'text': message});
+        });
+      }
+    };
+
+    _classroomService.onHandRaised = (from) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("$from raised their hand! ✋"),
+            backgroundColor: Colors.blueAccent,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     };
 
     // Replace with your local IP if testing on physical devices
@@ -74,10 +87,8 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
     if (mounted) {
       context.read<NotificationProvider>().addNotification({
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'title': widget.isMentor ? 'You are Live!' : 'Joined Class',
-        'body': widget.isMentor 
-            ? 'Your students can now join the session: ${widget.roomId}' 
-            : 'You have joined the interactive class: ${widget.roomId}',
+        'title': 'You are Live!',
+        'body': 'Your students can now join the session: ${widget.roomId}',
         'time': 'Just now',
         'isRead': false,
       });
@@ -137,8 +148,8 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
 
   Widget _buildVideoGrid() {
     final allParticipants = [
-      {'id': 'local', 'renderer': _localRenderer, 'name': 'You', 'isMentor': widget.isMentor},
-      ..._remoteRenderers.entries.map((e) => {'id': e.key, 'renderer': e.value, 'name': 'Guest', 'isMentor': !widget.isMentor}),
+      {'id': 'local', 'renderer': _localRenderer, 'name': 'You (Mentor)', 'isMentor': true},
+      ..._remoteRenderers.entries.map((e) => {'id': e.key, 'renderer': e.value, 'name': 'Guest Student', 'isMentor': false}),
     ];
 
     return GridView.builder(
@@ -330,9 +341,9 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
               icon: Icons.front_hand,
               color: Colors.grey[800]!,
               onPressed: () {
-                // Raise hand logic
+                _classroomService.raiseHand();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Hand raised!")),
+                  const SnackBar(content: Text("You raised your hand! ✋")),
                 );
               },
             ),

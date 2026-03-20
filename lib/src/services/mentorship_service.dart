@@ -1,16 +1,18 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:alumini_screen/src/models/mentorship_model.dart';
 import 'package:alumini_screen/src/models/chat_model.dart';
 
 /// Singleton service that manages mentorship requests and chat message streams.
 /// 
-/// This service acts as the central hub for submitting requests, updating their status,
-/// and handling real-time chat updates via streams.
+/// Updated to communicate with Spring Boot backend.
 class MentorshipService {
   static final MentorshipService _instance = MentorshipService._internal();
   factory MentorshipService() => _instance;
   MentorshipService._internal();
 
+  final String baseUrl = "http://localhost:8080/api/mentorship";
   final List<MentorshipRequest> _requests = [];
   final Map<String, List<ChatMessage>> _chats = {};
   
@@ -20,32 +22,56 @@ class MentorshipService {
   /// A broadcast stream of all mentorship requests.
   Stream<List<MentorshipRequest>> get requestsStream => _controller.stream;
   
+  /// Fetches all requests from the backend and updates the stream.
+  Future<void> fetchRequests() async {
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/requests"));
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        _requests.clear();
+        _requests.addAll(data.map((json) => MentorshipRequest.fromJson(json)).toList());
+        _controller.add(List.unmodifiable(_requests));
+      }
+    } catch (e) {
+      print("Error fetching requests: $e");
+    }
+  }
+
   /// Returns a broadcast stream for a specific chat session.
-  /// 
-  /// If the stream doesn't exist, it creates one and pushes any existing messages.
   Stream<List<ChatMessage>> getChatStream(String chatId) {
     if (!_chatControllers.containsKey(chatId)) {
       _chatControllers[chatId] = StreamController<List<ChatMessage>>.broadcast();
-      // Add initial data if exists
-      if (_chats.containsKey(chatId)) {
-        _chatControllers[chatId]!.add(List.unmodifiable(_chats[chatId]!));
-      }
     }
     return _chatControllers[chatId]!.stream;
   }
 
-  /// Submits a new mentorship request and notifies listeners via the stream.
-  void submitRequest(MentorshipRequest request) {
-    _requests.add(request);
-    _controller.add(List.unmodifiable(_requests));
+  /// Submits a new mentorship request to the backend.
+  Future<void> submitRequest(MentorshipRequest request) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/requests"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(request.toJson()),
+      );
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        await fetchRequests();
+      }
+    } catch (e) {
+      print("Error submitting request: $e");
+    }
   }
 
-  /// Updates the status of an existing request and broadcasts the change.
-  void updateRequestStatus(String id, MentorshipStatus status) {
-    final index = _requests.indexWhere((r) => r.id == id);
-    if (index != -1) {
-      _requests[index] = _requests[index].copyWith(status: status);
-      _controller.add(List.unmodifiable(_requests));
+  /// Updates the status of an existing request in the backend.
+  Future<void> updateRequestStatus(String id, MentorshipStatus status) async {
+    try {
+      final response = await http.patch(
+        Uri.parse("$baseUrl/requests/$id/status?status=${status.name}"),
+      );
+      if (response.statusCode == 200) {
+        await fetchRequests();
+      }
+    } catch (e) {
+      print("Error updating status: $e");
     }
   }
 
@@ -58,14 +84,23 @@ class MentorshipService {
   List<MentorshipRequest> getRequests() => List.unmodifiable(_requests);
 
   /// Sends a message in a specific chat session and updates the corresponding stream.
-  void sendMessage(String chatId, ChatMessage message) {
-    if (!_chats.containsKey(chatId)) {
-      _chats[chatId] = [];
-    }
-    _chats[chatId]!.add(message);
-    
-    if (_chatControllers.containsKey(chatId)) {
-      _chatControllers[chatId]!.add(List.unmodifiable(_chats[chatId]!));
+  Future<void> sendMessage(String chatId, ChatMessage message) async {
+    try {
+      final response = await http.post(
+        Uri.parse("http://localhost:8080/api/chats/$chatId/messages"),
+        headers: {"Content-Type": "application/json"},
+        body: json.encode(message.toJson()),
+      );
+      if (response.statusCode == 200) {
+        // In a real app, we'd wait for WebSocket/SSE, but for now we poll or push
+        if (!_chats.containsKey(chatId)) {
+          _chats[chatId] = [];
+        }
+        _chats[chatId]!.add(ChatMessage.fromJson(json.decode(response.body)));
+        _chatControllers[chatId]?.add(List.unmodifiable(_chats[chatId]!));
+      }
+    } catch (e) {
+      print("Error sending message: $e");
     }
   }
 
@@ -83,23 +118,9 @@ class MentorshipService {
     ];
   }
 
-  /// Seeds the service with initial mock data for demonstration purposes.
-  void seedData() {
-    if (_requests.isEmpty) {
-      submitRequest(MentorshipRequest(
-        id: "1",
-        student: Student(
-          id: "s1",
-          name: "John Doe",
-          branch: "Computer Science",
-          year: "3rd Year",
-          skills: ["Flutter", "Dart", "Firebase"],
-        ),
-        reason: "I want to learn more about architecture patterns in Flutter.",
-        topics: ["Flutter Best Practices", "Resume & Portfolio Review"],
-        createdAt: DateTime.now().subtract(const Duration(days: 1)),
-      ));
-    }
+  /// Seeds the service with initial mock data (now handled by backend).
+  Future<void> seedData() async {
+    await fetchRequests();
   }
 }
 

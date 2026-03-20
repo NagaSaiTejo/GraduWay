@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:alumini_screen/src/pages/nav_tabs/dashboard_page.dart';
 import 'package:alumini_screen/src/pages/nav_tabs/profile_page.dart';
 import 'package:alumini_screen/src/pages/nav_tabs/mentor_inbox_page.dart';
-import 'package:alumini_screen/src/pages/nav_tabs/placeholder_page.dart';
+import 'package:alumini_screen/src/pages/nav_tabs/notification_page.dart';
 import 'package:alumini_screen/src/widgets/floating_navbar.dart';
 
 /// The main layout of the application after the user logs in.

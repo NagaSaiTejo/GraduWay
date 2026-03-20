@@ -141,6 +141,7 @@ class _DashboardState extends State<Dashboard> {
           radius: 18,
           backgroundColor: Colors.blueAccent,
           child: Icon(Icons.person, color: Colors.white, size: 20),
+          
         ),
         const SizedBox(width: 20),
       ],
@@ -314,8 +315,7 @@ class _DashboardState extends State<Dashboard> {
     final actions = [
       {"title": "Post Job", "icon": Icons.add_circle_outline, "color": Colors.blueAccent},
       {"title": "Events", "icon": Icons.event_note, "color": Colors.indigoAccent},
-      {"title": "Watch Live", "icon": Icons.sensors, "color": Colors.redAccent},
-      {"title": "Join Class", "icon": Icons.groups_outlined, "color": Colors.purpleAccent},
+      {"title": "Start Stream", "icon": Icons.sensors, "color": Colors.redAccent},
       {"title": "Requests", "icon": Icons.pending_actions, "color": Colors.teal, "notif": true},
     ];
 
@@ -337,10 +337,8 @@ class _DashboardState extends State<Dashboard> {
               hasNotification: a['notif'] == true,
               onTap: a['title'] == "Requests" ? () {
                 Navigator.push(context, MaterialPageRoute(builder: (context) => const AlumniRequestsPage()));
-              } : a['title'] == "Join Class" ? () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const InteractiveClassroomPage(roomId: "Design-101", isMentor: false)));
-              } : a['title'] == "Watch Live" ? () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const BroadcastStreamingPage(isMentor: false, streamId: "mentor-live-1")));
+              } : a['title'] == "Start Stream" ? () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => BroadcastStreamingPage(streamId: "alumni-stream-${DateTime.now().millisecondsSinceEpoch}")));
               } : null,
             ),
           );

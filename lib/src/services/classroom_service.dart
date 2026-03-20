@@ -1,3 +1,4 @@
+// webrtc mesh network orchestration for multi-user classroom environments
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'dart:developer' as dev;
@@ -18,6 +19,7 @@ class ClassroomService {
   Function(String participantId)? onRemoteStreamRemoved;
   Function(List<String> participants)? onParticipantListChanged;
   Function(String from, String message)? onChatMessage;
+  Function(String from)? onHandRaised;
   Function()? onHeartReceived;
 
   final Map<String, dynamic> _config = {
@@ -73,6 +75,10 @@ class ClassroomService {
       onChatMessage?.call(data['userName'], data['text']);
     });
 
+    socket.on('user-raised-hand', (data) {
+      onHandRaised?.call(data['userName']);
+    });
+
     socket.on('receive-heart', (_) {
       onHeartReceived?.call();
     });
@@ -82,7 +88,7 @@ class ClassroomService {
       _removePeerConnection(userId);
     });
 
-    // Initialize local media
+    // Initialize local media // // // WEBRTC // // //
     localStream = await navigator.mediaDevices.getUserMedia({
       'audio': true,
       'video': true,
@@ -113,6 +119,7 @@ class ClassroomService {
 
     if (isOffer) {
       RTCSessionDescription offer = await pc.createOffer();
+      dev.log('✅ [CLASS] Created offer for user: $userId');
       await pc.setLocalDescription(offer);
       socket.emit('offer', {
         'offer': offer.toMap(),
@@ -123,6 +130,7 @@ class ClassroomService {
   }
 
   Future<void> _handleOffer(String from, dynamic offerData) async {
+    dev.log('📥 [CLASS] Received offer from: $from');
     if (!peerConnections.containsKey(from)) {
       await _createNewPeerConnection(from, false);
     }
@@ -131,8 +139,10 @@ class ClassroomService {
     await pc.setRemoteDescription(
       RTCSessionDescription(offerData['sdp'], offerData['type'])
     );
+    dev.log('✅ [CLASS] Set remote description for: $from');
 
     RTCSessionDescription answer = await pc.createAnswer();
+    dev.log('✅ [CLASS] Created answer for: $from');
     await pc.setLocalDescription(answer);
 
     socket.emit('answer', {
@@ -142,11 +152,13 @@ class ClassroomService {
   }
 
   Future<void> _handleAnswer(String from, dynamic answerData) async {
+    dev.log('📥 [CLASS] Received answer from: $from');
     RTCPeerConnection? pc = peerConnections[from];
     if (pc != null) {
       await pc.setRemoteDescription(
         RTCSessionDescription(answerData['sdp'], answerData['type'])
       );
+      dev.log('✅ [CLASS] Set remote description (Answer) for: $from');
     }
   }
 
@@ -191,8 +203,19 @@ class ClassroomService {
     localStream?.getVideoTracks().forEach((track) => track.enabled = enabled);
   }
 
+  /// Sends a hand raise signal.
+  void raiseHand() {
+    socket.emit('raise-hand', {
+      'roomId': _roomId,
+      'userName': _currentUserName,
+    });
+  }
+
   /// Cleans up resources.
   void dispose() {
+    localStream?.getTracks().forEach((track) {
+      track.stop();
+    });
     localStream?.dispose();
     peerConnections.values.forEach((pc) => pc.dispose());
     socket.disconnect();

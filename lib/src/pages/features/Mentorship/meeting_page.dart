@@ -1,11 +1,13 @@
+// webrtc direct peer-to-peer video meeting and session hosting
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import '../../../services/webrtc_service.dart';
+import 'dart:io' show Platform;
 
 /// A page for hosting and joining video meetings.
 class MeetingPage extends StatefulWidget {
-  final bool isHost;
-  const MeetingPage({super.key, required this.isHost});
+  final String roomId;
+  const MeetingPage({super.key, required this.roomId});
 
   @override
   State<MeetingPage> createState() => _MeetingPageState();
@@ -26,12 +28,19 @@ class _MeetingPageState extends State<MeetingPage> {
   }
 
   Future<void> _initWebRTC() async {
-    await _localRenderer.initialize();
-    await _remoteRenderer.initialize();
+    // Use 10.0.2.2 for Android Emulator, local IP for physical devices
+    String serverUrl = 'http://localhost:3000';
+    try {
+      if (Platform.isAndroid) {
+        // Special alias for host machine in Android Emulator
+        serverUrl = 'http://10.0.2.2:3000';
+      }
+    } catch (_) {}
 
-    // IMPORTANT: For physical devices, replace 'localhost' with your computer's local IP (e.g., 192.168.1.5)
-    const String serverUrl = 'http://localhost:3000'; 
-    await _webrtcService.init(serverUrl: serverUrl);
+    await _webrtcService.init(
+      serverUrl: serverUrl,
+      roomId: widget.roomId,
+    );
 
     _webrtcService.onRemoteStream = (stream) {
       setState(() {
@@ -39,12 +48,10 @@ class _MeetingPageState extends State<MeetingPage> {
       });
     };
 
-    if (widget.isHost) {
-      await _webrtcService.startCall();
-      setState(() {
-        _localRenderer.srcObject = _webrtcService.localStream;
-      });
-    }
+    await _webrtcService.startHostStream();
+    setState(() {
+      _localRenderer.srcObject = _webrtcService.localStream;
+    });
   }
 
   @override

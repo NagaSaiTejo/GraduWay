@@ -22,19 +22,20 @@ class FloatingNavbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(left: 24, right: 24, bottom: 35, top: 20),
-      height: 70,
+      margin: const EdgeInsets.only(left: 35, right: 35, bottom: 50),
+      height: 62,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFD54F).withOpacity(0.5), // Professional Amber Yellow tint
+        // color: const Color.fromARGB(255, 189, 189, 174).withOpacity(0.5), // Professional Amber Yellow tint
+        color: Colors.transparent,
         borderRadius: BorderRadius.circular(35),
         border: Border.all(
-          color: const Color(0xFFFFE082).withOpacity(0.4),
-          width: 1.5,
+          color: Colors.black,
+          width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 20,
+            blurRadius: 50,
             offset: const Offset(0, 10),
           ),
         ],
@@ -42,9 +43,9 @@ class FloatingNavbar extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(35),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+          filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -78,7 +79,7 @@ class FloatingNavbar extends StatelessWidget {
           ),
           child: Icon(
             icon,
-            color: isSelected ? Colors.black87 : Colors.black54,
+            color: isSelected ? Colors.black87 : Colors.black38,
             size: 26,
           ),
         ),

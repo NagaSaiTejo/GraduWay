@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:alumini_screen/src/models/mentorship_model.dart';
 import 'package:alumini_screen/src/services/mentorship_service.dart';
@@ -13,6 +14,7 @@ class MentorshipProvider with ChangeNotifier {
   final MentorshipService _service = MentorshipService();
   final PersistenceService _persistence = PersistenceService();
   ChatProvider? _chatProvider;
+  StreamSubscription? _subscription;
 
   bool _isLoading = false;
   String? _error;
@@ -42,15 +44,13 @@ class MentorshipProvider with ChangeNotifier {
     // Try to load from local first
     await loadFromLocal();
     
-    // If empty, seed data for demo
-    if (_allRequests.isEmpty) {
-      _service.seedData();
-      _allRequests = _service.getRequests();
-      await saveToLocal();
-    }
+    // Always sync with service to get latest from backend
+    await _service.seedData();
+    _allRequests = _service.getRequests();
+    await saveToLocal();
     
     // Listen to service updates
-    _service.requestsStream.listen((updatedRequests) {
+    _subscription = _service.requestsStream.listen((updatedRequests) {
       _allRequests = updatedRequests;
       saveToLocal();
       notifyListeners();
@@ -97,7 +97,7 @@ class MentorshipProvider with ChangeNotifier {
 
     try {
       final request = _allRequests.firstWhere((r) => r.id == id);
-      _service.updateRequestStatus(id, MentorshipStatus.accepted);
+      await _service.updateRequestStatus(id, MentorshipStatus.accepted);
       
       // Link with ChatProvider
       if (_chatProvider != null) {
@@ -115,9 +115,10 @@ class MentorshipProvider with ChangeNotifier {
   /// Rejects a mentorship request by ID.
   Future<void> rejectRequest(String id) async {
     _isLoading = true;
+    _error = null;
     notifyListeners();
     try {
-      _service.updateRequestStatus(id, MentorshipStatus.rejected);
+      await _service.updateRequestStatus(id, MentorshipStatus.rejected);
       await saveToLocal();
     } catch (e) {
       _error = e.toString();
@@ -125,6 +126,12 @@ class MentorshipProvider with ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     }
+  }
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }
 
