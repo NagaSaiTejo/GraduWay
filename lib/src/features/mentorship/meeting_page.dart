@@ -1,10 +1,12 @@
 // webrtc direct peer-to-peer video meeting and session hosting
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:alumini_screen/src/shared/services/webrtc_service.dart';
+import 'package:alumini_screen/src/shared/services/classroom_service.dart';
 import 'package:alumini_screen/src/shared/providers/auth_provider.dart';
 
 import 'dart:developer' as dev;
+
+import 'package:provider/provider.dart';
 
 /// A page for hosting and joining video meetings.
 class MeetingPage extends StatefulWidget {
@@ -18,7 +20,7 @@ class MeetingPage extends StatefulWidget {
 class _MeetingPageState extends State<MeetingPage> {
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
-  final WebrtcService _webrtcService = WebrtcService();
+  final ClassroomService _classroomService = ClassroomService();
 
   bool _isMuted = false;
   bool _isCameraOff = false;
@@ -30,12 +32,12 @@ class _MeetingPageState extends State<MeetingPage> {
   }
 
   Future<void> _initWebRTC() async {
-    await _webrtcService.init(
-      serverUrl: AuthProvider.getSignalingUrl(),
-      roomId: widget.roomId,
-    );
+    await _localRenderer.initialize();
+    await _remoteRenderer.initialize();
 
-    _webrtcService.onRemoteStream = (stream) {
+    final auth = context.read<AuthProvider>();
+
+    _classroomService.onRemoteStreamAdded = (id, stream) {
       if (mounted) {
         setState(() {
           _remoteRenderer.srcObject = stream;
@@ -43,19 +45,25 @@ class _MeetingPageState extends State<MeetingPage> {
       }
     };
 
-    _webrtcService.onMentorLeft = () {
+    _classroomService.onError = (message) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Mentor has left the meeting")),
+          SnackBar(content: Text(message)),
         );
         Navigator.pop(context);
       }
     };
 
-    await _webrtcService.startHostStream();
+    await _classroomService.joinRoom(
+      serverUrl: AuthProvider.getSignalingUrl(),
+      roomId: widget.roomId,
+      userName: auth.userName,
+      role: ClassroomRole.mentor, // Defaulting to mentor for this direct meeting page
+    );
+
     if (mounted) {
       setState(() {
-        _localRenderer.srcObject = _webrtcService.localStream;
+        _localRenderer.srcObject = _classroomService.localStream;
       });
     }
   }
@@ -69,24 +77,20 @@ class _MeetingPageState extends State<MeetingPage> {
   Future<void> _cleanup() async {
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
-    await _webrtcService.dispose();
+    await _classroomService.dispose();
   }
 
   void _toggleMute() {
     setState(() {
       _isMuted = !_isMuted;
-      _webrtcService.localStream?.getAudioTracks().forEach((track) {
-        track.enabled = !_isMuted;
-      });
+      _classroomService.toggleAudio(!_isMuted);
     });
   }
 
   void _toggleCamera() {
     setState(() {
       _isCameraOff = !_isCameraOff;
-      _webrtcService.localStream?.getVideoTracks().forEach((track) {
-        track.enabled = !_isCameraOff;
-      });
+      _classroomService.toggleVideo(!_isCameraOff);
     });
   }
 

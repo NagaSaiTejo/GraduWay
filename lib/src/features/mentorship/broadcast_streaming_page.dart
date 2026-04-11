@@ -4,7 +4,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:provider/provider.dart';
 import 'package:alumini_screen/src/shared/providers/auth_provider.dart';
 import 'package:alumini_screen/src/shared/providers/notification_provider.dart';
-import 'package:alumini_screen/src/shared/services/webrtc_service.dart';
+import 'package:alumini_screen/src/shared/services/classroom_service.dart';
 import 'dart:async';
 
 class BroadcastStreamingPage extends StatefulWidget {
@@ -20,7 +20,7 @@ class BroadcastStreamingPage extends StatefulWidget {
 }
 
 class _BroadcastStreamingPageState extends State<BroadcastStreamingPage> with TickerProviderStateMixin {
-  final WebrtcService _webrtcService = WebrtcService();
+  final ClassroomService _classroomService = ClassroomService();
   final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
   int _heartCount = 0;
   final List<Widget> _floatingHearts = [];
@@ -42,10 +42,19 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage> with Ti
   }
 
   void _setupListeners() {
-    _webrtcService.onCommentReceived = (from, text) {
+    _classroomService.onChatMessage = (from, text) {
       if (mounted) {
         setState(() {
           _comments.add({'user': from, 'text': text});
+        });
+      }
+    };
+
+    _classroomService.onError = (message) {
+       if (mounted) {
+        setState(() {
+          _isConnecting = false;
+          _errorMessage = message;
         });
       }
     };
@@ -73,21 +82,22 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage> with Ti
 
     try {
       await _localRenderer.initialize();
-
-      await _webrtcService.init(
-        serverUrl: AuthProvider.getSignalingUrl(),
-        roomId: widget.streamId,
-      ).timeout(const Duration(seconds: 5), onTimeout: () {
-        throw 'SIGNALING_TIMEOUT';
-      });
+      final auth = context.read<AuthProvider>();
 
       _setupListeners();
 
-      await _webrtcService.startHostStream();
+      await _classroomService.joinRoom(
+        serverUrl: AuthProvider.getSignalingUrl(),
+        roomId: widget.streamId,
+        userName: auth.userName,
+        role: ClassroomRole.mentor,
+      ).timeout(const Duration(seconds: 10), onTimeout: () {
+        throw 'SIGNALING_TIMEOUT';
+      });
       
       if (mounted) {
         setState(() {
-          _localRenderer.srcObject = _webrtcService.localStream;
+          _localRenderer.srcObject = _classroomService.localStream;
           _isConnecting = false;
         });
 
@@ -125,7 +135,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage> with Ti
   }
 
   Future<void> _cleanup() async {
-    await _webrtcService.dispose();
+    await _classroomService.dispose();
     await _localRenderer.dispose();
   }
 
@@ -146,7 +156,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage> with Ti
   void _postComment() {
     if (_commentController.text.isNotEmpty) {
       final auth = context.read<AuthProvider>();
-      _webrtcService.sendComment(_commentController.text, auth.userName);
+      _classroomService.sendMessage(_commentController.text);
       setState(() {
         _comments.add({
           'user': auth.userName,
@@ -160,18 +170,14 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage> with Ti
   void _toggleMute() {
     setState(() {
       _isMuted = !_isMuted;
-      _webrtcService.localStream?.getAudioTracks().forEach((track) {
-        track.enabled = !_isMuted;
-      });
+      _classroomService.toggleAudio(!_isMuted);
     });
   }
 
   void _toggleCamera() {
     setState(() {
       _isCameraOff = !_isCameraOff;
-      _webrtcService.localStream?.getVideoTracks().forEach((track) {
-        track.enabled = !_isCameraOff;
-      });
+      _classroomService.toggleVideo(!_isCameraOff);
     });
   }
 
