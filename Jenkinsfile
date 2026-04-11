@@ -4,14 +4,6 @@ pipeline {
     environment {
         // Enforce TLS 1.2 for Gradle dependency downloads
         JAVA_OPTS = "-Dhttps.protocols=TLSv1.2,TLSv1.3"
-    }
-
-    options {
-        timeout(time: 60, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-    }
-
-    environment {
         // Default placeholders
         SONAR_PROJECT_KEY = "signaling-server"
     }
