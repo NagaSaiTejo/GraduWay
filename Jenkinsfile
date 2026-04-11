@@ -62,6 +62,11 @@ pipeline {
                             echo '🛠️ Cleaning and building Mobile APK...'
                             // Use absolute path to flutter.bat to avoid PATH issues
                             def flutterCmd = "${env.FLUTTER_HOME}\\bin\\flutter.bat"
+                            
+                            // Fix Git "dubious ownership" error for Jenkins SYSTEM user
+                            bat "git config --global --add safe.directory ${env.FLUTTER_HOME}"
+                            bat "git config --global --add safe.directory %WORKSPACE%"
+                            
                             bat "${flutterCmd} clean"
                             bat "${flutterCmd} build apk --release"
                             archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
