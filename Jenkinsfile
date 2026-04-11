@@ -1,9 +1,14 @@
 pipeline {
     agent any
 
+    environment {
+        // Enforce TLS 1.2 for Gradle dependency downloads
+        JAVA_OPTS = "-Dhttps.protocols=TLSv1.2,TLSv1.3"
+    }
+
     options {
-        timeout(time: 30, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '10'))
+        timeout(time: 60, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '5'))
     }
 
     environment {
@@ -91,6 +96,8 @@ pipeline {
                             withCredentials([string(credentialsId: 'oc-token', variable: 'TOKEN')]) {
                                 bat "oc login ${env.OC_SERVER} --token=${TOKEN} --insecure-skip-tls-verify"
                                 bat "oc project ${env.OC_PROJECT}"
+                                bat 'oc apply -f openshift/mongodb.yaml'
+                                bat 'oc apply -f openshift/deployment.yaml'
                                 bat "oc set image deployment/signaling-server signaling-server=${env.DOCKER_IMAGE}"
                                 bat 'oc apply -f openshift/service.yaml'
                                 bat 'oc rollout status deployment/signaling-server'

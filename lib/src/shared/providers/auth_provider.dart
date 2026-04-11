@@ -82,9 +82,12 @@ class AuthProvider with ChangeNotifier {
   static String get _productionSignalingUrl => dotenv.get('SIGNALING_URL', fallback: '');
 
   static String getBaseUrl(String endpoint) {
-    // If not in demo mode and on mobile, use resolved IP, else localhost
+    // Priority: 1. Production signaling URL 2. Localhost 3. Resolved IP
+    if (_productionSignalingUrl.isNotEmpty) {
+      return '${_productionSignalingUrl.replaceAll(RegExp(r'/$'), '')}/$endpoint';
+    }
     final host = kIsWeb ? 'localhost' : _serverIp;
-    return 'http://$host:8080/api/$endpoint';
+    return 'http://$host:3000/$endpoint';
   }
 
   static String getSignalingUrl() {

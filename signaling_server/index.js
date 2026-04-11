@@ -1,9 +1,38 @@
-// WebRTC signaling server with role-based room management
+// Unified Backend: WebRTC signaling + REST API
+require('dotenv').config();
 const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+const authRoutes = require('./routes/authRoutes');
+const mentorshipRoutes = require('./routes/mentorshipRoutes');
+const chatRoutes = require('./routes/chatRoutes');
+
 const app = express();
 const http = require('http').createServer(app);
 const io = require('socket.io')(http, {
   cors: { origin: "*" }
+});
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+
+// MongoDB Connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/alumni_app';
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('🍃 Connected to MongoDB'))
+  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+
+// API Routes
+app.use('/auth', authRoutes);
+app.use('/api/mentorship', mentorshipRoutes);
+app.use('/api/chats', chatRoutes);
+
+// Root Health Check
+app.get('/', (req, res) => {
+  res.status(200).send({ status: 'UP', message: 'Alumni Signaling Server is running' });
 });
 
 const PORT = process.env.PORT || 3000;
