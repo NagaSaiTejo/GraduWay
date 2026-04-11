@@ -11,10 +11,14 @@ pipeline {
         FLUTTER_HOME = "C:\\flutter" 
         PATH = "${FLUTTER_HOME}\\bin;${env.PATH}"
         
-        // --- OpenShift Config (Update these in Jenkins) ---
+        // --- OpenShift & Registry Config ---
         OC_PROJECT = "alumni-live"
-        OC_SERVER = "https://api.cluster-url:6443" // Replace with your cluster API
-        OC_TOKEN = "" // Store this in Jenkins Credentials!
+        OC_SERVER = "https://api.cluster-url:6443"
+        
+        // --- DevOps Toolchain Config ---
+        DOCKER_IMAGE = "your-docker-id/signaling-server:latest" // REPLACE WITH YOUR REGISTRY PATH
+        SONAR_PROJECT_KEY = "signaling-server"
+        SONAR_HOST_URL = "http://localhost:9000" // Update to your SonarQube URL
     }
 
     stages {
@@ -25,60 +29,77 @@ pipeline {
             }
         }
 
-        stage('Clean & Verify') {
+        stage('SonarQube Analysis') {
             steps {
-                echo 'Cleaning build artifacts...'
-                bat 'flutter clean'
-                echo 'Checking Flutter environment status...'
-                bat 'flutter doctor'
+                echo '🚀 Running SonarQube Static Analysis...'
+                // We run analysis specifically on the signaling server logic
+                dir('signaling_server') {
+                    withSonarQubeEnv('My SonarQube Server') {
+                        bat "sonar-scanner -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.sources=. -Dsonar.host.url=${env.SONAR_HOST_URL}"
+                    }
+                }
             }
         }
 
-        stage('Build Mobile APK') {
+        stage('Clean & Build APK') {
             steps {
-                echo 'Building Release APK...'
+                echo 'Cleaning and building Mobile APK...'
+                bat 'flutter clean'
                 bat 'flutter build apk --release'
-                echo 'Archiving build artifacts...'
                 archiveArtifacts artifacts: 'build/app/outputs/flutter-apk/app-release.apk', fingerprint: true
             }
         }
 
-        stage('Deploy to OpenShift') {
-            when {
-                expression { return env.OC_TOKEN != "" }
-            }
+        stage('Docker Build & Push') {
             steps {
-                echo '🚀 Deploying Signaling Server to OpenShift...'
+                echo '📦 Building Docker Image for Signaling Server...'
+                dir('signaling_server') {
+                    script {
+                        // Build using the local Dockerfile
+                        bat "docker build -t ${env.DOCKER_IMAGE} ."
+                        
+                        // Push to Registry (Requires REGISTRY_USER/PASS credentials in Jenkins)
+                        withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                            bat "docker login -u ${USER} -p ${PASS}"
+                            bat "docker push ${env.DOCKER_IMAGE}"
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to OpenShift') {
+            steps {
+                echo '🚀 Triggering Orchestrated Deployment on OpenShift...'
                 
-                // 1. Authenticate & Select Project
-                bat "oc login ${env.OC_SERVER} --token=${env.OC_TOKEN} --insecure-skip-tls-verify"
-                bat "oc project ${env.OC_PROJECT}"
-                
-                // 2. Binary Build (Local code -> OpenShift Registry)
-                // Note: Ensures signaling-server build config exists
-                bat "oc get bc signaling-server || oc new-build --name signaling-server --binary=true"
-                
-                echo 'Starting Build from local directory...'
-                bat "oc start-build signaling-server --from-dir=signaling_server --follow"
-                
-                // 3. Apply Manifests (Deployment, Service, Route)
-                echo 'Applying Kubernetes manifests...'
-                bat 'oc apply -f openshift/deployment.yaml'
-                bat 'oc apply -f openshift/service.yaml'
-                
-                // 4. Verify Route
-                echo 'Retrieving Public Route URL...'
-                bat 'oc get route signaling-server'
+                withCredentials([string(credentialsId: 'oc-token', variable: 'TOKEN')]) {
+                    // 1. Authenticate
+                    bat "oc login ${env.OC_SERVER} --token=${TOKEN} --insecure-skip-tls-verify"
+                    bat "oc project ${env.OC_PROJECT}"
+                    
+                    // 2. Update Image
+                    // This forces OpenShift to pull the new image from the registry
+                    bat "oc set image deployment/signaling-server signaling-server=${env.DOCKER_IMAGE}"
+                    
+                    // 3. Apply changes (Services, Routes)
+                    bat 'oc apply -f openshift/service.yaml'
+                    
+                    // 4. Verify rollout
+                    bat 'oc rollout status deployment/signaling-server'
+                }
             }
         }
     }
 
     post {
+        always {
+            echo 'Pipeline execution finished.'
+        }
         success {
-            echo '✅ Deployment successful! Check OpenShift Route for your new URL.'
+            echo '✅ Full DevOps Pipeline completed successfully!'
         }
         failure {
-            echo '❌ Pipeline failed. Check oc status or build logs.'
+            echo '❌ Pipeline failed. Check logs for SonarQube or Docker push errors.'
         }
     }
 }

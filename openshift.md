@@ -1,83 +1,68 @@
-# 🏗️ OpenShift Deployment Procedure
+# 🚀 OpenShift Full DevOps Orchestration Guide
 
-This document provides the exact code, commands, and steps required to move your signaling server from your local machine to an enterprise OpenShift cluster.
-
----
-
-## 1️⃣ Prerequisites (One-Time Setup)
-
-Before you start the deployment, ensure your local Jenkins machine has:
-1.  **OpenShift CLI (`oc`)**: [Download and add to PATH](https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/).
-2.  **Jenkins Credentials**: You will need a **Server URL** and a **Login Token**.
+This document outlines the transition from local-binary builds to a production-grade **Full DevOps Lifecycle** using Git, Jenkins, SonarQube, and Docker.
 
 ---
 
-## 2️⃣ Step-by-Step Deployment Procedure
+## 🛠️ Your Action Items (Manual Setup)
 
-### Step A: Login & Project Creation
-Run these commands in your Windows terminal (PowerShell/CMD):
-```powershell
-# 1. Login to your cluster (Get this command from the OpenShift Web Console)
-oc login https://api.cluster-url:6443 --token=YOUR_TOKEN
+Since the pipeline is now fully automated, you need to configure the external tools to "talk" to Jenkins. Please perform these steps on your Jenkins and OpenShift instances:
 
-# 2. Create the project for your app
-oc new-project alumni-live
-```
+### 1. Jenkins Credentials
+Go to **Manage Jenkins > Credentials > System > Global credentials**. Add the following:
 
-### Step B: Prepare the Binary Build
-We use a "Binary Build" to send your local `signaling_server` folder directly to OpenShift's internal registry.
-```powershell
-# Create the build configuration (Only run this once)
-oc new-build --name signaling-server --binary=true
-```
+| ID | Type | Description |
+| :--- | :--- | :--- |
+| `oc-token` | Secret Text | Your OpenShift API Token (Get it from `oc whoami -t`) |
+| `docker-hub-login` | Username with password | Your Docker Registry (Docker Hub/Quay) credentials. |
+| `sonar-token` | Secret Text | Analysis token generated from SonarQube |
 
-### Step C: Trigger the Deployment via Jenkins
-The updated `Jenkinsfile` now handles this automatically. Every time you click **"Build Now"** in Jenkins:
-1.  It runs `flutter clean` and builds your APK.
-2.  It sends your `signaling_server/` code to OpenShift using:
-    `oc start-build signaling-server --from-dir=signaling_server`
-3.  It applies the manifests in the `openshift/` folder:
-    `oc apply -f openshift/deployment.yaml`
-    `oc apply -f openshift/service.yaml`
+### 2. SonarQube Configuration
+- **On SonarQube**: Create a new project named `signaling-server`.
+- **On Jenkins**: Install the "SonarQube Scanner" plugin. 
+- Go to **Manage Jenkins > System**. Add your SonarQube Server URL (default: `http://localhost:9000`).
 
----
+### 3. OpenShift Image Pull Secret
+If you are using a private registry (like Docker Hub), OpenShift needs permission to pull the image:
+```bash
+oc create secret docker-registry regsecret \
+    --docker-server=https://index.docker.io/v1/ \
+    --docker-username=<your-name> \
+    --docker-password=<your-pws> \
+    --docker-email=<your-email>
 
-## 3️⃣ Public Access (Routes)
-
-After the build completes, your app is running inside the cluster. To make it public:
-```powershell
-# Expose the service as a Route (Jenkins does this via service.yaml)
-oc get routes
-```
-**Look for the URL in the output:**
-> Host: `signaling-server-alumni-live.apps.cluster.com`
-
----
-
-## 4️⃣ Update Flutter App
-Now that your server is live, you must tell your Flutter app where to find it.
-
-1.  Open `lib/src/shared/providers/auth_provider.dart`.
-2.  Update the following line with your OpenShift Route URL:
-```dart
-static const String _productionSignalingUrl = 'https://signaling-server-alumni-live.apps.cluster.com';
+oc secrets link default regsecret --for=pull
 ```
 
 ---
 
-## 5️⃣ Deployment Cheat Sheet
+## 🔄 The New DevOps Flow
 
-| Action | Command |
-| :--- | :--- |
-| **Check Logs** | `oc logs -f deployment/signaling-server` |
-| **Check Pods** | `oc get pods` |
-| **Restart App** | `oc rollout restart deployment/signaling-server` |
-| **Get Public URL** | `oc get route signaling-server` |
-| **Check Build Status** | `oc describe build signaling-server` |
+1.  **Commit**: You push code to GitHub.
+2.  **Analyze**: Jenkins triggers and runs **SonarQube** to check for bugs/vulnerabilities.
+3.  **Build**: Jenkins builds a **Docker Image** using the `Dockerfile` in `signaling_server/`.
+4.  **Registry**: Jenkins pushes that image to your Registry (Docker Hub).
+5.  **Deploy**: Jenkins tells **OpenShift** to update the deployment to the new image.
+6.  **Rollout**: OpenShift performs a zero-downtime rolling update.
 
 ---
 
-### 🚀 Final Goal
-Once you finish these steps, your **Jenkins pipeline** will be the brain of your project:
-- **Local changes** in Flutter ➡️ **Jenkins** ➡️ **New APK** generated.
-- **Local changes** in Signaling ➡️ **Jenkins** ➡️ **OpenShift** updated automatically.
+## 🖥️ Useful Commands for You
+
+**Monitor the Rollout:**
+```bash
+oc rollout status deployment/signaling-server
+```
+
+**Check Service Logs:**
+```bash
+oc logs -f deployment/signaling-server
+```
+
+**Verify the Public URL:**
+```bash
+oc get route signaling-server
+```
+
+> [!NOTE]
+> If you change your Docker Hub username, update the `DOCKER_IMAGE` variable at the top of the **[Jenkinsfile](file:///c:/project%20space/alumini_screen/Jenkinsfile)**.

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: signaling-server
-        image: signaling-server:latest # This will be updated by oc start-build
+        image: your-docker-id/signaling-server:latest # This will be updated by Jenkins pipeline
         ports:
         - containerPort: 3000
         env:
