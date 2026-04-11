@@ -4,6 +4,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const morgan = require('morgan');
 
 const authRoutes = require('./routes/authRoutes');
 const mentorshipRoutes = require('./routes/mentorshipRoutes');
@@ -17,6 +18,7 @@ const io = require('socket.io')(http, {
 
 // Middleware
 app.use(cors());
+app.use(morgan('dev'));
 app.use(bodyParser.json());
 
 // MongoDB Connection
@@ -30,9 +32,19 @@ app.use('/auth', authRoutes);
 app.use('/api/mentorship', mentorshipRoutes);
 app.use('/api/chats', chatRoutes);
 
-// Root Health Check
+// Root Health Check (Used by OpenShift Readiness/Liveness probes)
 app.get('/', (req, res) => {
-  res.status(200).send({ status: 'UP', message: 'Alumni Signaling Server is running' });
+  const mongoStatus = mongoose.connection.readyState === 1 ? 'CONNECTED' : 'DISCONNECTED';
+  res.status(mongoStatus === 'CONNECTED' ? 200 : 503).send({ 
+    status: 'UP', 
+    mongodb: mongoStatus,
+    message: 'Alumni Signaling Server is running',
+    timestamp: new Date().toISOString()
+  });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).send({ status: 'OK' });
 });
 
 const PORT = process.env.PORT || 3000;

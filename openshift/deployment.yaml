@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: signaling-server
-        image: your-docker-id/signaling-server:latest # This will be updated by Jenkins pipeline
+        image: rajesh200402/signaling-server:latest
         ports:
         - containerPort: 3000
         env:
@@ -25,14 +25,27 @@ spec:
         - name: MONGODB_URI
           value: "mongodb://mongodb:27017/alumni_app"
         - name: START_MEDIA_SERVER
-          value: "false" # Media server requires more config/ports, keep false for basic P2P
+          value: "false"
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 20
+          periodSeconds: 10
         resources:
           limits:
             cpu: "500m"
-            memory: "512Mi"
+            memory: "1Gi"
           requests:
             cpu: "200m"
-            memory: "256Mi"
-      # OpenShift compatibility: run as non-root
+            memory: "512Mi"
       securityContext:
         runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
