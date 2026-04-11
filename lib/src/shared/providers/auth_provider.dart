@@ -89,7 +89,7 @@ class AuthProvider with ChangeNotifier {
 
   static String getSignalingUrl() {
     // Priority: 1. Production URL (if not empty/placeholder) 2. Resolved IP 3. Localhost
-    if (_productionSignalingUrl.contains('onrender.com')) {
+    if (_productionSignalingUrl.isNotEmpty) {
       return _productionSignalingUrl;
     }
     final host = kIsWeb ? 'localhost' : _serverIp;
