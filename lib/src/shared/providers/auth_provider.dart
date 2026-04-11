@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 // ignore: depend_on_referenced_packages
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -77,9 +78,8 @@ class AuthProvider with ChangeNotifier {
   //  URL Helpers
   // ──────────────────────────────────────────────────────────────
 
-  // REPLACE THIS with your OpenShift Route URL
-  // Run 'oc get routes' to find your host.
-  static const String _productionSignalingUrl = 'https://signaling-server-23mh1a05n6-dev.apps.rm2.thpm.p1.openshiftapps.com';
+  // Production Signaling URL is now loaded from .env
+  static String get _productionSignalingUrl => dotenv.get('SIGNALING_URL', fallback: '');
 
   static String getBaseUrl(String endpoint) {
     // If not in demo mode and on mobile, use resolved IP, else localhost

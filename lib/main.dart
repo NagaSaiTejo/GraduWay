@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:alumini_screen/src/shared/providers/auth_provider.dart';
 import 'package:alumini_screen/src/shared/providers/mentorship_provider.dart';
 import 'package:alumini_screen/src/shared/providers/chat_provider.dart';
@@ -15,6 +16,9 @@ import 'package:alumini_screen/src/core/theme/app_theme.dart';
 void main() async {
   // Required before any async call in main()
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
 
   // Resolve the backend server IP BEFORE the app renders, so login()
   // always has the correct address ready.

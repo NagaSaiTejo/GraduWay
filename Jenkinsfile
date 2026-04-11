@@ -7,21 +7,43 @@ pipeline {
     }
 
     environment {
-        // --- Flutter Config ---
-        FLUTTER_HOME = "C:\\dev\\flutter" 
-        PATH = "${FLUTTER_HOME}\\bin;${env.PATH}"
-        
-        // --- OpenShift & Registry Config ---
-        OC_PROJECT = "23mh1a05n6-dev"
-        OC_SERVER = "https://api.rm2.thpm.p1.openshiftapps.com:6443"
-        
-        // --- DevOps Toolchain Config ---
-        DOCKER_IMAGE = "rajesh200402/signaling-server:latest"
+        // These will be overridden by the .env file in the Initialize stage
+        OC_PROJECT = ""
+        OC_SERVER = ""
+        DOCKER_IMAGE = ""
         SONAR_PROJECT_KEY = "signaling-server"
-        SONAR_HOST_URL = "http://localhost:9000"
+        SONAR_HOST_URL = ""
+        FLUTTER_HOME = ""
     }
 
     stages {
+        stage('Initialize') {
+            steps {
+                script {
+                    if (fileExists('.env')) {
+                        echo "📝 Loading environment variables from .env..."
+                        def envFile = readFile('.env')
+                        envFile.split('\r?\n').each { line ->
+                            line = line.trim()
+                            if (line && !line.startsWith('#') && line.contains('=')) {
+                                def parts = line.split('=', 2)
+                                def key = parts[0].trim()
+                                def value = parts[1].trim()
+                                env."${key}" = value
+                                echo "Loaded ${key}"
+                            }
+                        }
+                    } else {
+                        echo "⚠️ .env file NOT found. Using default/manual environment variables."
+                    }
+                    
+                    // Update PATH with the loaded FLUTTER_HOME
+                    if (env.FLUTTER_HOME) {
+                        env.PATH = "${env.FLUTTER_HOME}\\bin;${env.PATH}"
+                    }
+                }
+            }
+        }
         stage('Checkout') {
             steps {
                 echo 'Checking out source code...'
