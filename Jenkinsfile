@@ -34,7 +34,7 @@ pipeline {
                 echo '🚀 Running SonarQube Static Analysis...'
                 // We run analysis specifically on the signaling server logic
                 dir('signaling_server') {
-                    withSonarQubeEnv('My SonarQube Server') {
+                    withSonarQubeEnv('SonarQube') {
                         bat "sonar-scanner -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} -Dsonar.sources=. -Dsonar.host.url=${env.SONAR_HOST_URL}"
                     }
                 }
