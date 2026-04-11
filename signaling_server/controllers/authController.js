@@ -4,6 +4,11 @@ const { v4: uuidv4 } = require('uuid');
 exports.login = async (req, res) => {
     try {
         const { email, name } = req.body;
+        
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
         let user = await User.findOne({ email });
         
         if (!user) {
