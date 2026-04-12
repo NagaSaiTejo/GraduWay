@@ -13,10 +13,13 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 # Copy application source
-COPY . .
+COPY --chown=node:node . .
 
-# Update ffmpeg path for Linux (overrides the Windows path in media_server.js)
+# Update ffmpeg path for Linux
 ENV FFMPEG_PATH=/usr/bin/ffmpeg
+
+# Switch to non-root user for OpenShift compatibility
+USER node
 
 EXPOSE 3000 8000 1935
 
