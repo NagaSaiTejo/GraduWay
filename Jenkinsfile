@@ -102,6 +102,7 @@ pipeline {
                                 bat "${ocCmd} apply -f openshift/deployment.yaml"
                                 bat "${ocCmd} set image deployment/signaling-server signaling-server=${env.DOCKER_IMAGE}"
                                 bat "${ocCmd} apply -f openshift/service.yaml"
+                                bat "${ocCmd} rollout restart deployment/signaling-server"
                                 bat "${ocCmd} rollout status deployment/signaling-server"
                             }
                         }
