@@ -57,8 +57,17 @@ app.get('/api/health', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-// Track rooms: { roomId: { mentorSocketId, title, students: [socketId], startTime } }
+// Version: 1.0.2 - Force Clear Support
 const rooms = {};
+
+// Maintenance endpoints
+app.get('/rooms', (req, res) => res.json(rooms));
+app.get('/clear-rooms', (req, res) => {
+  const roomIds = Object.keys(rooms);
+  roomIds.forEach(id => delete rooms[id]);
+  console.log(`[MAINTENANCE] Cleared ${roomIds.length} rooms`);
+  res.send(`Cleared ${roomIds.length} rooms. Dashboard will update on next client connect.`);
+});
 
 const broadcastRoomList = () => {
   const roomList = Object.keys(rooms).map(id => ({
