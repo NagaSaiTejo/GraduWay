@@ -187,7 +187,7 @@ class _StudentDashboardState extends State<StudentDashboard> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Welcome, ${auth.userName}!",
+            "Welcome, ${auth.userName.isNotEmpty ? auth.userName : 'Student'}!",
             style: const TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.bold,

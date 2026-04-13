@@ -1,5 +1,10 @@
 pipeline {
     agent any
+    
+    triggers {
+        githubPush()
+        pollSCM('* * * * *')
+    }
 
     environment {
         // Enforce TLS 1.2 for Gradle dependency downloads

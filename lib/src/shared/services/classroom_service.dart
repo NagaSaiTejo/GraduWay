@@ -57,14 +57,14 @@ class ClassroomService {
 
       // 2. Setup Socket.io
       _socket = io.io(serverUrl, io.OptionBuilder()
-          .setTransports(['websocket']) 
+          .setTransports(['polling', 'websocket']) 
           .setQuery({'userName': userName})
           .enableAutoConnect()
           .build());
 
       // 3. Register Events
       _socket!.onConnect((_) {
-        dev.log('✅ Connected to Signaling Server');
+        dev.log('✅ Connected to Signaling Server: $serverUrl');
         _socket!.emit('join-room', {
           'roomId': _roomId,
           'role': _role == ClassroomRole.mentor ? 'mentor' : 'student',
@@ -74,8 +74,23 @@ class ClassroomService {
         onConnected?.call();
       });
 
-      _socket!.onConnectError((err) => dev.log('❌ Connection Error: $err'));
-      _socket!.onError((err) => onError?.call('Socket Error: $err'));
+      _socket!.onConnectError((err) {
+        dev.log('❌ Connection Error ($serverUrl): $err');
+        // On mobile, this often means SSL handshake failed
+      });
+
+      _socket!.onReconnectAttempt((attempt) => dev.log('🔄 Reconnect attempt: $attempt'));
+      _socket!.onReconnectError((err) => dev.log('❌ Reconnect Error: $err'));
+
+      _socket!.onError((err) {
+        dev.log('❌ Socket Error: $err');
+        onError?.call('Socket Connection failed. Error: $err');
+      });
+
+      _socket!.on('error', (msg) {
+        dev.log('⚠️ Server Error: $msg');
+        onError?.call(msg);
+      });
 
       // Listen for global room updates
       _socket!.on('room-list', (data) {

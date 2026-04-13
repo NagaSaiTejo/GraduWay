@@ -92,7 +92,12 @@ class AuthProvider with ChangeNotifier {
   static String getSignalingUrl() {
     // Priority: 1. Production URL (if not empty/placeholder) 2. Resolved IP 3. Localhost
     if (_productionSignalingUrl.isNotEmpty) {
-      return _productionSignalingUrl.replaceAll(RegExp(r'/$'), '');
+      String url = _productionSignalingUrl.replaceAll(RegExp(r'/$'), '');
+      // Ensure explicit port 443 for production HTTPS to avoid ':0' glitch in mobile socket client
+      if (url.startsWith('https://') && !url.contains(':', 8)) {
+        return '$url:443';
+      }
+      return url;
     }
     final host = kIsWeb ? 'localhost' : _serverIp;
     return 'http://$host:3000';
@@ -175,7 +180,7 @@ class AuthProvider with ChangeNotifier {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         _userId = data['id'];
-        _userName = data['name'];
+        _userName = data['name'] ?? 'User';
         _techField = data['techField'] ?? _techField;
         _company = data['company'] ?? _company;
         _yoe = data['yoe'] ?? _yoe;

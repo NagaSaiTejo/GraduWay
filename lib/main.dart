@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
@@ -12,10 +13,23 @@ import 'package:alumini_screen/src/shared/providers/ui_provider.dart';
 import 'package:alumini_screen/src/features/auth/login_page.dart';
 import 'package:alumini_screen/src/core/theme/app_theme.dart';
 
+/// Global HTTP overrides to allow self-signed certificates (OpenShift routes)
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
+  }
+}
+
 /// Entry point of the application.
 void main() async {
   // Required before any async call in main()
   WidgetsFlutterBinding.ensureInitialized();
+  
+  if (!kIsWeb) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
   
   // Load environment variables
   await dotenv.load(fileName: ".env");
