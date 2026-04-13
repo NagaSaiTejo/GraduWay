@@ -77,8 +77,8 @@ pipeline {
                         stage('Docker Build & Push') {
                             echo '📦 Building Docker Image for Signaling Server...'
                             dir('signaling_server') {
-                                // Build using the local Dockerfile
-                                bat "docker build -t ${env.DOCKER_IMAGE} ."
+                                // Build using the local Dockerfile with cache bypass for stability
+                                bat "docker build --no-cache --pull -t ${env.DOCKER_IMAGE} ."
                                 
                                 // Push to Registry
                                 withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
