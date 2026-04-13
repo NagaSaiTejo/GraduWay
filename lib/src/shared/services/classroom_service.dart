@@ -60,12 +60,18 @@ class ClassroomService {
         });
       }
 
-      // 2. Setup Socket.io
+      // 2. Setup Socket.io with hardened connection settings
       _socket = io.io(serverUrl, io.OptionBuilder()
-          .setTransports(['polling', 'websocket']) 
+          .setTransports(['websocket', 'polling']) // Prioritize WebSocket
           .setQuery({'userName': userName})
           .enableAutoConnect()
+          .setReconnectionAttempts(10)
+          .setReconnectionDelay(3000)
+          .setExtraHeaders({'Connection': 'upgrade', 'Upgrade': 'websocket'})
           .build());
+
+      // Increase timeout period for slow cloud-starts/mobile networks
+      _socket?.io.timeout(20000); // 20 seconds
 
       // 3. Register Events
       _socket!.onConnect((_) async {
