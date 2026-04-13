@@ -147,7 +147,7 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
     for (var renderer in _remoteRenderers.values) {
       await renderer.dispose();
     }
-    await _classroomService.dispose();
+    await _classroomService.leaveRoom();
   }
 
   void _sendMessage() {

@@ -8,6 +8,11 @@ import 'dart:developer' as dev;
 enum ClassroomRole { mentor, student }
 
 class ClassroomService {
+  // Singleton pattern for unified signaling
+  static final ClassroomService _instance = ClassroomService._internal();
+  factory ClassroomService() => _instance;
+  ClassroomService._internal();
+
   io.Socket? _socket;
   String _roomId = '';
   ClassroomRole _role = ClassroomRole.student;
@@ -60,26 +65,22 @@ class ClassroomService {
         });
       }
 
-      // 2. Setup Socket.io with hardened connection settings
-      _socket = io.io(serverUrl, io.OptionBuilder()
-          .setTransports(['websocket', 'polling']) // Prioritize WebSocket
-          .setQuery({'userName': userName})
-          .enableAutoConnect()
-          .setReconnectionAttempts(10)
-          .setReconnectionDelay(3000)
-          .setExtraHeaders({'Connection': 'upgrade', 'Upgrade': 'websocket'})
-          .build());
-
-      // Increase timeout period for slow cloud-starts/mobile networks
-      _socket?.io.timeout(20000); // 20 seconds
-
-      // 3. Register Events
-      _socket!.onConnect((_) async {
-        dev.log('✅ Connected to Signaling Server: $serverUrl');
+      // 2. Setup or Reuse Socket.io
+      if (_socket == null || !_socket!.connected) {
+        _socket = io.io(serverUrl, io.OptionBuilder()
+            .setTransports(['websocket', 'polling'])
+            .setQuery({'userName': userName})
+            .enableAutoConnect()
+            .setReconnectionAttempts(10)
+            .setReconnectionDelay(3000)
+            .setConnectionTimeout(20000)
+            .setExtraHeaders({'Connection': 'upgrade', 'Upgrade': 'websocket'})
+            .build());
         
-        // Brief delay before joining to ensure backend socket state is fully established
-        await Future.delayed(const Duration(milliseconds: 500));
-        
+        _socket?.io.timeout = 20000;
+        _registerBasicEvents(serverUrl);
+      } else {
+        // Already connected, just join the new room
         _socket!.emit('join-room', {
           'roomId': _roomId,
           'role': _role == ClassroomRole.mentor ? 'mentor' : 'student',
@@ -87,7 +88,24 @@ class ClassroomService {
           'title': title ?? roomId,
         });
         onConnected?.call();
+      }
+
+  void _registerBasicEvents(String serverUrl) {
+    _socket!.onConnect((_) async {
+      dev.log('✅ Connected to Signaling Server: $serverUrl');
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      _socket!.emit('join-room', {
+        'roomId': _roomId,
+        'role': _role == ClassroomRole.mentor ? 'mentor' : 'student',
+        'userName': 'Discovery-Lobby', // Default if not re-joined
       });
+      onConnected?.call();
+    });
+
+    _socket!.on('room-list', (data) {
+      onRoomListUpdate?.call(data as List<dynamic>);
+    });
 
       _socket!.onConnectError((err) {
         dev.log('❌ Connection Error ($serverUrl): $err');
@@ -260,12 +278,27 @@ class ClassroomService {
     }
   }
 
-  Future<void> dispose() async {
+  Future<void> leaveRoom() async {
     localStream?.getTracks().forEach((t) => t.stop());
     await localStream?.dispose();
+    localStream = null;
+    
     for (var pc in peerConnections.values) {
       pc.dispose();
     }
+    peerConnections.clear();
+    remoteStreams.clear();
+    
+    // Switch back to lobby instead of fully disconnecting
+    _socket!.emit('join-room', {
+      'roomId': 'global-lobby',
+      'role': 'student',
+      'userName': 'Discovery-Return',
+    });
+  }
+
+  Future<void> dispose() async {
+    await leaveRoom();
     _socket?.dispose();
     _socket = null;
   }
