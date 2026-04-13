@@ -177,6 +177,24 @@ io.on('connection', (socket) => {
     socket.to(data.roomId).emit('user-raised-hand', data);
   });
 
+  // Explicit Room Leave: { roomId }
+  socket.on('leave-room', (data) => {
+    const roomId = data.roomId;
+    console.log(`[LEAVE] User ${socket.id} leaving room ${roomId}`);
+    
+    if (rooms[roomId]) {
+      if (socket.data.role === 'mentor' && rooms[roomId].mentorSocketId === socket.id) {
+        socket.to(roomId).emit('mentor-left');
+        delete rooms[roomId];
+        console.log(`[ROOM] Session ended and deleted: ${roomId}`);
+      } else {
+        rooms[roomId].students = rooms[roomId].students.filter(id => id !== socket.id);
+        socket.to(roomId).emit('user-left', socket.id);
+      }
+      broadcastRoomList();
+    }
+  });
+
   // Cleanup on disconnect
   socket.on('disconnect', () => {
     console.log(`[DISCONNECT] User: ${socket.id}`);

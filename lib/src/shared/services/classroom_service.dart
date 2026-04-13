@@ -32,14 +32,21 @@ class ClassroomService {
   Function()? onConnected;
   Function(List<dynamic> rooms)? onRoomListUpdate;
 
-  // Standard WebRTC Configuration using multiple reliable STUN servers
+  // Robust WebRTC Configuration using STUN & Free TURN for NAT Traversal
   final Map<String, dynamic> _rtcConfig = {
     'iceServers': [
       {'urls': 'stun:stun.l.google.com:19302'},
       {'urls': 'stun:stun1.l.google.com:19302'},
-      {'urls': 'stun:stun2.l.google.com:19302'},
-      {'urls': 'stun:stun3.l.google.com:19302'},
-      {'urls': 'stun:stun4.l.google.com:19302'},
+      // Free Community TURN servers from Open Relay Project
+      {
+        'urls': [
+          'stun:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:80',
+          'turn:openrelay.metered.ca:443?transport=tcp',
+        ],
+        'username': 'openrelayproject',
+        'credential': 'openrelayproject',
+      },
     ],
     'iceTransportPolicy': 'all',
     'sdpSemantics': 'unified-plan',
@@ -308,6 +315,9 @@ class ClassroomService {
   }
 
   Future<void> leaveRoom() async {
+    // Explicitly notify server so it can cleanup the room object immediately
+    _socket?.emit('leave-room', {'roomId': _roomId});
+
     localStream?.getTracks().forEach((t) => t.stop());
     await localStream?.dispose();
     localStream = null;
