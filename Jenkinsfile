@@ -80,10 +80,12 @@ pipeline {
                                 // Build using the local Dockerfile with cache bypass for stability
                                 bat "docker build --no-cache --pull -t ${env.DOCKER_IMAGE} ."
                                 
-                                // Push to Registry
-                                withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                                    bat "docker login -u ${USER} -p ${PASS}"
-                                    bat "docker push ${env.DOCKER_IMAGE}"
+                                // Push to Registry with retries for transient network failures
+                                retry(3) {
+                                    withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                                        bat "docker login -u ${USER} -p ${PASS}"
+                                        bat "docker push ${env.DOCKER_IMAGE}"
+                                    }
                                 }
                             }
                         }

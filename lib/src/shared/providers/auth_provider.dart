@@ -25,8 +25,14 @@ class AuthProvider with ChangeNotifier {
   static String get serverIp => _serverIp;
 
   static Future<void> resolveServerIp() async {
+    // On web, we cannot easily scan local networks due to CORS. 
+    // We rely on the SIGNALING_URL from .env or window.location.
     if (kIsWeb) {
-      _serverIp = 'localhost';
+      if (_productionSignalingUrl.isNotEmpty) {
+        dev.log('🌐 [AUTH] Web mode: Utilizing production signaling URL');
+      } else {
+        dev.log('🌐 [AUTH] Web mode: No production URL found, defaulting to localhost');
+      }
       return;
     }
 
@@ -90,15 +96,17 @@ class AuthProvider with ChangeNotifier {
   }
 
   static String getSignalingUrl() {
-    // Priority: 1. Production URL (if not empty/placeholder) 2. Resolved IP 3. Localhost
+    // Priority: 1. Production URL (from .env)
     if (_productionSignalingUrl.isNotEmpty) {
       String url = _productionSignalingUrl.replaceAll(RegExp(r'/$'), '');
-      // Ensure explicit port 443 for production HTTPS to avoid ':0' glitch in mobile socket client
+      // Ensure explicit port 443 for production HTTPS to avoid ':0' glitch in some socket clients
       if (url.startsWith('https://') && !url.contains(':', 8)) {
         return '$url:443';
       }
       return url;
     }
+
+    // 2. Fallback: Resolved IP or Localhost
     final host = kIsWeb ? 'localhost' : _serverIp;
     return 'http://$host:3000';
   }
