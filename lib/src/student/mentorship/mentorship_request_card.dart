@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:alumini_screen/src/student/shared/models/mentorship_model.dart';
+import 'package:alumini_screen/src/alumni/shared/models/mentorship_model.dart';
 import 'package:alumini_screen/src/student/shared/services/mentorship_service.dart';
 
 /// A card widget that displays details of a mentorship request.
@@ -246,6 +246,7 @@ class MentorshipRequestCard extends StatelessWidget {
     );
   }
 }
+
 
 
 

@@ -4,7 +4,7 @@ import 'package:alumini_screen/src/alumni/profile/profile_dashboard_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:alumini_screen/src/student/core/theme/app_theme.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -204,6 +204,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
+
 
 
 

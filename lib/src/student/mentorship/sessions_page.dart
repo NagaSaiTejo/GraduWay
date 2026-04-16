@@ -1,8 +1,8 @@
 import 'package:alumini_screen/src/alumni/mentorship/interactive_classroom_page.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/mentorship_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/mentorship_provider.dart';
 import 'package:alumini_screen/src/student/core/theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -427,5 +427,7 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 }
+
+
 
 

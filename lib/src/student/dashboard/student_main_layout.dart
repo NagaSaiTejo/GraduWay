@@ -8,7 +8,7 @@ import 'package:alumini_screen/src/student/core/theme/app_theme.dart';
 import 'package:alumini_screen/src/student/core/widgets/floating_navbar.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 
 class StudentMainLayout extends StatefulWidget {
   const StudentMainLayout({super.key});
@@ -96,5 +96,6 @@ class PlaceholderScreen extends StatelessWidget {
     );
   }
 }
+
 
 

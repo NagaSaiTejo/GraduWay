@@ -7,8 +7,8 @@ import 'package:alumini_screen/src/alumni/notifications/notifications_page.dart'
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/mentorship_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/mentorship_provider.dart';
 import 'package:alumini_screen/src/student/core/theme/app_theme.dart';
 // import 'package:flutter_animate/flutter_animate.dart';
 
@@ -486,6 +486,8 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 }
+
+
 
 
 

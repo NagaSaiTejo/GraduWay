@@ -1,7 +1,7 @@
 import 'package:alumini_screen/src/alumni/mentorship/interactive_classroom_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 
 class StudentDashboard extends StatefulWidget {
   const StudentDashboard({super.key});
@@ -356,5 +356,6 @@ class _StudentDashboardState extends State<StudentDashboard> {
     );
   }
 }
+
 
 

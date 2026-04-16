@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/mentorship_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/mentorship_provider.dart';
 import 'package:alumini_screen/src/student/core/theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:alumini_screen/src/student/shared/models/mentorship_model.dart';
+import 'package:alumini_screen/src/alumni/shared/models/mentorship_model.dart';
 
 class MenteesPage extends StatefulWidget {
   final bool initialShowActive;
@@ -161,5 +161,7 @@ class _MenteesPageState extends State<MenteesPage> with SingleTickerProviderStat
     );
   }
 }
+
+
 
 

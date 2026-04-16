@@ -79,6 +79,9 @@ class MyApp extends StatelessWidget {
       title: 'Alumni Connect',
       theme: AppTheme.lightTheme,
       home: const LoginScreen(),
+      routes: {
+        '/home': (context) => const LoginScreen(),
+      },
       debugShowCheckedModeBanner: false,
     );
   }

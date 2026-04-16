@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:alumini_screen/src/student/shared/models/mentorship_model.dart';
+import 'package:alumini_screen/src/alumni/shared/models/mentorship_model.dart';
 import 'package:alumini_screen/src/student/shared/services/mentorship_service.dart';
 import 'package:alumini_screen/src/student/shared/services/persistence_service.dart';
 import 'package:alumini_screen/src/student/shared/services/classroom_service.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/chat_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/chat_provider.dart';
 
 /// Manages the state of mentorship requests and sessions.
 class MentorshipProvider with ChangeNotifier {
@@ -164,6 +164,9 @@ class MentorshipProvider with ChangeNotifier {
     super.dispose();
   }
 }
+
+
+
 
 
 

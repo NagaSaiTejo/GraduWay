@@ -1,6 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter/material.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 
 /// A small dialog that lets the user set a custom server IP address.
 /// Useful when running on a physical device that can't reach localhost.
@@ -151,5 +151,6 @@ class _ServerIpDialogState extends State<ServerIpDialog> {
     );
   }
 }
+
 
 

@@ -10,7 +10,8 @@ class SkillsPage extends StatelessWidget {
     return Consumer<AuthProvider>(
       builder: (context, auth, _) {
         // Mock categorization for demo purposes
-        final skills = auth.skills.isEmpty ? ["Flutter", "Dart", "Firebase", "System Design"] : auth.skills;
+        // Use user-defined skills, or empty list if none
+        final skills = auth.skills;
         
         return Scaffold(
           backgroundColor: const Color(0xFFF5F7FA),
@@ -25,7 +26,7 @@ class SkillsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildMentorshipStats(),
+                _buildMentorshipStats(auth),
                 const SizedBox(height: 32),
                 const Text("Core Competencies", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 16),
@@ -42,7 +43,7 @@ class SkillsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMentorshipStats() {
+  Widget _buildMentorshipStats(AuthProvider auth) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -58,9 +59,9 @@ class SkillsPage extends StatelessWidget {
           children: [
             _buildStatItem("5.0", "Rating", Icons.star_rounded, Colors.amber),
             const VerticalDivider(width: 1),
-            _buildStatItem("12", "Endorsed", Icons.verified_outlined, Colors.blue),
+            _buildStatItem(auth.status == UserStatus.verified ? "Verified" : "Pending", "Status", Icons.verified_outlined, Colors.blue),
             const VerticalDivider(width: 1),
-            _buildStatItem("5+", "Years", Icons.history_edu_rounded, Colors.green),
+            _buildStatItem(auth.yoe.isNotEmpty ? auth.yoe : "0", "Years", Icons.history_edu_rounded, Colors.green),
           ],
         ),
       ),

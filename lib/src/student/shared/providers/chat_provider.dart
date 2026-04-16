@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:alumini_screen/src/student/shared/models/chat_model.dart';
+import 'package:alumini_screen/src/alumni/shared/models/chat_model.dart';
 import 'package:alumini_screen/src/student/shared/services/mentorship_service.dart';
 import 'package:alumini_screen/src/student/shared/services/persistence_service.dart';
 
@@ -82,5 +82,6 @@ class ChatProvider with ChangeNotifier {
     notifyListeners();
   }
 }
+
 
 

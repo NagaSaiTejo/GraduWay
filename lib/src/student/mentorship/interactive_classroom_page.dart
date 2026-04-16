@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:provider/provider.dart';
 import 'package:alumini_screen/src/student/shared/services/classroom_service.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/notification_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/notification_provider.dart';
 import 'dart:developer' as dev;
 import 'dart:ui';
 
@@ -681,5 +681,7 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
     );
   }
 }
+
+
 
 

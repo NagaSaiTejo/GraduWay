@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:alumini_screen/src/student/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 
 class SkillsPage extends StatelessWidget {
   const SkillsPage({super.key});
@@ -144,5 +144,6 @@ class SkillsPage extends StatelessWidget {
     );
   }
 }
+
 
 
