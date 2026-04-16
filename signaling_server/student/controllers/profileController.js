@@ -1,5 +1,5 @@
 const Student = require('../models/Student');
-const User = require('../../models/User');
+const User = require('../../core/models/User');
 
 exports.getProfile = async (req, res) => {
     try {
