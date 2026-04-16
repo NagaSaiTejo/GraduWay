@@ -6,5 +6,6 @@ const mentorshipController = require('../controllers/mentorshipController');
 router.get('/requests', mentorshipController.getAllRequests);
 router.post('/requests', mentorshipController.submitRequest);
 router.patch('/requests/:id/status', mentorshipController.updateStatus);
+router.get('/dashboard/:mentorId', mentorshipController.getDashboardSummary);
 
 module.exports = router;

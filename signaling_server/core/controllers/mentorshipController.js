@@ -95,3 +95,23 @@ exports.updateStatus = async (req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
+exports.getDashboardSummary = async (req, res) => {
+    try {
+        const { mentorId } = req.params;
+        const mentor = await User.findOne({ id: mentorId });
+        if (!mentor) return res.status(404).json({ message: 'Mentor not found' });
+
+        const pendingCount = await MentorshipRequest.countDocuments({ mentor: mentor._id, status: 'pending' });
+        const acceptedCount = await MentorshipRequest.countDocuments({ mentor: mentor._id, status: 'accepted' });
+        const rejectedCount = await MentorshipRequest.countDocuments({ mentor: mentor._id, status: 'rejected' });
+
+        res.status(200).json({
+            pendingCount,
+            acceptedCount,
+            rejectedCount
+        });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
+};

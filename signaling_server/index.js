@@ -9,10 +9,8 @@ const morgan = require('morgan');
 const loginRoutes = require('./login/routes/loginRoutes');
 const signupRoutes = require('./signup/routes/signupRoutes');
 const alumniProfileRoutes = require('./alumni/routes/profileRoutes');
-const alumniMentorshipRoutes = require('./alumni/routes/mentorshipRoutes');
 const alumniChatRoutes = require('./alumni/routes/chatRoutes');
 const studentProfileRoutes = require('./student/routes/profileRoutes');
-const studentMentorshipRoutes = require('./student/routes/mentorshipRoutes');
 const studentChatRoutes = require('./student/routes/chatRoutes');
 const adminRoutes = require('./admin/routes/adminRoutes');
 const coreMentorshipRoutes = require('./core/routes/mentorshipRoutes');
@@ -71,12 +69,10 @@ app.use('/api/auth/signup', signupRoutes);
 
 // Alumni Module Routes
 app.use('/api/alumni', alumniProfileRoutes);
-app.use('/api/alumni/mentorship', alumniMentorshipRoutes);
 app.use('/api/alumni/chats', alumniChatRoutes);
 
 // Student Module Routes
 app.use('/api/student', studentProfileRoutes);
-app.use('/api/student/mentorship', studentMentorshipRoutes);
 app.use('/api/student/chats', studentChatRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/mentorship', coreMentorshipRoutes);
