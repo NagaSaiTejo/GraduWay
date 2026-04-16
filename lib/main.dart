@@ -1,17 +1,17 @@
 import 'dart:io';
+import 'package:alumini_screen/src/alumni/shared/core/theme/app_theme.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/chat_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/mentorship_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/notification_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/ui_provider.dart';
+import 'package:alumini_screen/src/login/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:alumini_screen/src/shared/providers/auth_provider.dart';
-import 'package:alumini_screen/src/shared/providers/mentorship_provider.dart';
-import 'package:alumini_screen/src/shared/providers/chat_provider.dart';
-import 'package:alumini_screen/src/shared/providers/notification_provider.dart';
-import 'package:alumini_screen/src/shared/providers/ui_provider.dart';
-import 'package:alumini_screen/src/features/auth/login_page.dart';
-import 'package:alumini_screen/src/core/theme/app_theme.dart';
 
 /// Global HTTP overrides to allow self-signed certificates (OpenShift routes)
 class MyHttpOverrides extends HttpOverrides {

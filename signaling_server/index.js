@@ -6,9 +6,14 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
 
-const authRoutes = require('./routes/authRoutes');
-const mentorshipRoutes = require('./routes/mentorshipRoutes');
-const chatRoutes = require('./routes/chatRoutes');
+const loginRoutes = require('./login/routes/loginRoutes');
+const signupRoutes = require('./signup/routes/signupRoutes');
+const alumniProfileRoutes = require('./alumni/routes/profileRoutes');
+const alumniMentorshipRoutes = require('./alumni/routes/mentorshipRoutes');
+const alumniChatRoutes = require('./alumni/routes/chatRoutes');
+const studentProfileRoutes = require('./student/routes/profileRoutes');
+const studentMentorshipRoutes = require('./student/routes/mentorshipRoutes');
+const studentChatRoutes = require('./student/routes/chatRoutes');
 
 const app = express();
 const http = require('http').createServer(app);
@@ -38,9 +43,18 @@ mongoose.connect(MONGODB_URI)
   .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/mentorship', mentorshipRoutes);
-app.use('/api/chats', chatRoutes);
+app.use('/api/auth/login', loginRoutes);
+app.use('/api/auth/signup', signupRoutes);
+
+// Alumni Module Routes
+app.use('/api/alumni', alumniProfileRoutes);
+app.use('/api/alumni/mentorship', alumniMentorshipRoutes);
+app.use('/api/alumni/chats', alumniChatRoutes);
+
+// Student Module Routes
+app.use('/api/student', studentProfileRoutes);
+app.use('/api/student/mentorship', studentMentorshipRoutes);
+app.use('/api/student/chats', studentChatRoutes);
 
 // Root Health Check (Used by OpenShift Readiness/Liveness probes)
 app.get('/', (req, res) => {
