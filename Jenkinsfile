@@ -7,9 +7,7 @@ pipeline {
     }
 
     environment {
-        // Enforce TLS 1.2 for Gradle dependency downloads
         JAVA_OPTS = "-Dhttps.protocols=TLSv1.2,TLSv1.3"
-        // Default placeholders
         SONAR_PROJECT_KEY = "signaling-server"
     }
 
@@ -33,22 +31,35 @@ pipeline {
                         error "❌ .env file NOT found. This pipeline requires a local .env file for configuration."
                     }
 
-                    // Wrap all subsequent stages in withEnv to ensure variables are available
                     withEnv(envVars) {
                         stage('Diagnostics') {
                             echo "🔍 Environment Diagnostics:"
                             echo "PATH (System): ${env.PATH}"
                             echo "FLUTTER_HOME: ${env.FLUTTER_HOME}"
                             echo "SONAR_HOST_URL: ${env.SONAR_HOST_URL}"
-                            
-                            // Check Docker
                             bat "docker --version || echo 'Docker not found'"
                         }
 
+                        // ─────────────────────────────────────────────────────
+                        // QUALITY GATE STAGE 1: Run Tests & Generate Coverage
+                        // This must happen BEFORE the SonarQube scan so that
+                        // coverage reports exist for SonarQube to read.
+                        // ─────────────────────────────────────────────────────
+                        stage('Run Backend Tests') {
+                            echo "🧪 Running Quality Gate test suite..."
+                            dir('signaling_server') {
+                                bat "npm install"
+                                bat "npm test"
+                            }
+                        }
+
+                        // ─────────────────────────────────────────────────────
+                        // QUALITY GATE STAGE 2: SonarQube Static Analysis
+                        // Passes the coverage report (lcov.info) to SonarQube
+                        // so that Coverage % is accurately reported.
+                        // ─────────────────────────────────────────────────────
                         stage('SonarQube Analysis') {
-                            echo "🚀 Running SonarQube Static Analysis using Docker..."
-                            // We map the signaling_server directory to /usr/src inside the container
-                            // We use host.docker.internal to reach the SonarQube server on the host
+                            echo "🚀 Running SonarQube Static Analysis with Coverage..."
                             bat """
                                 docker run --rm ^
                                 -e SONAR_HOST_URL="${env.SONAR_HOST_URL}" ^
@@ -56,16 +67,34 @@ pipeline {
                                 -v "%WORKSPACE%\\signaling_server:/usr/src" ^
                                 sonarsource/sonar-scanner-cli ^
                                 -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} ^
-                                -Dsonar.sources=.
+                                -Dsonar.sources=. ^
+                                -Dsonar.tests=tests ^
+                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info ^
+                                -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/coverage/**
                             """
+                        }
+
+                        // ─────────────────────────────────────────────────────
+                        // QUALITY GATE STAGE 3: ENFORCE THE GATE
+                        // This step polls SonarQube for the quality gate result.
+                        // If SonarQube says FAILED, the entire pipeline STOPS
+                        // here and does NOT build the APK or deploy to production.
+                        // ─────────────────────────────────────────────────────
+                        stage('Quality Gate') {
+                            echo "🛡️ Waiting for SonarQube Quality Gate result..."
+                            timeout(time: 5, unit: 'MINUTES') {
+                                def qg = waitForQualityGate()
+                                if (qg.status != 'OK') {
+                                    error "❌ QUALITY GATE FAILED: Status=${qg.status}. Fix all issues before deploying to production."
+                                }
+                            }
+                            echo "✅ Quality Gate PASSED — Code is production-ready!"
                         }
 
                         stage('Clean & Build APK') {
                             echo '🛠️ Cleaning and building Mobile APK...'
-                            // Use absolute path to flutter.bat to avoid PATH issues
                             def flutterCmd = "${env.FLUTTER_HOME}\\bin\\flutter.bat"
                             
-                            // Fix Git "dubious ownership" error for Jenkins SYSTEM user
                             bat "git config --global --add safe.directory ${env.FLUTTER_HOME}"
                             bat "git config --global --add safe.directory %WORKSPACE%"
                             
@@ -77,10 +106,7 @@ pipeline {
                         stage('Docker Build & Push') {
                             echo '📦 Building Docker Image for Signaling Server...'
                             dir('signaling_server') {
-                                // Build using the local Dockerfile with cache bypass for stability
                                 bat "docker build --no-cache --pull -t ${env.DOCKER_IMAGE} ."
-                                
-                                // Push to Registry with retries for transient network failures
                                 retry(3) {
                                     withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                                         bat "docker login -u ${USER} -p ${PASS}"
@@ -92,7 +118,6 @@ pipeline {
 
                         stage('Deploy to OpenShift') {
                             echo '🚀 Triggering Orchestrated Deployment on OpenShift...'
-                            // Use absolute path to oc.exe if defined, otherwise fallback to global command
                             def ocCmd = env.OC_PATH ?: 'oc'
                             
                             withCredentials([string(credentialsId: 'oc-token', variable: 'TOKEN')]) {
@@ -115,12 +140,14 @@ pipeline {
     post {
         always {
             echo 'Pipeline execution finished.'
+            // Archive coverage reports for history
+            junit allowEmptyResults: true, testResults: 'signaling_server/coverage/*.xml'
         }
         success {
-            echo '✅ Full DevOps Pipeline completed successfully!'
+            echo '✅ Full DevOps Pipeline completed successfully! Quality Gate PASSED.'
         }
         failure {
-            echo '❌ Pipeline failed. Check logs for .env loading or Docker errors.'
+            echo '❌ Pipeline failed. Check Quality Gate results or build logs.'
         }
     }
 }

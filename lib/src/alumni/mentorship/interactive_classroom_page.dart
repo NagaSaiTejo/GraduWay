@@ -119,11 +119,23 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('⚠️ $message'),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
+            backgroundColor: Colors.orange.shade800,
+            duration: const Duration(seconds: 8),
+            action: SnackBarAction(
+              label: 'LEAVE',
+              textColor: Colors.white,
+              onPressed: () {
+                if (mounted) Navigator.pop(context);
+              },
+            ),
           ),
         );
-        Navigator.pop(context);
+        // Only auto-leave for fatal server-side errors, NOT transport retries
+        if (message.contains('multiple attempts')) {
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) Navigator.pop(context);
+          });
+        }
       }
     };
 

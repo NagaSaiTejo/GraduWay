@@ -121,14 +121,23 @@ class ClassroomService {
 
     _socket!.onConnectError((err) {
       dev.log('❌ Connection Error ($serverUrl): $err');
+      // DO NOT call onError here — socket will automatically retry via reconnection.
     });
 
     _socket!.onReconnectAttempt((attempt) => dev.log('🔄 Reconnect attempt: $attempt'));
     _socket!.onReconnectError((err) => dev.log('❌ Reconnect Error: $err'));
 
+    _socket!.onReconnectFailed((_) {
+      dev.log('💀 All reconnection attempts failed. Reporting error to UI.');
+      onError?.call('Unable to connect to classroom after multiple attempts. Please check your network and try again.');
+    });
+
     _socket!.onError((err) {
       dev.log('❌ Socket Error: $err');
-      onError?.call('Socket Connection failed. Error: $err');
+      final errStr = err.toString();
+      if (!errStr.contains('TransportError') && !errStr.contains('xhr poll error')) {
+        onError?.call('Socket Connection failed. Error: $errStr');
+      }
     });
 
     _socket!.on('error', (msg) {
