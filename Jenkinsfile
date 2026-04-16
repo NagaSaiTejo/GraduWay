@@ -55,23 +55,26 @@ pipeline {
 
                         // ─────────────────────────────────────────────────────
                         // QUALITY GATE STAGE 2: SonarQube Static Analysis
-                        // Passes the coverage report (lcov.info) to SonarQube
-                        // so that Coverage % is accurately reported.
+                        // Must run inside withSonarQubeEnv so Jenkins can
+                        // register the analysis task and waitForQualityGate()
+                        // knows which result to poll for.
                         // ─────────────────────────────────────────────────────
                         stage('SonarQube Analysis') {
                             echo "🚀 Running SonarQube Static Analysis with Coverage..."
-                            bat """
-                                docker run --rm ^
-                                -e SONAR_HOST_URL="${env.SONAR_HOST_URL}" ^
-                                -e SONAR_TOKEN="${env.SONAR_TOKEN}" ^
-                                -v "%WORKSPACE%\\signaling_server:/usr/src" ^
-                                sonarsource/sonar-scanner-cli ^
-                                -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} ^
-                                -Dsonar.sources=. ^
-                                -Dsonar.tests=tests ^
-                                -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info ^
-                                -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/coverage/**
-                            """
+                            withSonarQubeEnv('SonarQube') {
+                                bat """
+                                    docker run --rm ^
+                                    -e SONAR_HOST_URL="${env.SONAR_HOST_URL}" ^
+                                    -e SONAR_TOKEN="${env.SONAR_TOKEN}" ^
+                                    -v "%WORKSPACE%\\signaling_server:/usr/src" ^
+                                    sonarsource/sonar-scanner-cli ^
+                                    -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} ^
+                                    -Dsonar.sources=. ^
+                                    -Dsonar.tests=tests ^
+                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info ^
+                                    -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/coverage/**
+                                """
+                            }
                         }
 
                         // ─────────────────────────────────────────────────────
