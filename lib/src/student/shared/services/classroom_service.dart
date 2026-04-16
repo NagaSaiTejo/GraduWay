@@ -79,7 +79,10 @@ class ClassroomService {
       }
 
       // 2. Setup or Reuse Socket.io
-      if (_socket == null || !_socket!.connected) {
+        dev.log('🔌 [CLASS] Attempting connection...');
+        dev.log('🔗 [CLASS] Server URL: $serverUrl');
+        dev.log('📂 [CLASS] Socket Path: /api/socket');
+
         _socket = io.io(serverUrl, io.OptionBuilder()
             .setTransports(['polling', 'websocket']) 
             .setPath('/api/socket') // Explicit path for deployment stability
@@ -90,6 +93,7 @@ class ClassroomService {
             .build());
         
         _socket?.io.timeout = 30000;
+        dev.log('⏳ [CLASS] Socket initialized with 30s timeout');
         _registerBasicEvents(serverUrl, userName); // Pass userName for events
       } else {
         // Already connected, just join the new room

@@ -98,6 +98,11 @@ pipeline {
                             echo '🛠️ Cleaning and building Mobile APK...'
                             def flutterCmd = "${env.FLUTTER_HOME}\\bin\\flutter.bat"
                             
+                            // FORCE INJECTION: Inject the production signaling URL into the .env asset file
+                            // This ensures the APK is hardcoded to the correct OpenShift endpoint
+                            bat "echo SIGNALING_URL=https://signaling-server-balasrirajesh-dev.apps.sandbox-m2.ll9k.p1.openshiftapps.com > .env"
+                            echo "✅ Baked SIGNALING_URL into .env asset for APK build."
+
                             bat "git config --global --add safe.directory ${env.FLUTTER_HOME}"
                             bat "git config --global --add safe.directory %WORKSPACE%"
                             
