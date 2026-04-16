@@ -54,44 +54,38 @@ pipeline {
                         }
 
                         // ─────────────────────────────────────────────────────
-                        // QUALITY GATE STAGE 2: SonarQube Static Analysis
-                        // Must run inside withSonarQubeEnv so Jenkins can
-                        // register the analysis task and waitForQualityGate()
-                        // knows which result to poll for.
+                        // QUALITY GATE: Analysis & Enforcement
+                        // Wrapped in dir('signaling_server') so Jenkins finds the report-task.txt
                         // ─────────────────────────────────────────────────────
-                        stage('SonarQube Analysis') {
-                            echo "🚀 Running SonarQube Static Analysis with Coverage..."
-                            withSonarQubeEnv('SonarQube') {
-                                bat """
-                                    docker run --rm ^
-                                    -e SONAR_HOST_URL="http://host.docker.internal:9000" ^
-                                    -e SONAR_TOKEN="${env.SONAR_TOKEN}" ^
-                                    -v "%WORKSPACE%\\signaling_server:/usr/src" ^
-                                    sonarsource/sonar-scanner-cli ^
-                                    -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} ^
-                                    -Dsonar.sources=. ^
-                                    -Dsonar.tests=tests ^
-                                    -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info ^
-                                    -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/coverage/**
-                                """
-                            }
-                        }
-
-                        // ─────────────────────────────────────────────────────
-                        // QUALITY GATE STAGE 3: ENFORCE THE GATE
-                        // This step polls SonarQube for the quality gate result.
-                        // If SonarQube says FAILED, the entire pipeline STOPS
-                        // here and does NOT build the APK or deploy to production.
-                        // ─────────────────────────────────────────────────────
-                        stage('Quality Gate') {
-                            echo "🛡️ Waiting for SonarQube Quality Gate result..."
-                            timeout(time: 5, unit: 'MINUTES') {
-                                def qg = waitForQualityGate()
-                                if (qg.status != 'OK') {
-                                    error "❌ QUALITY GATE FAILED: Status=${qg.status}. Fix all issues before deploying to production."
+                        dir('signaling_server') {
+                            stage('SonarQube Analysis') {
+                                echo "🚀 Running SonarQube Static Analysis with Coverage..."
+                                withSonarQubeEnv('SonarQube') {
+                                    bat """
+                                        docker run --rm ^
+                                        -e SONAR_HOST_URL="http://host.docker.internal:9000" ^
+                                        -e SONAR_TOKEN="${env.SONAR_TOKEN}" ^
+                                        -v "%WORKSPACE%\\signaling_server:/usr/src" ^
+                                        sonarsource/sonar-scanner-cli ^
+                                        -Dsonar.projectKey=${env.SONAR_PROJECT_KEY} ^
+                                        -Dsonar.sources=. ^
+                                        -Dsonar.tests=tests ^
+                                        -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info ^
+                                        -Dsonar.exclusions=**/node_modules/**,**/tests/**,**/coverage/**
+                                    """
                                 }
                             }
-                            echo "✅ Quality Gate PASSED — Code is production-ready!"
+
+                            stage('Quality Gate') {
+                                echo "🛡️ Waiting for SonarQube Quality Gate result..."
+                                timeout(time: 5, unit: 'MINUTES') {
+                                    def qg = waitForQualityGate()
+                                    if (qg.status != 'OK') {
+                                        error "❌ QUALITY GATE FAILED: Status=${qg.status}. Fix all issues before deploying to production."
+                                    }
+                                }
+                                echo "✅ Quality Gate PASSED — Code is production-ready!"
+                            }
                         }
 
                         stage('Clean & Build APK') {
