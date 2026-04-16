@@ -79,6 +79,7 @@ class ClassroomService {
       }
 
       // 2. Setup or Reuse Socket.io
+      if (_socket == null || !_socket!.connected) {
         dev.log('🔌 [CLASS] Attempting connection...');
         dev.log('🔗 [CLASS] Server URL: $serverUrl');
         dev.log('📂 [CLASS] Socket Path: /api/socket');
