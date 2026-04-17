@@ -141,23 +141,14 @@ io.on('connection', (socket) => {
     socket.data.roomId = roomId;
     socket.data.role = role;
 
-    if (!rooms[roomId]) {
-      // Allow global-lobby to be created by anyone for discovery
-      if (roomId === 'global-lobby') {
-        rooms[roomId] = {
-          participants: {}, // socketId -> { role, userName }
-          title: 'Global Lobby',
-          startTime: new Date().toLocaleTimeString()
-        };
-    // 0. Ensure room exists (Lazy initialization)
+    // Ensure room exists (Lazy initialization)
     if (!rooms[roomId]) {
       console.log(`[ROOM] Initializing room: ${roomId}`);
       rooms[roomId] = {
-        participants: {},
-        title: title || roomId,
+        participants: {}, // socketId -> { role, userName }
+        title: title || (roomId === 'global-lobby' ? 'Global Lobby' : roomId),
         startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
-    }
     }
 
     // HANDSHAKE: Send historical messages to the joining user
