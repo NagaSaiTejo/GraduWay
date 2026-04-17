@@ -45,6 +45,56 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showCreateClassDialog(context),
+        backgroundColor: const Color(0xFF1E293B),
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        label: const Text("Create Live Lab", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ).animate().fadeIn(delay: 800.ms).slideY(begin: 0.2),
+    );
+  }
+
+  void _showCreateClassDialog(BuildContext context) {
+    final controller = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Create Faculty Session"),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: "Enter Lab Name (e.g. System Audit)",
+            border: OutlineInputBorder(),
+          ),
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final title = controller.text.trim();
+              if (title.isNotEmpty) {
+                final provider = context.read<MentorshipProvider>();
+                provider.startNewWebinar(title);
+                Navigator.pop(context);
+                
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InteractiveClassroomPage(
+                      roomId: title.toLowerCase().replaceAll(' ', '-'),
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text("Start Session"),
+          ),
+        ],
+      ),
     );
   }
 

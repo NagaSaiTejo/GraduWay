@@ -30,7 +30,7 @@ class ClassroomService {
   Function(String participantId)? onRemoteStreamRemoved;
   Function(String from, String text)? onChatMessage;
   Function(String from)? onHandRaised;
-  Function(String mentorId, String userName)? onMentorJoined;
+  Function(String mentorId, String userName, {String? role})? onMentorJoined;
   Function(String message)? onError;
   Function()? onConnected;
   Function(List<dynamic> rooms)? onRoomListUpdate;
@@ -206,8 +206,8 @@ class ClassroomService {
     _socket!.on('user-raised-hand', (data) => onHandRaised?.call(data['userName'] ?? 'Someone'));
 
     _socket!.on('mentor-joined', (data) {
-      dev.log('👨‍🏫 [RTC] Mentor joined: ${data['userName']}');
-      onMentorJoined?.call(data['mentorId'], data['userName']);
+      dev.log('👨‍🏫 [RTC] Host joined: ${data['userName']} (${data['role']})');
+      onMentorJoined?.call(data['mentorId'], data['userName'], role: data['role']);
     });
 
     // 4. Connect

@@ -154,6 +154,8 @@ io.on('connection', (socket) => {
       if (!rooms[roomId]) {
         rooms[roomId] = {
           mentorSocketId: null,
+          hostName: null,
+          hostRole: null,
           students: [],
           title: title,
           startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -180,13 +182,16 @@ io.on('connection', (socket) => {
     if (role === 'mentor' || role === 'admin') {
       const wasEmpty = !rooms[roomId].mentorSocketId;
       rooms[roomId].mentorSocketId = socket.id;
+      rooms[roomId].hostName = data.userName || 'Unknown Host';
+      rooms[roomId].hostRole = role;
       
       if (wasEmpty) {
-        console.log(`[ROOM] Mentor ${socket.id} started room: ${roomId}`);
-        // 1. Notify existing students that mentor is here
+        console.log(`[ROOM] ${role} ${socket.id} started room: ${roomId}`);
+        // 1. Notify existing students that host is here
         socket.to(roomId).emit('mentor-joined', { 
           mentorId: socket.id, 
-          userName: data.userName 
+          userName: rooms[roomId].hostName,
+          role: role
         });
 
         // 2. Trigger handshake for all waiting students
@@ -196,12 +201,13 @@ io.on('connection', (socket) => {
       }
     } else {
       rooms[roomId].students.push(socket.id);
-      // If mentor is already here, notify them about the new student AND notify student about mentor
+      // If host is already here, notify them about the new student AND notify student about host
       if (rooms[roomId].mentorSocketId) {
         io.to(rooms[roomId].mentorSocketId).emit('user-joined', socket.id);
         socket.emit('mentor-joined', { 
           mentorId: rooms[roomId].mentorSocketId, 
-          userName: 'Mentor'
+          userName: rooms[roomId].hostName,
+          role: rooms[roomId].hostRole
         });
       }
     }
