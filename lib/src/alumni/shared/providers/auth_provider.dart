@@ -445,6 +445,7 @@ class AuthProvider with ChangeNotifier {
           notifyListeners();
           dev.log('🔄 [AUTH] Status synchronized: $_status');
         }
+      }
     } catch (e) {
       dev.log('⚠️ [AUTH] Status sync failed: $e');
     }
