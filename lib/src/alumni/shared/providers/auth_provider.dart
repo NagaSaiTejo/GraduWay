@@ -24,6 +24,9 @@ class AuthProvider with ChangeNotifier {
     return '127.0.0.1';
   }
 
+  static bool _isAdmin = false;
+  static bool get isUserAdmin => _isAdmin;
+
   static String get serverIp => _serverIp;
 
   static Future<void> resolveServerIp() async {
@@ -277,6 +280,7 @@ class AuthProvider with ChangeNotifier {
         }
 
         _isDemoMode = false;
+        _isAdmin = (_role == UserRole.admin);
         notifyListeners();
         return true;
       } else {
