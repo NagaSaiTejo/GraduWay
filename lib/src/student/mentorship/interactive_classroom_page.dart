@@ -32,6 +32,7 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
 
   bool _isMuted = false;
   bool _isCameraOff = false;
+  bool _isSpeakerOn = true;
   bool _showChat = false;
   bool _isInitialized = false;
   bool _hasHost = false; 
@@ -72,6 +73,42 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
         setState(() {
           _messages.add({'from': from, 'text': message});
         });
+        
+        // Instant Popup notification if chat is closed
+        if (!_showChat) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(
+                children: [
+                  const Icon(Icons.chat_bubble_outline, color: Colors.white, size: 16),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: RichText(
+                      text: TextSpan(
+                        style: const TextStyle(color: Colors.white, fontSize: 13),
+                        children: [
+                          TextSpan(text: "$from: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: message),
+                        ],
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.blueAccent.withOpacity(0.9),
+              duration: const Duration(seconds: 3),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              action: SnackBarAction(
+                label: "VIEW",
+                textColor: Colors.white,
+                onPressed: () => setState(() => _showChat = true),
+              ),
+            ),
+          );
+        }
       }
     };
 
@@ -732,6 +769,15 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
                   onPressed: () {
                     setState(() => _isCameraOff = !_isCameraOff);
                     _classroomService.toggleVideo(!_isCameraOff);
+                  },
+                ),
+                _buildControlBtn(
+                  icon: _isSpeakerOn ? Icons.volume_up : Icons.volume_off,
+                  active: _isSpeakerOn,
+                  activeColor: Colors.amber,
+                  onPressed: () {
+                    setState(() => _isSpeakerOn = !_isSpeakerOn);
+                    _classroomService.setSpeakerphoneOn(_isSpeakerOn);
                   },
                 ),
                 _buildControlBtn(

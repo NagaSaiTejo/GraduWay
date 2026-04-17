@@ -314,6 +314,10 @@ class ClassroomService {
     }
   }
 
+  Future<void> setSpeakerphoneOn(bool enable) async {
+    await Helper.setSpeakerphoneOn(enable);
+  }
+
   Future<void> leaveRoom() async {
     _socket?.emit('leave-room', {'roomId': _roomId});
 
