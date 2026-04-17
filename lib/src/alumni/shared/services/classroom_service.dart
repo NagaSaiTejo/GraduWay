@@ -24,6 +24,7 @@ class ClassroomService {
   MediaStream? localStream;
   final Map<String, RTCPeerConnection> peerConnections = {};
   final Map<String, MediaStream> remoteStreams = {};
+  final Map<String, Map<String, String>> participants = {}; // id -> { role, userName }
 
   // Handlers for the UI
   Function(String participantId, MediaStream stream)? onRemoteStreamAdded;
@@ -164,51 +165,58 @@ class ClassroomService {
       onRoomListUpdate?.call(data as List<dynamic>);
     });
 
+    _socket!.on('participant-list', (data) async {
+      dev.log('👥 [RTC] Received participant list: $data');
+      final participantMap = Map<String, dynamic>.from(data as Map);
+      
+      participantMap.forEach((id, metadata) {
+        if (id != _socket!.id) {
+          participants[id] = Map<String, String>.from(metadata);
+          // MESH RULE: Newly joined user initiates offers to everyone already in the room
+          _createOffer(id, userName);
+        }
+      });
+    });
+
+    _socket!.on('participant-joined', (data) {
+      final id = data['socketId'];
+      dev.log('👋 [RTC] New participant joined: ${data['userName']} ($id)');
+      participants[id] = {
+        'role': data['role'],
+        'userName': data['userName']
+      };
+      
+      // We are the "existing" participant, so we wait for the "new" participant to offer us
+      if (data['role'] == 'mentor' || data['role'] == 'admin') {
+        onMentorJoined?.call(id, data['userName'], role: data['role']);
+      }
+    });
+
+    _socket!.on('participant-left', (id) {
+      dev.log('🚪 [RTC] Participant left: $id');
+      participants.remove(id);
+      _removePeer(id);
+    });
+
     // --- Signaling Handshake ---
     
-    // When a new student joins, the Mentor creates an OFFER
-    _socket!.on('user-joined', (studentId) async {
-      if (_role == ClassroomRole.mentor) {
-        await _createOffer(studentId, userName);
-      }
-    });
+    // When an OFFER arrives
+    _socket!.on('offer', (data) async => await _handleOffer(data, userName));
 
-    // When an OFFER arrives (usually for Students)
-    _socket!.on('offer', (data) async {
-      if (_role == ClassroomRole.student) {
-        await _handleOffer(data, userName);
-      }
-    });
-
-    // When an ANSWER arrives (usually for Mentors)
+    // When an ANSWER arrives
     _socket!.on('answer', (data) async => await _handleAnswer(data));
 
-    // When an ICE candidate arrives (Both)
+    // When an ICE candidate arrives
     _socket!.on('ice-candidate', (data) async => await _handleIceCandidate(data));
 
-    // Cleanup when someone leaves
-    _socket!.on('user-left', (id) => _removePeer(id));
-    _socket!.on('mentor-left', (_) => onError?.call('Mentor has ended the session.'));
+    // Cleanup
+    _socket!.on('mentor-left', (_) => onError?.call('The educational session has ended.'));
 
     // Chat & Engagement
     _socket!.on('new-message', (data) => onChatMessage?.call(data['userName'] ?? 'Unknown', data['text']));
     
     // Media Relay (Images)
-    _socket!.on('new-image', (data) {
-      dev.log('🖼️ [RTC] Visual media received from ${data['userName']}');
-      // Mix image messages into chat with a type flag
-      onChatMessage?.call(data['userName'] ?? 'Unknown', '[IMAGE]');
-      // We also update the messages list directly in the UI via the standard handler
-      // but the UI needs to know it's an image.
-      // For simplicity, we can extend the message map in the UI.
-    });
-
     _socket!.on('user-raised-hand', (data) => onHandRaised?.call(data['userName'] ?? 'Someone'));
-
-    _socket!.on('mentor-joined', (data) {
-      dev.log('👨‍🏫 [RTC] Host joined: ${data['userName']} (${data['role']})');
-      onMentorJoined?.call(data['mentorId'], data['userName'], role: data['role']);
-    });
 
     // 4. Connect
     if (!_socket!.connected) _socket!.connect();

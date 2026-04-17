@@ -107,13 +107,18 @@ app.get('/api/clear-rooms', (req, res) => {
 });
 
 const getFormattedRoomList = () => {
-  return Object.keys(rooms).map(id => ({
-    id,
-    title: rooms[id].title || id,
-    isLive: true,
-    attendees: rooms[id].students.length,
-    startTime: rooms[id].startTime
-  }));
+  return Object.keys(rooms).map(id => {
+    const participantMap = rooms[id].participants || {};
+    const hosts = Object.values(participantMap).filter(p => p.role === 'mentor' || p.role === 'admin');
+    
+    return {
+      id,
+      title: rooms[id].title || id,
+      isLive: hosts.length > 0,
+      attendees: Object.keys(participantMap).length,
+      startTime: rooms[id].startTime
+    };
+  });
 };
 
 const broadcastRoomList = () => {
@@ -140,8 +145,7 @@ io.on('connection', (socket) => {
       // Allow global-lobby to be created by anyone for discovery
       if (roomId === 'global-lobby') {
         rooms[roomId] = {
-          mentorSocketId: null,
-          students: [],
+          participants: {}, // socketId -> { role, userName }
           title: 'Global Lobby',
           startTime: new Date().toLocaleTimeString()
         };
@@ -153,10 +157,7 @@ io.on('connection', (socket) => {
       
       if (!rooms[roomId]) {
         rooms[roomId] = {
-          mentorSocketId: null,
-          hostName: null,
-          hostRole: null,
-          students: [],
+          participants: {},
           title: title,
           startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         };
@@ -179,38 +180,20 @@ io.on('connection', (socket) => {
       })
       .catch(err => console.error('[ROOM HISTORY] Failed to load messages:', err));
 
-    if (role === 'mentor' || role === 'admin') {
-      const wasEmpty = !rooms[roomId].mentorSocketId;
-      rooms[roomId].mentorSocketId = socket.id;
-      rooms[roomId].hostName = data.userName || 'Unknown Host';
-      rooms[roomId].hostRole = role;
-      
-      if (wasEmpty) {
-        console.log(`[ROOM] ${role} ${socket.id} started room: ${roomId}`);
-        // 1. Notify existing students that host is here
-        socket.to(roomId).emit('mentor-joined', { 
-          mentorId: socket.id, 
-          userName: rooms[roomId].hostName,
-          role: role
-        });
+    // 1. Add to participant map
+    rooms[roomId].participants[socket.id] = { role, userName: data.userName || 'Anonymous' };
 
-        // 2. Trigger handshake for all waiting students
-        rooms[roomId].students.forEach(studentId => {
-          socket.emit('user-joined', studentId);
-        });
-      }
-    } else {
-      rooms[roomId].students.push(socket.id);
-      // If host is already here, notify them about the new student AND notify student about host
-      if (rooms[roomId].mentorSocketId) {
-        io.to(rooms[roomId].mentorSocketId).emit('user-joined', socket.id);
-        socket.emit('mentor-joined', { 
-          mentorId: rooms[roomId].mentorSocketId, 
-          userName: rooms[roomId].hostName,
-          role: rooms[roomId].hostRole
-        });
-      }
-    }
+    // 2. Send current participant list to the new joiner
+    socket.emit('participant-list', rooms[roomId].participants);
+
+    // 3. Notify everyone else that a new participant has joined
+    socket.to(roomId).emit('participant-joined', {
+      socketId: socket.id,
+      role: role,
+      userName: data.userName || 'Anonymous'
+    });
+
+    console.log(`[ROOM] ${role} ${data.userName} (${socket.id}) joined ${roomId}`);
 
     broadcastRoomList();
   });
@@ -290,13 +273,21 @@ io.on('connection', (socket) => {
     console.log(`[LEAVE] User ${socket.id} leaving room ${roomId}`);
     
     if (rooms[roomId]) {
-      if (socket.data.role === 'mentor' && rooms[roomId].mentorSocketId === socket.id) {
-        socket.to(roomId).emit('mentor-left');
-        delete rooms[roomId];
-        console.log(`[ROOM] Session ended and deleted: ${roomId}`);
-      } else {
-        rooms[roomId].students = rooms[roomId].students.filter(id => id !== socket.id);
-        socket.to(roomId).emit('user-left', socket.id);
+      const participant = rooms[roomId].participants[socket.id];
+      const isHost = participant && (participant.role === 'mentor' || participant.role === 'admin');
+
+      delete rooms[roomId].participants[socket.id];
+      socket.to(roomId).emit('participant-left', socket.id);
+
+      if (isHost) {
+        // If an Admin leaves or explicitly ends, we can choose to delete.
+        // For now, if no hosts are left, delete the room.
+        const remainingHosts = Object.values(rooms[roomId].participants).filter(p => p.role === 'mentor' || p.role === 'admin');
+        if (remainingHosts.length === 0) {
+          socket.to(roomId).emit('mentor-left');
+          delete rooms[roomId];
+          console.log(`[ROOM] Session ended: ${roomId}`);
+        }
       }
       broadcastRoomList();
     }
@@ -307,12 +298,18 @@ io.on('connection', (socket) => {
     console.log(`[DISCONNECT] User: ${socket.id}`);
     const roomId = socket.data.roomId;
     if (roomId && rooms[roomId]) {
-      if (socket.data.role === 'mentor' && rooms[roomId].mentorSocketId === socket.id) {
-        socket.to(roomId).emit('mentor-left');
-        delete rooms[roomId];
-      } else {
-        rooms[roomId].students = rooms[roomId].students.filter(id => id !== socket.id);
-        socket.to(roomId).emit('user-left', socket.id);
+      const participant = rooms[roomId].participants[socket.id];
+      const isHost = participant && (participant.role === 'mentor' || participant.role === 'admin');
+
+      delete rooms[roomId].participants[socket.id];
+      socket.to(roomId).emit('participant-left', socket.id);
+
+      if (isHost) {
+        const remainingHosts = Object.values(rooms[roomId].participants).filter(p => p.role === 'mentor' || p.role === 'admin');
+        if (remainingHosts.length === 0) {
+          socket.to(roomId).emit('mentor-left');
+          delete rooms[roomId];
+        }
       }
       broadcastRoomList();
     }

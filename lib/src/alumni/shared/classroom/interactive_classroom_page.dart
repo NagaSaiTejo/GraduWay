@@ -339,14 +339,25 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
         'renderer': _localRenderer, 
         'name': isStudent 
             ? 'You (Student)' 
-            : (auth.role == UserRole.admin ? 'You (Faculty Host)' : 'You (Mentor)'), 
-        'isMentor': !isStudent
+            : (auth.role == UserRole.admin ? 'You (Faculty Host)' : 'You (Alumni)'), 
+        'role': auth.role.name,
+        'isHost': !isStudent
       },
-      ..._remoteRenderers.entries.map((e) => {
-        'id': e.key, 
-        'renderer': e.value, 
-        'name': isStudent ? 'Teacher' : 'Student', 
-        'isMentor': isStudent
+      ..._remoteRenderers.entries.map((e) {
+        final meta = _classroomService.participants[e.key] ?? {};
+        final role = meta['role'] ?? 'student';
+        final name = meta['userName'] ?? 'Participant';
+        final isRemoteHost = (role == 'mentor' || role == 'admin');
+        
+        return {
+          'id': e.key, 
+          'renderer': e.value, 
+          'name': isRemoteHost 
+              ? (role == 'admin' ? 'Faculty: $name' : 'Alumni: $name')
+              : name, 
+          'role': role,
+          'isHost': isRemoteHost
+        };
       }),
     ];
 
@@ -361,7 +372,7 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
       itemCount: allParticipants.length,
       itemBuilder: (context, index) {
         final p = allParticipants[index];
-        final isHost = p['isMentor'] == true;
+        final isHost = p['isHost'] == true;
         
         return Container(
           decoration: BoxDecoration(
@@ -473,10 +484,13 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: Colors.amber,
+                            color: p['role'] == 'admin' ? Colors.blueAccent : Colors.amber,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text("TEACHER", style: TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.w900)),
+                          child: Text(
+                            p['role'] == 'admin' ? "FACULTY" : "ALUMNUS", 
+                            style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w900)
+                          ),
                         ),
                       const SizedBox(width: 8),
                       const CircleAvatar(
