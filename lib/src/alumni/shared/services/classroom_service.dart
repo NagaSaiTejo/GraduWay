@@ -35,6 +35,7 @@ class ClassroomService {
   Function(String message)? onError;
   Function()? onConnected;
   Function(List<dynamic> rooms)? onRoomListUpdate;
+  Function(Map<String, dynamic> data)? onAnnouncementReceived;
 
   // Robust WebRTC Configuration using STUN & Free TURN for NAT Traversal
   final Map<String, dynamic> _rtcConfig = {
@@ -184,6 +185,7 @@ class ClassroomService {
     _socket!.on('new-message', (data) => onChatMessage?.call(data['userName'] ?? 'Unknown', data['text']));
     _socket!.on('user-raised-hand', (data) => onHandRaised?.call(data['userName'] ?? 'Someone'));
     _socket!.on('room-list', (data) => onRoomListUpdate?.call(data as List<dynamic>));
+    _socket!.on('new-announcement', (data) => onAnnouncementReceived?.call(Map<String, dynamic>.from(data as Map)));
 
     if (!_socket!.connected) _socket!.connect();
   }
@@ -300,6 +302,13 @@ class ClassroomService {
 
   void toggleAudio(bool enabled) => localStream?.getAudioTracks().forEach((t) => t.enabled = enabled);
   void toggleVideo(bool enabled) => localStream?.getVideoTracks().forEach((t) => t.enabled = enabled);
+
+  Future<void> switchCamera() async {
+    if (localStream != null) {
+      final videoTrack = localStream!.getVideoTracks().first;
+      await Helper.switchCamera(videoTrack);
+    }
+  }
 
   Future<void> leaveRoom() async {
     _socket?.emit('leave-room', {'roomId': _roomId});
