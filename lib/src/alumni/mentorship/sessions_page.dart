@@ -1,4 +1,4 @@
-import 'package:alumini_screen/src/alumni/mentorship/interactive_classroom_page.dart';
+import 'package:alumini_screen/src/alumni/shared/classroom/interactive_classroom_page.dart';
 import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

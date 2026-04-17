@@ -137,17 +137,28 @@ io.on('connection', (socket) => {
     socket.data.role = role;
 
     if (!rooms[roomId]) {
-      if (role !== 'mentor' && role !== 'admin') {
+      // Allow global-lobby to be created by anyone for discovery
+      if (roomId === 'global-lobby') {
+        rooms[roomId] = {
+          mentorSocketId: null,
+          students: [],
+          title: 'Global Lobby',
+          startTime: new Date().toLocaleTimeString()
+        };
+      } else if (role !== 'mentor' && role !== 'admin') {
         console.log(`[ROOM] Denied: ${role} ${socket.id} attempted to join non-existent room ${roomId}`);
         socket.emit('error', 'Class has not started yet. Please wait for the Alumni/Mentor to join.');
         return;
       }
-      rooms[roomId] = {
-        mentorSocketId: null,
-        students: [],
-        title: title,
-        startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
+      
+      if (!rooms[roomId]) {
+        rooms[roomId] = {
+          mentorSocketId: null,
+          students: [],
+          title: title,
+          startTime: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        };
+      }
     }
 
     // HANDSHAKE: Send historical messages to the joining user
@@ -166,7 +177,7 @@ io.on('connection', (socket) => {
       })
       .catch(err => console.error('[ROOM HISTORY] Failed to load messages:', err));
 
-    if (data.role === 'mentor') {
+    if (role === 'mentor' || role === 'admin') {
       const wasEmpty = !rooms[roomId].mentorSocketId;
       rooms[roomId].mentorSocketId = socket.id;
       
@@ -185,9 +196,13 @@ io.on('connection', (socket) => {
       }
     } else {
       rooms[roomId].students.push(socket.id);
-      // If mentor is already here, notify them about the new student
+      // If mentor is already here, notify them about the new student AND notify student about mentor
       if (rooms[roomId].mentorSocketId) {
         io.to(rooms[roomId].mentorSocketId).emit('user-joined', socket.id);
+        socket.emit('mentor-joined', { 
+          mentorId: rooms[roomId].mentorSocketId, 
+          userName: 'Mentor'
+        });
       }
     }
 

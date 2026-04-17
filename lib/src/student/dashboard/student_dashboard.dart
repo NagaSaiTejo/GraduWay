@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:alumini_screen/src/alumni/mentorship/interactive_classroom_page.dart';
+import 'package:alumini_screen/src/alumni/shared/classroom/interactive_classroom_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
@@ -84,6 +84,8 @@ class _StudentDashboardState extends State<StudentDashboard> {
                       _buildGreeting(),
                       const SizedBox(height: 24),
                       _buildJoinSessionCard(),
+                      const SizedBox(height: 32),
+                      _buildLiveRoomsSection(), // New section for live rooms
                       const SizedBox(height: 32),
                       _buildSectionTitle('Available Mentors'),
                       const SizedBox(height: 16),
@@ -315,6 +317,86 @@ class _StudentDashboardState extends State<StudentDashboard> {
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLiveRoomsSection() {
+    return Consumer<MentorshipProvider>(
+      builder: (context, provider, _) {
+        final liveRooms = provider.webinars;
+        if (liveRooms.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle('Live Classroom Sessions'),
+            const SizedBox(height: 16),
+            ...liveRooms.map((room) => _buildLiveRoomCard(context, room)),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildLiveRoomCard(BuildContext context, Map<String, dynamic> room) {
+    final title = room['title'] ?? 'Untitled Class';
+    final attendees = room['attendees'] ?? 0;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.redAccent.withOpacity(0.3), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.redAccent.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.redAccent.withOpacity(0.1),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.sensors, color: Colors.redAccent, size: 20),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text("$attendees students attending", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+              ],
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InteractiveClassroomPage(
+                    roomId: title.toLowerCase().replaceAll(' ', '-'),
+                  ),
+                ),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("JOIN LIVE"),
           ),
         ],
       ),

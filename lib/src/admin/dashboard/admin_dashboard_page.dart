@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:alumini_screen/src/admin/shared/providers/admin_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/providers/mentorship_provider.dart';
+import 'package:alumini_screen/src/alumni/shared/classroom/interactive_classroom_page.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class AdminDashboardPage extends StatefulWidget {
@@ -34,6 +36,8 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
               _buildModernHeader(context),
               const SizedBox(height: 40),
               _buildPremiumStatsGrid(context),
+              const SizedBox(height: 40),
+              _buildLiveSessionsOversight(context),
               const SizedBox(height: 40),
               _buildInsightSection(context),
               const SizedBox(height: 100), // Space for fab/footer
@@ -374,6 +378,87 @@ class _AdminDashboardPageState extends State<AdminDashboardPage> {
           style: const TextStyle(color: Colors.grey, height: 1.5),
         ),
       ],
+    );
+  }
+
+  Widget _buildLiveSessionsOversight(BuildContext context) {
+    return Consumer<MentorshipProvider>(
+      builder: (context, provider, _) {
+        final sessions = provider.webinars;
+        if (sessions.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Live Classroom Oversight",
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF1E293B)),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(32),
+                border: Border.all(color: Colors.redAccent.withOpacity(0.2)),
+              ),
+              child: Column(
+                children: sessions.map((s) => _buildLiveSessionRow(context, s)).toList(),
+              ),
+            ),
+          ],
+        ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1);
+      },
+    );
+  }
+
+  Widget _buildLiveSessionRow(BuildContext context, Map<String, dynamic> session) {
+    final title = session['title'] ?? 'Unknown Class';
+    final attendees = session['attendees'] ?? 0;
+    
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.redAccent.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.sensors, color: Colors.redAccent, size: 20),
+          ),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                Text("Active Session • $attendees attending", style: TextStyle(color: Colors.blueGrey[400], fontSize: 13)),
+              ],
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => InteractiveClassroomPage(
+                    roomId: title.toLowerCase().replaceAll(' ', '-'),
+                  ),
+                ),
+              );
+            },
+            icon: const Icon(Icons.remove_red_eye_outlined, size: 16),
+            label: const Text("JOIN AS ADMIN"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF1E293B),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
