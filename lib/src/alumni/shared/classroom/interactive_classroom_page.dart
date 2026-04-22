@@ -755,166 +755,171 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
 
   Widget _buildControls() {
     return Positioned(
-      bottom: 24,
-      left: 24,
-      right: 24,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(30),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: Container(
-            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(30),
-              border: Border.all(color: Colors.white.withOpacity(0.15)),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 20,
-                  offset: const Offset(0, 10),
+      bottom: 0,
+      left: 0,
+      right: 0,
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(30),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(color: Colors.white.withOpacity(0.15)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.3),
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _buildControlBtn(
-                    icon: _isMuted ? Icons.mic_off : Icons.mic,
-                    active: !_isMuted,
-                    activeColor: Colors.blueAccent,
-                    onPressed: () {
-                      setState(() => _isMuted = !_isMuted);
-                      _classroomService.toggleAudio(!_isMuted);
-                    },
-                  ),
-                  _buildControlBtn(
-                    icon: _isCameraOff ? Icons.videocam_off : Icons.videocam,
-                    active: !_isCameraOff,
-                    activeColor: Colors.blueAccent,
-                    onPressed: () {
-                      setState(() => _isCameraOff = !_isCameraOff);
-                      _classroomService.toggleVideo(!_isCameraOff);
-                    },
-                  ),
-                  
-                  // Audio Output Selection Menu
-                  PopupMenuButton<String>(
-                    offset: const Offset(0, -180),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    color: const Color(0xFF1E1E1E),
-                    icon: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: _isSpeakerOn ? Colors.amber : Colors.white.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _isSpeakerOn ? Icons.volume_up : Icons.volume_down, 
-                        color: Colors.white, 
-                        size: 22
-                      ),
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
+                  children: [
+                    _buildControlBtn(
+                      icon: _isMuted ? Icons.mic_off : Icons.mic,
+                      active: !_isMuted,
+                      activeColor: Colors.blueAccent,
+                      onPressed: () {
+                        setState(() => _isMuted = !_isMuted);
+                        _classroomService.toggleAudio(!_isMuted);
+                      },
                     ),
-                    onSelected: (String value) {
-                      setState(() {
-                        if (value == 'speaker') {
-                          _isSpeakerOn = true;
-                          _classroomService.setSpeakerphoneOn(true);
-                        } else {
-                          _isSpeakerOn = false;
-                          _classroomService.setSpeakerphoneOn(false);
-                        }
-                      });
-                    },
-                    itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                      PopupMenuItem<String>(
-                        value: 'speaker',
-                        child: Row(
-                          children: [
-                            Icon(Icons.volume_up, color: _isSpeakerOn ? Colors.amber : Colors.white70, size: 20),
-                            const SizedBox(width: 12),
-                            const Text('External Speaker', style: TextStyle(color: Colors.white)),
-                          ],
+                    _buildControlBtn(
+                      icon: _isCameraOff ? Icons.videocam_off : Icons.videocam,
+                      active: !_isCameraOff,
+                      activeColor: Colors.blueAccent,
+                      onPressed: () {
+                        setState(() => _isCameraOff = !_isCameraOff);
+                        _classroomService.toggleVideo(!_isCameraOff);
+                      },
+                    ),
+                    
+                    // Audio Output Selection Menu
+                    PopupMenuButton<String>(
+                      offset: const Offset(0, -180),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      color: const Color(0xFF1E1E1E),
+                      icon: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _isSpeakerOn ? Colors.amber : Colors.white.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          _isSpeakerOn ? Icons.volume_up : Icons.volume_down, 
+                          color: Colors.white, 
+                          size: 20
                         ),
                       ),
-                      PopupMenuItem<String>(
-                        value: 'earpiece',
-                        child: Row(
-                          children: [
-                            Icon(Icons.phone_in_talk, color: !_isSpeakerOn ? Colors.amber : Colors.white70, size: 20),
-                            const SizedBox(width: 12),
-                            const Text('Phone Earpiece', style: TextStyle(color: Colors.white)),
-                          ],
+                      onSelected: (String value) {
+                        setState(() {
+                          if (value == 'speaker') {
+                            _isSpeakerOn = true;
+                            _classroomService.setSpeakerphoneOn(true);
+                          } else {
+                            _isSpeakerOn = false;
+                            _classroomService.setSpeakerphoneOn(false);
+                          }
+                        });
+                      },
+                      itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                        PopupMenuItem<String>(
+                          value: 'speaker',
+                          child: Row(
+                            children: [
+                              Icon(Icons.volume_up, color: _isSpeakerOn ? Colors.amber : Colors.white70, size: 20),
+                              const SizedBox(width: 12),
+                              const Text('External Speaker', style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
                         ),
-                      ),
-                      PopupMenuItem<String>(
-                        value: 'bluetooth',
-                        child: Row(
-                          children: [
-                            const Icon(Icons.bluetooth, color: Colors.blueAccent, size: 20),
-                            const SizedBox(width: 12),
-                            const Text('Bluetooth Device', style: TextStyle(color: Colors.white)),
-                          ],
+                        PopupMenuItem<String>(
+                          value: 'earpiece',
+                          child: Row(
+                            children: [
+                              Icon(Icons.phone_in_talk, color: !_isSpeakerOn ? Colors.amber : Colors.white70, size: 20),
+                              const SizedBox(width: 12),
+                              const Text('Phone Earpiece', style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        PopupMenuItem<String>(
+                          value: 'bluetooth',
+                          child: Row(
+                            children: [
+                              const Icon(Icons.bluetooth, color: Colors.blueAccent, size: 20),
+                              const SizedBox(width: 12),
+                              const Text('Bluetooth Device', style: TextStyle(color: Colors.white)),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
             
-                  // Hand Raise Toggle
-                  _buildControlBtn(
-                    icon: Icons.front_hand,
-                    active: _isLocalHandRaised,
-                    activeColor: Colors.amber.shade700,
-                    onPressed: () {
-                      setState(() {
-                        _isLocalHandRaised = !_isLocalHandRaised;
-                        final auth = context.read<AuthProvider>();
-                        _classroomService.raiseHand(auth.userName, _isLocalHandRaised);
-                      });
-                      
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(_isLocalHandRaised ? "You raised your hand! ✋" : "You lowered your hand."),
-                          behavior: SnackBarBehavior.floating,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          backgroundColor: _isLocalHandRaised ? Colors.blueAccent : Colors.grey[800],
-                          duration: const Duration(seconds: 2),
-                          margin: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                    // Hand Raise Toggle
+                    _buildControlBtn(
+                      icon: Icons.front_hand,
+                      active: _isLocalHandRaised,
+                      activeColor: Colors.amber.shade700,
+                      onPressed: () {
+                        setState(() {
+                          _isLocalHandRaised = !_isLocalHandRaised;
+                          final auth = context.read<AuthProvider>();
+                          _classroomService.raiseHand(auth.userName, _isLocalHandRaised);
+                        });
+                        
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(_isLocalHandRaised ? "You raised your hand! ✋" : "You lowered your hand."),
+                            behavior: SnackBarBehavior.floating,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            backgroundColor: _isLocalHandRaised ? Colors.blueAccent : Colors.grey[800],
+                            duration: const Duration(seconds: 2),
+                            margin: const EdgeInsets.fromLTRB(16, 16, 16, 100),
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 4),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: Colors.redAccent,
+                          borderRadius: BorderRadius.circular(20),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.redAccent.withOpacity(0.3),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            )
+                          ],
                         ),
-                      );
-                    },
-                  ),
-                  const SizedBox(width: 20),
-                  GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent,
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.redAccent.withOpacity(0.3),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          )
-                        ],
-                      ),
-                      child: const Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.call_end, color: Colors.white, size: 20),
-                          SizedBox(width: 8),
-                          Text("LEAVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
-                        ],
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.call_end, color: Colors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text("LEAVE", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
