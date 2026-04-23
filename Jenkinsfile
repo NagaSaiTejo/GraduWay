@@ -69,7 +69,7 @@ pipeline {
             steps {
                 echo '📦 Building Docker Image for Signaling Server...'
                 dir('signaling_server') {
-                    bat "docker build --no-cache --pull -t ${env.DOCKER_IMAGE} ."
+                    bat "docker build -t ${env.DOCKER_IMAGE} ."
                     retry(3) {
                         withCredentials([usernamePassword(credentialsId: 'docker-hub-login', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                             bat "docker login -u ${USER} -p ${PASS}"

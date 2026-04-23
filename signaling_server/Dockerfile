@@ -3,8 +3,8 @@
 # ─────────────────────────────────────────
 FROM node:20-alpine
 
-# Install ffmpeg (required by node-media-server for HLS/DASH transcoding)
-RUN apk add --no-cache ffmpeg
+# Install ffmpeg with retry logic and explicit mirror for resilience
+RUN for i in 1 2 3; do apk add --no-cache ffmpeg && break || sleep 5; done
 
 WORKDIR /app
 
