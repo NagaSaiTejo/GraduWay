@@ -1,0 +1,89 @@
+GRADUWAY - END-TO-END VISUAL WALKTHROUGH & PROJECT OVERVIEW
+
+This document serves as a complete narrative walkthrough of the GraduWay platform. By reading this, you will experience the exact user flow and see the application exactly as a user would, screen by screen.
+
+--- THE LOGIN EXPERIENCE ---
+
+When you first launch GraduWay, you are greeted by a sleek, modern, white, and airy Login Screen. 
+- Visuals: At the top center, a vibrant gradient logo depicting a graduation cap sits above the bold text "Welcome to GraduWay" and the subtitle "Bridging the gap between students and success."
+- Interaction: You don't need to select your role from a clunky dropdown. Instead, there are simply two input fields: "Email Address" and "Password".
+- The Magic (Domain Routing): The app intelligently detects who you are based on what you type.
+  * If a user types "james@stud.com", the app knows they are a Student named James.
+  * If a user types "sarah@alum.com", the app knows they are an Alumni named Sarah.
+  * If a user types "admin@admin.com", the app logs them into the administrative console.
+- Hinting: At the top right of the screen, there is a subtle 'i' (info) icon. If you tap it, a semi-transparent dropdown card cleanly appears, reminding you of these email rules. Tapping it again makes it vanish.
+
+If you click the bright blue "Sign In" button, a loading spinner briefly appears, and you are smoothly transitioned into your specific Dashboard.
+
+--- 1. THE STUDENT JOURNEY ---
+
+Scenario: You logged in as "james@stud.com".
+
+The Student Home Screen (/home)
+- First Impression: The screen slides in seamlessly. At the very top, large, bold text says: "Good Morning, James! 👋". The app remembered your name from your email.
+- The Command Center: Just below your name, a polished card displays your current stats: "B.Tech CSE • 3rd Year". Next to it is a circular progress ring highlighting your "Career Score" (e.g., 450 Points). This immediately hooks the student with gamification.
+- Quick Actions: Below the header is a grid of four beautifully illustrated square buttons:
+  1. Alumni Directory (Find mentors)
+  2. Q&A Forum (Ask questions)
+  3. Career Roadmap (Plan your future)
+  4. Placements (View college hiring data)
+- Community Feed: Scrolling down, you see a horizontal carousel of "Top Alumni Mentors" featuring their profile pictures and current companies (e.g., "Sarah - Google"). Below that is a "Trending Q&A" feed showing the most active career discussions happening on campus right now.
+
+The Career Roadmap Page (/roadmap)
+- Visuals: When you tap "Career Roadmap", you are taken to a vertical, timeline-style visual interface. It looks like a skill tree from a modern video game.
+- Functionality: At the top, a dropdown asks, "What is your target career?" (e.g., Software Development Engineer). Once selected, the timeline populates with specific nodes connected by lines: "Learn Data Structures", "Master System Design", "Build 3 Projects", "Mock Interviews".
+- Why it exists: Students often feel lost. This screen provides a literal map. When James taps a node and marks it "Complete", a satisfying animation plays, and his overall Career Score on the Home page goes up.
+
+The Skill Packages & Badges Page (/skill-package)
+- Visuals: This page showcases a grid of unlockable, colorful hexagonal badges. Some are glowing (unlocked), others are greyed out (locked).
+- Functionality: As James explores the app, asks questions, or finishes roadmap nodes, he unlocks badges like "Skill Seeker" or "Curious Mind". This page tracks his soft and technical skills visually.
+
+The Placement Reality Dashboard (/placement)
+- Visuals: A clean, analytical page filled with interactive graphs. 
+- Functionality: James sees a line chart showing "Average Salary Trends" over the last 5 years at his college. Below it, a pie chart shows "Top Recruiters" (e.g., TCS, Amazon, Microsoft).
+- Why it exists: It removes rumors and shows students the hard truth about their college's placements, helping them set realistic expectations.
+
+The Q&A Forum (/qa) & Alumni Directory (/alumni)
+- If James has a specific question ("How do I crack the Amazon interview?"), he goes to the Q&A page. It looks like a clean, stripped-down version of Reddit or Quora, with upvote arrows and tags. He types his question, which is instantly sent to the Alumni network.
+- If he wants direct networking, he visits the Directory. He sees a vertical list of Alumni cards. He uses a filter at the top to select "Company: Microsoft". The list instantly filters to show only alumni working there, allowing him to tap their profile and view their LinkedIn.
+
+--- 2. THE ALUMNI JOURNEY ---
+
+Scenario: You logged in as "sarah@alum.com".
+
+The Alumni Home Screen (/alumni-home)
+- First Impression: The app welcomes you: "Welcome back, Sarah! 👋". 
+- The impact dashboard: Alumni are busy professionals. The screen doesn't overwhelm them. Instead, it prominently displays three large, satisfying impact metrics at the top:
+  1. Students Mentored (e.g., 14)
+  2. Questions Answered (e.g., 32)
+  3. Profile Views (e.g., 105)
+- Quick Actions: Directly below her stats is a prominent button: "Answer Pending Questions (5)".
+
+The Student Questions Feed (/alumni-questions)
+- When Sarah taps to answer questions, she sees a focused, card-based interface. Each card shows a student's question, their branch, and year. 
+- She can tap "Answer" to quickly type advice from her smartphone, or swipe away questions outside her expertise. 
+- Why it exists: It reduces the friction of mentoring. Sarah can help 5 students while waiting in line for coffee, passing her industry knowledge directly down to the current batch.
+
+--- 3. THE ADMIN JOURNEY ---
+
+Scenario: You logged in as "admin@admin.com".
+
+The Admin Console (/admin-home)
+- First Impression: A serious, data-driven dashboard. The header reads "Admin Console".
+- Telemetry: The top shows 4 grid squares tracking platform health: Total Students (1,240), Verified Alumni (156), Active Q&A (432), and Upcoming Events (12).
+- Trends: Below the grid is a smooth, curved line chart displaying the "Registration Trend" over the last week. This allows the college to see if app adoption is growing.
+
+User & Content Management (/admin-users)
+- The Admin needs to keep the platform safe. On the home screen, there is an alert: "Reported Content (2)". 
+- When tapped, a bottom sheet slides up showing flagged content (e.g., "Anon Student posted inappropriate comment"). The Admin has two simple buttons: "Dismiss" (ignore the report) or "Remove" (delete the content and warn the user).
+
+--- SHARED PLATFORM FUNCTIONALITY ---
+
+The Dynamic Profile System (/profile)
+- No matter if you are a Student, Alumni, or Admin, you have a Profile tab located on the Bottom Navigation Bar.
+- Visually, it looks like a standard settings page with a circular Avatar, your Name, your Email, and a button to "Edit Profile".
+- The technical marvel: If James taps "Edit Profile" and changes his name to "James Bond" and hits Save, the change is instantaneous. He doesn't need to refresh the app. If he navigates back to the Home Screen, the giant text at the top immediately reads "Good Morning, James Bond! 👋".
+- This is achieved using Riverpod State Management—a single "Auth State" acts as the brain behind the app, instantly propagating data to every pixel on the screen.
+
+--- SUMMARY ---
+By walking through this document, one can see that GraduWay is not a static list of pages. It is a dynamic, gamified ecosystem. It uses clean, modern UI patterns (sliding animations, overlay cards, responsive charts) tailored specifically to the psychological needs of its three distinct users: providing motivation and maps for Students, low-friction impact metrics for Alumni, and safe, high-level telemetry for Administrators.
