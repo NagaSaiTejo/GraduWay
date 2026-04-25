@@ -97,13 +97,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/roadmap', builder: (_, __) => const RoadmapScreen()),
       GoRoute(path: '/badges', builder: (_, __) => const BadgesScreen()),
       GoRoute(path: '/sessions', builder: (_, __) => const SessionsPage()),
-      GoRoute(path: '/classroom', builder: (_, __) => const SessionsPage()),
 
       // Interactive Classroom
       GoRoute(
-        path: '/classroom/:id',
+        path: '/classroom/:roomId',
         builder: (context, state) => InteractiveClassroomPage(
-          roomId: state.pathParameters['id']!,
+          roomId: state.pathParameters['roomId']!,
         ),
       ),
 
@@ -186,12 +185,6 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
 
       // ─── Fullscreen session routes (no shell / no navbar) ─────────────
-      GoRoute(
-        path: '/classroom/:roomId',
-        builder: (context, state) => InteractiveClassroomPage(
-          roomId: state.pathParameters['roomId'] ?? 'lobby',
-        ),
-      ),
       GoRoute(
         path: '/alumni-classroom/:roomId',
         builder: (context, state) => InteractiveClassroomPage(

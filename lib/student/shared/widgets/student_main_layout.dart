@@ -1,5 +1,5 @@
 import 'package:graduway/theme/app_colors.dart';
-import 'package:graduway/student/shared/services/classroom_service.dart';
+import 'package:graduway/shared/services/classroom_service.dart';
 import 'package:graduway/alumni/chat/mentor_inbox_page.dart';
 import 'package:graduway/student/dashboard/student_dashboard.dart';
 import 'package:graduway/alumni/notifications/notifications_page.dart';

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:provider/provider.dart';
-import 'package:graduway/student/shared/services/classroom_service.dart';
+import 'package:graduway/shared/services/classroom_service.dart';
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 import 'package:graduway/alumni/shared/providers/notification_provider.dart';
 import 'package:image_picker/image_picker.dart';

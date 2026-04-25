@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graduway/alumni/shared/models/chat_model.dart';
-import 'package:graduway/alumni/shared/services/mentorship_service.dart';
-import 'package:graduway/alumni/shared/services/persistence_service.dart';
+import 'package:graduway/shared/services/mentorship_service.dart';
+import 'package:graduway/shared/services/persistence_service.dart';
 
 /// Manages the state of chat conversations, including message history and unread counts.
 class ChatProvider with ChangeNotifier {

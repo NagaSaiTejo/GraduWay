@@ -1,4 +1,3 @@
-import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:developer' as dev;
@@ -493,7 +492,7 @@ class AuthProvider with ChangeNotifier {
     final lowEmail = email.toLowerCase();
     _role = lowEmail.endsWith('@admin.com')
         ? UserRole.admin
-        : (lowEmail.endsWith('@alumin.com')
+        : (lowEmail.endsWith('@alumni.com')
             ? UserRole.mentor
             : UserRole.student);
     notifyListeners();

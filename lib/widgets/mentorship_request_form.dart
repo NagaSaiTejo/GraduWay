@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduway/alumni/shared/models/mentorship_model.dart';
-import 'package:graduway/student/shared/services/mentorship_service.dart';
+import 'package:graduway/shared/services/mentorship_service.dart';
 
 /// A bottom-sheet form that allows students to submit a mentorship request.
 ///

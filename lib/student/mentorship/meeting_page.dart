@@ -1,7 +1,7 @@
 // webrtc direct peer-to-peer video meeting and session hosting
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:graduway/student/shared/services/classroom_service.dart';
+import 'package:graduway/shared/services/classroom_service.dart';
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 
 import 'dart:developer' as dev;
@@ -78,7 +78,7 @@ class _MeetingPageState extends State<MeetingPage> {
   Future<void> _cleanup() async {
     await _localRenderer.dispose();
     await _remoteRenderer.dispose();
-    await _classroomService.dispose();
+    _classroomService.dispose();
   }
 
   void _toggleMute() {

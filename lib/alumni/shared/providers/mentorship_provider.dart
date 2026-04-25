@@ -3,9 +3,9 @@ import 'dart:async';
 import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:graduway/alumni/shared/models/mentorship_model.dart';
-import 'package:graduway/alumni/shared/services/mentorship_service.dart';
-import 'package:graduway/alumni/shared/services/persistence_service.dart';
-import 'package:graduway/alumni/shared/services/classroom_service.dart';
+import 'package:graduway/shared/services/mentorship_service.dart';
+import 'package:graduway/shared/services/persistence_service.dart';
+import 'package:graduway/shared/services/classroom_service.dart';
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 import 'package:graduway/alumni/shared/providers/chat_provider.dart';
 

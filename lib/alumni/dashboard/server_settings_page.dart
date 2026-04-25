@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
-import 'package:graduway/alumni/shared/services/network_discovery_service.dart';
+import 'package:graduway/shared/services/network_discovery_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:io';
 
