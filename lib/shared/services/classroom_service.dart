@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io' as dart_io;
 import 'dart:convert';
 import 'dart:developer' as dev;
-import 'package:graduway/alumni/shared/providers/auth_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Roles for the classroom:
 /// - Mentor (Alumni/Faculty): Can start sessions, send offers.
@@ -71,6 +71,17 @@ class ClassroomService {
     // --- Media Setup ---
     if (useMedia) {
       try {
+        // Request Permissions (Required for Android/iOS)
+        final camStatus = await Permission.camera.request();
+        final micStatus = await Permission.microphone.request();
+
+        if (camStatus != PermissionStatus.granted ||
+            micStatus != PermissionStatus.granted) {
+          dev.log('❌ [RTC] Permissions denied: Cam=$camStatus, Mic=$micStatus');
+          onError?.call('Camera/Microphone permissions are required.');
+          return; // Stop if permissions not granted
+        }
+
         localStream = await navigator.mediaDevices.getUserMedia({
           'audio': true,
           'video': {
@@ -119,7 +130,14 @@ class ClassroomService {
     });
 
     _socket!.onDisconnect((_) => dev.log('❌ [SOCKET] Disconnected'));
-    _socket!.onConnectError((data) => dev.log('⚠️ [SOCKET] Connection Error: $data'));
+    _socket!.onConnectError((data) {
+      dev.log('⚠️ [SOCKET] Connection Error: $data');
+      onError?.call('Could not connect to signaling server. Please check your internet or server status.');
+    });
+    _socket!.on('connect_timeout', (data) {
+      dev.log('⚠️ [SOCKET] Connection Timeout: $data');
+      onError?.call('Signaling server connection timed out.');
+    });
     _socket!.on('error', (msg) => onError?.call(msg.toString()));
 
     // --- Signaling Handshake (MESH Logic) ---

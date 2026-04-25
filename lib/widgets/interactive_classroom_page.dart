@@ -197,6 +197,9 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
 
     _classroomService.onError = (message) {
       if (mounted) {
+        setState(() {
+          _connectionState = "Connection Failed";
+        });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('⚠️ $message'),
@@ -211,9 +214,9 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
             ),
           ),
         );
-        if (message.contains('multiple attempts')) {
-          Future.delayed(const Duration(seconds: 2), () {
-            if (mounted) Navigator.pop(context);
+        if (message.contains('multiple attempts') || message.contains('timed out') || message.contains('Could not connect')) {
+          Future.delayed(const Duration(seconds: 3), () {
+            if (mounted && _connectionState == "Connection Failed") Navigator.pop(context);
           });
         }
       }

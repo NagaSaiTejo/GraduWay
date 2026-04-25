@@ -66,5 +66,9 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>GraduWay needs camera access for interactive classroom sessions and video calls.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>GraduWay needs microphone access for audio in interactive classroom sessions.</string>
 </dict>
 </plist>
