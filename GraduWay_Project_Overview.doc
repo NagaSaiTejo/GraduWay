@@ -1,0 +1,30 @@
+GRADUWAY
+GraduWay is a comprehensive educational networking and career-guidance platform built using Flutter. Its core philosophy is to bridge the gap between current students, successful alumni, and college administration. It solves the common problem where students lack actionable career roadmaps and alumni lack a structured medium to share their industry experience.
+The entire application relies on a strict, role-based architecture. A single entry point (the Login Screen) dynamically routes users into three completely different experiences based on their identity: Student, Alumni, or Admin.
+--- 1. The Authentication & Routing System ---
+To make testing and demonstrations completely frictionless, the login system uses an intuitive "Email Domain Routing" pattern rather than a strict database of passwords. 
+* Emails ending in @stud.com automatically log the user in as a Student.
+* Emails ending in @alum.com automatically log the user in as an Alumni.
+* Emails ending in @admin.com automatically log the user in as an Admin.
+The system dynamically extracts the user's name from the email (e.g., typing nagasai@stud.com extracts "Nagasai") and uses this state across the entire app so that greetings and profile pages feel personalized and real immediately upon login.
+--- 2. The Student Experience ---
+The student flow is designed to keep users motivated through gamification and informed through data. This is the heart of the application.
+* Home Dashboard: Acts as the command center. Upon entering, students see a personalized greeting, their "Career Score" (a gamified metric of their progress), and quick access links to vital areas. It also highlights "Trending Questions" and "Top Alumni" to hook them into the community right away.
+* Interactive Career Roadmap: A vertical, timeline-based UI. Once a student selects a career goal (like Software Engineer), the app generates node-based steps (e.g., "Learn Data Structures", "Build Projects"). Checking these off increases their Career Score.
+* Skill Packages & Badges: A gamification engine with interactive progress rings. As students interact with the app, they unlock achievements like the "Skill Seeker" badge.
+* Placement Reality Dashboard: This page combats campus rumors with hard data. It uses analytical charts to show actual salary trends, top recruiters, and year-over-year placement rates for their specific college.
+* Alumni Q&A Forum: A scrolling feed where students can post technical or career questions aimed specifically at alumni.
+* Alumni Directory: A searchable list where students can filter alumni by branch or company (e.g., finding CSE alumni who work at Google) and view their detailed career profiles.
+--- 3. The Alumni Experience ---
+Alumni are busy professionals, so their interface is streamlined to help them give back to the community with minimal time investment.
+* Impact Dashboard: Instead of a complex hub, the Alumni Home Screen immediately shows them their impact statistics—how many students they have helped and how many questions they have answered.
+* Pending Questions Feed: A focused interface where alumni can efficiently read queries posted by students and provide answers based on their real-world experience.
+--- 4. The Admin Experience ---
+The Admin role ensures the platform remains safe, relevant, and well-maintained.
+* Telemetry Console: A bird's-eye view for college administration showing grid statistics (Total Students, Verified Alumni, Active Q&A threads) and a line chart of registration trends over time.
+* User & Content Management: A moderation hub. Admins can view Q&A threads or profiles flagged by the community for inappropriate or misleading content, allowing them to dismiss the reports or remove the content entirely.
+--- 5. Shared Technical Functionality ---
+Across all three roles, the app features a Dynamic Profile System. When users navigate to their settings to edit their Name or Bio, the underlying state management specifically propagates this change instantly. Without reloading the page, the user's new name visually updates in the header, in the home screen greeting, and across the entire platform.
+--- Why this project stands out ---
+GraduWay successfully models a complete, multi-role university ecosystem in a single codebase. It proves out complex deep-linking, real-time state propagation, and dynamic UI rendering while providing a genuinely useful product flow aimed at increasing student employability and alumni engagement. The transitions, animations, and clean layouts ensure it feels like a premium, modern application rather than a technical minimum viable product.
+

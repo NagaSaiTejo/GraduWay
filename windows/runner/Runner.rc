@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "alumini_screen" "\0"
+            VALUE "CompanyName", "com.graduway" "\0"
+            VALUE "FileDescription", "graduway" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "alumini_screen" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "alumini_screen.exe" "\0"
-            VALUE "ProductName", "alumini_screen" "\0"
+            VALUE "InternalName", "graduway" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.graduway. All rights reserved." "\0"
+            VALUE "OriginalFilename", "graduway.exe" "\0"
+            VALUE "ProductName", "graduway" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

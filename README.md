@@ -1,78 +1,60 @@
-# Alumni Screen - Unified Architecture
+# GraduWay
 
-Welcome to the **Alumni Screen** project. This project has been modernized into a streamlined, high-performance architecture using a **Unified Node.js Backend** and a **Flutter Frontend**.
+**GraduWay** is a premier Alumni-Student Guidance Platform tailored for Aditya Engineering College. It serves as a digital bridge connecting ambitious students with experienced alumni to foster mentorship, professional growth, and networking within the college ecosystem.
 
-## 🏗️ Architecture Overview
+## Purpose
 
-The project is split into two primary components:
+The primary goal of GraduWay is to facilitate meaningful interactions between current students and alumni. By leveraging the expertise of graduates, students gain invaluable industrial insights, career guidance, and technical mentorship that textbooks alone cannot provide.
 
-1.  **Flutter Frontend (`/lib`)**: A cross-platform mobile and web application.
-2.  **Unified Node.js Backend (`/signaling_server`)**: A single-service backend that handles:
-    - RESTful APIs (Chat, User Management, Mentorship).
-    - WebRTC Signaling logic.
-    - Node-Media-Server for live broadcasting.
-    - MongoDB persistence.
+## Key Features
 
----
+- **Role-Based Access**: Specialized interfaces for Students, Alumni, and Admins.
+- **Mentorship Hub**: Connect with alumni based on industry, expertise, and department.
+- **Career Pathways**: Explore roadmaps and success stories shared by seniors.
+- **Q&A Forums**: A collaborative space for technical and professional queries.
+- **Event Networking**: Stay updated on webinars, workshops, and industrial visits.
+- **Interactive Roadmaps**: Visualize career journeys in various technical fields.
 
-## 📂 Project Structure
+## Tech Stack
 
-| Directory | Purpose |
-| :--- | :--- |
-| `lib/` | Flutter application source code. |
-| `signaling_server/` | **Unified Backend** (Express, Socket.io, Mongoose). |
-| `openshift/` | Kubernetes/OpenShift deployment manifests. |
-| `scripts/` | Project utility and helper scripts. |
-| `project_docs/` | Detailed documentation and setup guides. |
-| `android/ios/...` | Platform-specific Flutter configuration. |
+- **Framework**: Flutter (Dart)
+- **State Management**: Riverpod
+- **Navigation**: GoRouter
+- **Animations**: Flutter Animate, Shimmer
+- **UI Design**: Modern, Responsive, and User-Centric
 
----
+## Getting Started
 
-## 🚀 Quick Start (Local Development)
+### Prerequisites
 
-### 1. Prerequisites
-- **Flutter SDK** (v3.19+)
-- **Node.js** (v20+)
-- **MongoDB** (Running locally or via Docker)
-- **FFmpeg** (Required for media broadcasting)
+- Flutter SDK (v3.0.0 or higher)
+- Android Studio / VS Code
+- Git
 
-### 2. Run the Backend
-You can run the backend directly or via Docker Compose.
+### Installation
 
-**Manual Start:**
-```powershell
-cd signaling_server
-npm install
-npm start
-```
-*Alternatively, use the helper script:* `.\scripts\run_dev_backend.bat`
+1. **Clone the repository**:
+   ```bash
+   git clone [repository-url]
+   cd graduway
+   ```
 
-**Docker Compose:**
-```powershell
-docker-compose up --build
-```
+2. **Install dependencies**:
+   ```bash
+   flutter pub get
+   ```
 
-### 3. Run the Frontend
-```powershell
-flutter pub get
-flutter run
-```
+3. **Run the application**:
+   ```bash
+   flutter run
+   ```
+
+## Roles & Permissions
+
+- **Students**: Can search alumni, ask questions, view roadmaps, and participate in events.
+- **Alumni**: Can mentor students, share experiences, and guide future graduates.
+- **Admins**: Manage user verification, content moderation, and platform oversight.
 
 ---
 
-## 🛠️ CI/CD & Deployment
-
-This project uses an automated **Jenkins Pipeline** for testing and deployment.
-
-- **Pipeline**: Defined in `Jenkinsfile`.
-- **Target**: Deployed to **OpenShift** as a containerized service.
-- **Monitoring**: SonarQube analysis is automatically performed on every merge to `main`.
-
-Refer to [openshift.md](openshift.md) for detailed deployment environment information.
-
----
-
-## 📄 Documentation Links
-- [Deployment Guide](project_docs/DEPLOYMENT_GUIDE.md)
-- [WebRTC Setup Guide](project_docs/WEBRTC_SETUP_GUIDE.md)
-- [Testing Checklist](project_docs/TESTING_CHECKLIST.md)
+*GraduWay — Bridging the Gap, Navigating the Future.*

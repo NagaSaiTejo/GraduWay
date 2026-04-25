@@ -1,19 +1,22 @@
 import 'dart:io';
-import 'package:alumini_screen/src/alumni/shared/core/theme/app_theme.dart';
-import 'package:alumini_screen/src/alumni/shared/providers/auth_provider.dart';
-import 'package:alumini_screen/src/alumni/shared/providers/chat_provider.dart';
-import 'package:alumini_screen/src/alumni/shared/providers/mentorship_provider.dart';
-import 'package:alumini_screen/src/alumni/shared/providers/notification_provider.dart';
-import 'package:alumini_screen/src/alumni/shared/providers/ui_provider.dart';
-import 'package:alumini_screen/src/admin/shared/providers/admin_provider.dart';
-import 'package:alumini_screen/src/login/login_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:provider/provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:provider/provider.dart' as legacy_provider;
 import 'package:provider/single_child_widget.dart';
-import 'package:alumini_screen/src/login/auth_dispatcher.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+
+// NagaSai Imports
+import 'package:graduway/app.dart';
+
+// Rajesh Imports
+import 'package:graduway/alumni/shared/providers/auth_provider.dart';
+import 'package:graduway/alumni/shared/providers/chat_provider.dart';
+import 'package:graduway/alumni/shared/providers/mentorship_provider.dart';
+import 'package:graduway/alumni/shared/providers/notification_provider.dart';
+import 'package:graduway/alumni/shared/providers/ui_provider.dart';
+import 'package:graduway/admin/shared/providers/admin_provider.dart';
 
 /// Global HTTP overrides to allow self-signed certificates (OpenShift routes)
 class MyHttpOverrides extends HttpOverrides {
@@ -24,7 +27,6 @@ class MyHttpOverrides extends HttpOverrides {
   }
 }
 
-/// Entry point of the application.
 void main() async {
   // Required before any async call in main()
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,21 +36,24 @@ void main() async {
   }
   
   // Load environment variables
-  await dotenv.load(fileName: ".env");
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (e) {
+    debugPrint("Warning: .env file not found. Ensure it exists at the root.");
+  }
 
-  // Resolve the backend server IP BEFORE the app renders, so login()
-  // always has the correct address ready.
+  // Resolve the backend server IP BEFORE the app renders
   await AuthProvider.resolveServerIp();
 
-  final List<SingleChildWidget> providers = [
-    ChangeNotifierProvider(create: (_) => AuthProvider()),
-    ChangeNotifierProvider(create: (_) => ChatProvider()),
-    ChangeNotifierProvider(create: (_) => NotificationProvider()),
-    ChangeNotifierProvider(create: (_) => UIProvider()),
-    ChangeNotifierProvider(create: (_) => AdminProvider()),
+  // Rajesh's Provider List
+  final List<SingleChildWidget> legacyProviders = [
+    legacy_provider.ChangeNotifierProvider(create: (_) => AuthProvider()),
+    legacy_provider.ChangeNotifierProvider(create: (_) => ChatProvider()),
+    legacy_provider.ChangeNotifierProvider(create: (_) => NotificationProvider()),
+    legacy_provider.ChangeNotifierProvider(create: (_) => UIProvider()),
+    legacy_provider.ChangeNotifierProvider(create: (_) => AdminProvider()),
 
-    // MentorshipProvider depends on ChatProvider and AuthProvider for ID-aware fetching
-    ChangeNotifierProxyProvider2<ChatProvider, AuthProvider, MentorshipProvider>(
+    legacy_provider.ChangeNotifierProxyProvider2<ChatProvider, AuthProvider, MentorshipProvider>(
       create: (_) => MentorshipProvider(),
       update: (_, chat, auth, mentorship) => (mentorship ?? MentorshipProvider())
         ..setChatProvider(chat)
@@ -56,38 +61,15 @@ void main() async {
     ),
   ];
 
-  if (kIsWeb) {
-    runApp(DevicePreview(
+  runApp(
+    DevicePreview(
       enabled: true,
-      builder: (context) => MultiProvider(
-        providers: providers,
-        child: const MyApp(),
+      builder: (context) => ProviderScope(
+        child: legacy_provider.MultiProvider(
+          providers: legacyProviders,
+          child: const GraduWayApp(),
+        ),
       ),
-    ));
-  } else {
-    runApp(MultiProvider(
-      providers: providers,
-      child: const MyApp(),
-    ));
-  }
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      useInheritedMediaQuery: true,
-      locale: DevicePreview.locale(context),
-      builder: DevicePreview.appBuilder,
-      title: 'Alumni Connect',
-      theme: AppTheme.lightTheme,
-      home: const AuthDispatcher(),
-      routes: {
-        '/home': (context) => const AuthDispatcher(),
-      },
-      debugShowCheckedModeBanner: false,
-    );
-  }
+    ),
+  );
 }

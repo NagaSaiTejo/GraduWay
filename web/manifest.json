@@ -1,6 +1,6 @@
 {
-    "name": "alumini_screen",
-    "short_name": "alumini_screen",
+    "name": "alumsync",
+    "short_name": "alumsync",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
