@@ -85,7 +85,7 @@ pipeline {
                 echo '🚀 Triggering Orchestrated Deployment on OpenShift...'
                 script {
                     def ocCmd = env.OC_PATH ?: 'oc'
-                    def TOKEN = "sha256~QjoK3Nhy_FR_yeuPRMvQhHS33N747Q0cyp-vNKufaRU"
+                    def TOKEN = "sha256~OvHpLyNAcyZF__efR9O-_NyFohMBpeTBemOH2hhvgtI"
                     bat "${ocCmd} login ${env.OC_SERVER} --token=\"${TOKEN}\" --insecure-skip-tls-verify"
                     bat "${ocCmd} project ${env.OC_PROJECT}"
                     bat "${ocCmd} apply -f openshift/mongodb.yaml"
