@@ -422,7 +422,11 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
               ),
               // End Button
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () async {
+                  context.read<MentorshipProvider>().endWebinar(widget.streamId);
+                  await _classroomService.leaveRoom();
+                  if (mounted) Navigator.pop(context);
+                },
                 child: const Text("Done",
                     style: TextStyle(
                         color: Colors.white,

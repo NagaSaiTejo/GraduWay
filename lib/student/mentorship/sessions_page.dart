@@ -144,8 +144,7 @@ class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderSt
               final id = controller.text.trim();
               if (id.isNotEmpty) {
                 Navigator.pop(context);
-                Navigator.push(
-                  context,
+                Navigator.of(context, rootNavigator: true).push(
                   MaterialPageRoute(
                     builder: (context) => isInteractive 
                       ? InteractiveClassroomPage(roomId: id.toLowerCase().replaceAll(' ', '-'))
@@ -190,8 +189,7 @@ class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderSt
                 
                 if (success) {
                   Navigator.pop(context);
-                  Navigator.push(
-                    context,
+                  Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
                       builder: (context) => isInteractive
                         ? InteractiveClassroomPage(roomId: title.toLowerCase().replaceAll(' ', '-'))
@@ -232,8 +230,7 @@ class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderSt
               index: index,
               onJoin: () {
                 // Join 1-on-1 Mentorship session
-                Navigator.push(
-                  context,
+                Navigator.of(context, rootNavigator: true).push(
                   MaterialPageRoute(
                     builder: (context) => InteractiveClassroomPage(
                       roomId: "mentorship-${request.id}",
@@ -274,8 +271,7 @@ class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderSt
                         isLive: webinar['isLive'],
                         index: index,
                         icon: Icons.groups_rounded,
-                        onJoin: () => Navigator.push(
-                          context,
+                        onJoin: () => Navigator.of(context, rootNavigator: true).push(
                           MaterialPageRoute(
                             builder: (context) => InteractiveClassroomPage(
                               roomId: webinar['title'].toLowerCase().replaceAll(' ', '-'),
@@ -319,8 +315,7 @@ class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderSt
                         isLive: webinar['isLive'],
                         index: index,
                         icon: Icons.podcasts_rounded,
-                        onJoin: () => Navigator.push(
-                          context,
+                        onJoin: () => Navigator.of(context, rootNavigator: true).push(
                           MaterialPageRoute(
                             builder: (context) => student_broadcast.BroadcastStreamingPage(
                               streamId: webinar['title'].toLowerCase().replaceAll(' ', '-'),
@@ -393,8 +388,7 @@ class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderSt
                   onPressed: () {
                     final roomId = _joinController.text.trim();
                     if (roomId.isNotEmpty) {
-                      Navigator.push(
-                        context,
+                      Navigator.of(context, rootNavigator: true).push(
                         MaterialPageRoute(
                           builder: (context) => isInteractive
                               ? InteractiveClassroomPage(

@@ -226,6 +226,12 @@ class MentorshipProvider with ChangeNotifier {
     }
   }
 
+  /// Ends a webinar session and removes it from the local list.
+  void endWebinar(String title) {
+    _webinars.removeWhere((w) => w['title'] == title || w['id'] == title.toLowerCase().replaceAll(' ', '-'));
+    notifyListeners();
+  }
+
   void _addMockWebinar(String title) {
     _webinars.insert(0, {
       'id': title.toLowerCase().replaceAll(' ', '-'),

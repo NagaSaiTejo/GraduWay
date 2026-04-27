@@ -410,7 +410,10 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
               ),
               // Exit Button
               TextButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () async {
+                  await _classroomService.leaveRoom();
+                  if (mounted) Navigator.pop(context);
+                },
                 child: const Text("Exit",
                     style: TextStyle(
                         color: Colors.white,
