@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 import 'package:graduway/alumni/shared/providers/notification_provider.dart';
 import 'package:graduway/shared/services/classroom_service.dart';
+import 'package:graduway/theme/app_colors.dart';
 import 'dart:async';
 
 class BroadcastStreamingPage extends StatefulWidget {
@@ -362,85 +363,71 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   Widget _buildTopHeader() {
-    final auth = context.read<AuthProvider>();
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
                 children: [
                   // Host Info
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(auth.userName,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14)),
-                      Text(auth.techField,
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 11)),
+                      Row(
+                        children: [
+                          Consumer<AuthProvider>(
+                            builder: (context, auth, _) => Text(auth.userName,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18)),
+                          ),
+                          const SizedBox(width: 4),
+                          const Icon(Icons.check_circle,
+                              color: Colors.white, size: 16),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      // Live Badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Row(
+                          children: [
+                            const CircleAvatar(
+                                radius: 3, backgroundColor: Colors.white),
+                            const SizedBox(width: 6),
+                            Text(_formatTime(_secondsElapsed),
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold)),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
-                  const SizedBox(width: 15),
-                  // Live Badge
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      children: [
-                        const Text("LIVE",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12)),
-                        const SizedBox(width: 6),
-                        Text(_formatTime(_secondsElapsed),
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 11)),
-                      ],
-                    ),
                   ),
                 ],
               ),
-              // Viewer Count
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.visibility_outlined,
-                        color: Colors.white, size: 16),
-                    SizedBox(width: 6),
-                    Text("245",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13)),
-                  ],
-                ),
+              // End Button
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Done",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500)),
               ),
             ],
           ),
@@ -451,48 +438,53 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
 
   Widget _buildSideControls() {
     return Positioned(
-      right: 20,
-      top: 150,
+      right: 15,
+      bottom: 120,
       child: Column(
         children: [
-          _buildSideButton(Icons.cameraswitch, "Flip",
-              onPressed: _classroomService.switchCamera),
-          _buildSideButton(Icons.auto_fix_high, "Effects", onPressed: () {}),
-          _buildSideButton(Icons.lightbulb_outline, "Light", onPressed: () {}),
-          _buildSideButton(_isMuted ? Icons.mic_off : Icons.mic, "Mic",
-              onPressed: _toggleMute, isActive: _isMuted),
-          _buildSideButton(
+          _buildInteractionButton(
+              Icons.favorite_border, "2.5K", onPressed: _addHeart),
+          const SizedBox(height: 15),
+          _buildInteractionButton(Icons.chat_bubble_outline, "421",
+              onPressed: () {}),
+          const SizedBox(height: 15),
+          _buildInteractionButton(Icons.share, "", onPressed: () {}),
+          const SizedBox(height: 15),
+          _buildInteractionButton(
               _isCameraOff ? Icons.videocam_off : Icons.videocam, "Cam",
               onPressed: _toggleCamera, isActive: _isCameraOff),
-          const SizedBox(height: 20),
-          _buildSideButton(Icons.close, "End",
-              color: Colors.redAccent, onPressed: () => Navigator.pop(context)),
+          const SizedBox(height: 15),
+          _buildInteractionButton(_isMuted ? Icons.mic_off : Icons.mic, "Mic",
+              onPressed: _toggleMute, isActive: _isMuted),
         ],
       ),
     );
   }
 
-  Widget _buildSideButton(IconData icon, String label,
-      {required VoidCallback onPressed,
-      Color color = Colors.white24,
-      bool isActive = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onPressed,
-            child: CircleAvatar(
-              radius: 22,
-              backgroundColor: isActive ? Colors.red.withOpacity(0.5) : color,
-              child: Icon(icon, color: Colors.white, size: 22),
+  Widget _buildInteractionButton(IconData icon, String label,
+      {required VoidCallback onPressed, bool isActive = false}) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onPressed,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isActive ? Colors.red.withOpacity(0.3) : Colors.black26,
+              shape: BoxShape.circle,
             ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
+        ),
+        if (label.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 10)),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold)),
         ],
-      ),
+      ],
     );
   }
 
@@ -502,14 +494,15 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
       left: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
             // Comments Panel
             SizedBox(
-              height: 200,
+              height: 180,
+              width: MediaQuery.of(context).size.width * 0.7,
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: _comments.length,
@@ -517,28 +510,28 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
                 itemBuilder: (context, index) {
                   final comment = _comments[_comments.length - 1 - index];
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: const EdgeInsets.only(bottom: 8.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.white12,
-                            child: Icon(Icons.person,
-                                size: 16, color: Colors.white)),
-                        const SizedBox(width: 10),
+                          radius: 12,
+                          backgroundColor: Colors.white24,
+                          child: Icon(Icons.person, size: 14, color: Colors.white),
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(comment['user']!,
                                   style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.white70,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13)),
+                                      fontSize: 12)),
                               Text(comment['text']!,
                                   style: const TextStyle(
-                                      color: Colors.white70, fontSize: 13)),
+                                      color: Colors.white, fontSize: 13)),
                             ],
                           ),
                         ),
@@ -548,18 +541,18 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             // Bottom Bar
             Row(
               children: [
                 Expanded(
                   child: Container(
-                    height: 48,
+                    height: 44,
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: Colors.white10,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white12),
+                      color: Colors.white.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: Colors.white24),
                     ),
                     child: Row(
                       children: [
@@ -569,34 +562,46 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
                             style: const TextStyle(
                                 color: Colors.white, fontSize: 14),
                             decoration: const InputDecoration(
-                              hintText: "Add a comment...",
+                              hintText: "Send a message",
                               hintStyle: TextStyle(color: Colors.white54),
                               border: InputBorder.none,
                             ),
                             onSubmitted: (_) => _postComment(),
                           ),
                         ),
-                        IconButton(
-                            icon: const Icon(Icons.send,
-                                color: Colors.white, size: 18),
-                            onPressed: _postComment),
+                        const Icon(Icons.add_circle_outline,
+                            color: Colors.white, size: 20),
+                        const SizedBox(width: 12),
+                        GestureDetector(
+                          onTap: _postComment,
+                          child: const Icon(Icons.send,
+                              color: Colors.white, size: 20),
+                        ),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                GestureDetector(
-                  onTap: _addHeart,
-                  child: const Icon(Icons.favorite,
-                      color: Colors.redAccent, size: 32),
-                ),
-                const SizedBox(width: 10),
-                const Icon(Icons.card_giftcard,
-                    color: Colors.orangeAccent, size: 30),
+                const SizedBox(width: 12),
+                _buildBottomActionIcon(Icons.autorenew_outlined,
+                    onTap: _classroomService.switchCamera),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomActionIcon(IconData icon, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: const BoxDecoration(
+          color: Colors.white10,
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: Colors.white, size: 22),
       ),
     );
   }

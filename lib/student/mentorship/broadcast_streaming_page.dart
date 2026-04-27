@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 import 'package:graduway/alumni/shared/providers/notification_provider.dart';
 import 'package:graduway/shared/services/classroom_service.dart';
+import 'package:graduway/theme/app_colors.dart';
 import 'dart:async';
 
 class BroadcastStreamingPage extends StatefulWidget {
@@ -22,7 +23,7 @@ class BroadcastStreamingPage extends StatefulWidget {
 class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
     with TickerProviderStateMixin {
   final ClassroomService _classroomService = ClassroomService();
-  final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
+  final RTCVideoRenderer _remoteRenderer = RTCVideoRenderer();
   int _heartCount = 0;
   final List<Widget> _floatingHearts = [];
   final List<Map<String, String>> _comments = [];
@@ -34,6 +35,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   bool _isCameraOff = false;
   String? _errorMessage;
   bool _isConnecting = true;
+  String _hostName = "Loading...";
 
   @override
   void initState() {
@@ -43,6 +45,21 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   void _setupListeners() {
+    _classroomService.onRemoteStreamAdded = (id, stream) {
+      if (mounted) {
+        setState(() {
+          _remoteRenderer.srcObject = stream;
+        });
+      }
+    };
+
+    _classroomService.onMentorJoined = (id, name, {role}) {
+      if (mounted) {
+        setState(() {
+          _hostName = name;
+        });
+      }
+    };
     _classroomService.onChatMessage = (from, text) {
       if (mounted) {
         setState(() {
@@ -82,7 +99,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
     });
 
     try {
-      await _localRenderer.initialize();
+      await _remoteRenderer.initialize();
       final auth = context.read<AuthProvider>();
 
       _setupListeners();
@@ -92,7 +109,8 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
         serverUrl: AuthProvider.getSignalingUrl(),
         roomId: widget.streamId,
         userName: auth.userName,
-        role: ClassroomRole.mentor,
+        role: ClassroomRole.student,
+        useMedia: false, // Watcher doesn't share video/audio
       )
           .timeout(const Duration(seconds: 10), onTimeout: () {
         throw 'SIGNALING_TIMEOUT';
@@ -100,16 +118,15 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
 
       if (mounted) {
         setState(() {
-          _localRenderer.srcObject = _classroomService.localStream;
           _isConnecting = false;
         });
 
+        if (!mounted) return;
         // Add a notification for the live stream
         context.read<NotificationProvider>().addNotification({
           'id': DateTime.now().millisecondsSinceEpoch.toString(),
-          'title': 'Streaming Live!',
-          'body':
-              'Your followers have been notified that you are live in session: ${widget.streamId}',
+          'title': 'Watching Live!',
+          'body': 'You are now watching the live session: ${widget.streamId}',
           'time': 'Just now',
           'isRead': false,
         });
@@ -143,7 +160,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
 
   Future<void> _cleanup() async {
     _classroomService.dispose();
-    await _localRenderer.dispose();
+    await _remoteRenderer.dispose();
   }
 
   void _addHeart() {
@@ -175,17 +192,11 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   void _toggleMute() {
-    setState(() {
-      _isMuted = !_isMuted;
-      _classroomService.toggleAudio(!_isMuted);
-    });
+    // Watcher cannot share media
   }
 
   void _toggleCamera() {
-    setState(() {
-      _isCameraOff = !_isCameraOff;
-      _classroomService.toggleVideo(!_isCameraOff);
-    });
+    // Watcher cannot share media
   }
 
   @override
@@ -333,11 +344,23 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   Widget _buildVideoLayer() {
     return Container(
       color: Colors.black,
-      child: RTCVideoView(
-        _localRenderer,
-        mirror: true,
-        objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-      ),
+      child: _remoteRenderer.srcObject != null
+          ? RTCVideoView(
+              _remoteRenderer,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            )
+          : const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.video_camera_back_outlined,
+                      color: Colors.white24, size: 64),
+                  SizedBox(height: 16),
+                  Text("Waiting for streamer...",
+                      style: TextStyle(color: Colors.white38)),
+                ],
+              ),
+            ),
     );
   }
 
@@ -362,85 +385,37 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   Widget _buildTopHeader() {
-    final auth = context.read<AuthProvider>();
     return Positioned(
       top: 0,
       left: 0,
       right: 0,
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+          padding: const EdgeInsets.fromLTRB(20, 10, 20, 0),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  // Host Info
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white24,
-                    child: Icon(Icons.person, color: Colors.white, size: 20),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(auth.userName,
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14)),
-                      Text(auth.techField,
-                          style: const TextStyle(
-                              color: Colors.white70, fontSize: 11)),
-                    ],
-                  ),
-                  const SizedBox(width: 15),
-                  // Live Badge
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.redAccent,
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Row(
-                      children: [
-                        const Text("LIVE",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 12)),
-                        const SizedBox(width: 6),
-                        Text(_formatTime(_secondsElapsed),
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 11)),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              // Viewer Count
+              // Live Badge
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.error,
+                  borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.visibility_outlined,
-                        color: Colors.white, size: 16),
-                    SizedBox(width: 6),
-                    Text("245",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13)),
-                  ],
-                ),
+                child: const Text("LIVE",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14)),
+              ),
+              // Exit Button
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Exit",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500)),
               ),
             ],
           ),
@@ -450,49 +425,26 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   Widget _buildSideControls() {
-    return Positioned(
-      right: 20,
-      top: 150,
-      child: Column(
-        children: [
-          _buildSideButton(Icons.cameraswitch, "Flip",
-              onPressed: _classroomService.switchCamera),
-          _buildSideButton(Icons.auto_fix_high, "Effects", onPressed: () {}),
-          _buildSideButton(Icons.lightbulb_outline, "Light", onPressed: () {}),
-          _buildSideButton(_isMuted ? Icons.mic_off : Icons.mic, "Mic",
-              onPressed: _toggleMute, isActive: _isMuted),
-          _buildSideButton(
-              _isCameraOff ? Icons.videocam_off : Icons.videocam, "Cam",
-              onPressed: _toggleCamera, isActive: _isCameraOff),
-          const SizedBox(height: 20),
-          _buildSideButton(Icons.close, "End",
-              color: Colors.redAccent, onPressed: () => Navigator.pop(context)),
-        ],
-      ),
-    );
+    return const SizedBox.shrink(); // Moved to bottom bar in Image 1
   }
 
-  Widget _buildSideButton(IconData icon, String label,
-      {required VoidCallback onPressed,
-      Color color = Colors.white24,
-      bool isActive = false}) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: Column(
-        children: [
-          GestureDetector(
-            onTap: onPressed,
-            child: CircleAvatar(
-              radius: 22,
-              backgroundColor: isActive ? Colors.red.withOpacity(0.5) : color,
-              child: Icon(icon, color: Colors.white, size: 22),
-            ),
-          ),
+  Widget _buildInteractionButton(IconData icon, String label,
+      {required VoidCallback onPressed}) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onPressed,
+          child: Icon(icon, color: Colors.white, size: 28),
+        ),
+        if (label.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(label,
-              style: const TextStyle(color: Colors.white70, fontSize: 10)),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold)),
         ],
-      ),
+      ],
     );
   }
 
@@ -502,7 +454,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
       left: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
@@ -510,6 +462,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
             // Comments Panel
             SizedBox(
               height: 200,
+              width: MediaQuery.of(context).size.width * 0.7,
               child: ListView.builder(
                 padding: EdgeInsets.zero,
                 itemCount: _comments.length,
@@ -517,28 +470,28 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
                 itemBuilder: (context, index) {
                   final comment = _comments[_comments.length - 1 - index];
                   return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
+                    padding: const EdgeInsets.only(bottom: 8.0),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.white12,
-                            child: Icon(Icons.person,
-                                size: 16, color: Colors.white)),
-                        const SizedBox(width: 10),
+                          radius: 12,
+                          backgroundColor: Colors.white24,
+                          child: Icon(Icons.person, size: 14, color: Colors.white),
+                        ),
+                        const SizedBox(width: 8),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(comment['user']!,
                                   style: const TextStyle(
-                                      color: Colors.white,
+                                      color: Colors.white70,
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 13)),
+                                      fontSize: 12)),
                               Text(comment['text']!,
                                   style: const TextStyle(
-                                      color: Colors.white70, fontSize: 13)),
+                                      color: Colors.white, fontSize: 13)),
                             ],
                           ),
                         ),
@@ -548,55 +501,52 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
                 },
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             // Bottom Bar
             Row(
               children: [
-                Expanded(
+                // Comment Button
+                GestureDetector(
+                  onTap: () {
+                    // Show comment input dialog or similar
+                  },
                   child: Container(
-                    height: 48,
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    height: 36,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white10,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: Colors.white12),
+                      color: Colors.white24,
+                      borderRadius: BorderRadius.circular(18),
                     ),
-                    child: Row(
+                    child: const Row(
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _commentController,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 14),
-                            decoration: const InputDecoration(
-                              hintText: "Add a comment...",
-                              hintStyle: TextStyle(color: Colors.white54),
-                              border: InputBorder.none,
-                            ),
-                            onSubmitted: (_) => _postComment(),
-                          ),
-                        ),
-                        IconButton(
-                            icon: const Icon(Icons.send,
-                                color: Colors.white, size: 18),
-                            onPressed: _postComment),
+                        const Text("Comment",
+                            style: TextStyle(color: Colors.white, fontSize: 14)),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.more_vert, color: Colors.white, size: 16),
                       ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
-                GestureDetector(
-                  onTap: _addHeart,
-                  child: const Icon(Icons.favorite,
-                      color: Colors.redAccent, size: 32),
-                ),
-                const SizedBox(width: 10),
-                const Icon(Icons.card_giftcard,
-                    color: Colors.orangeAccent, size: 30),
+                const Spacer(),
+                // Icon Controls
+                _buildBottomIcon(Icons.help_outline),
+                _buildBottomIcon(Icons.send_outlined),
+                _buildBottomIcon(Icons.sentiment_satisfied_alt_outlined),
+                _buildBottomIcon(Icons.favorite_border, onTap: _addHeart),
               ],
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomIcon(IconData icon, {VoidCallback? onTap}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.only(left: 12),
+        child: Icon(icon, color: Colors.white, size: 28),
       ),
     );
   }

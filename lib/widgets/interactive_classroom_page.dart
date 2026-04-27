@@ -42,6 +42,11 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
   final Set<String> _raisedHands = {};
   String _connectionState = "Connecting to classroom handshake...";
 
+  // Permission State
+  bool _canAccessMic = false;
+  bool _canAccessVideo = false;
+  final Map<String, Map<String, bool>> _studentPermissions = {}; // socketId -> {mic, video}
+
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -162,6 +167,46 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
       }
     };
 
+    _classroomService.onPermissionUpdate = (mic, video) async {
+      if (mounted) {
+        setState(() {
+          _canAccessMic = mic;
+          _canAccessVideo = video;
+        });
+
+        if ((mic || video) && _classroomService.localStream == null) {
+          try {
+            await _classroomService.startLocalStream();
+          } catch (e) {
+            dev.log('❌ [RTC] Error starting local stream: $e');
+          }
+          if (mounted) {
+            setState(() {
+              if (_classroomService.localStream != null) {
+                _localRenderer.srcObject = _classroomService.localStream;
+              }
+            });
+          }
+        } else if (!mic && !video && _classroomService.localStream != null) {
+          _classroomService.stopLocalStream();
+          if (mounted) {
+            setState(() {
+              _localRenderer.srcObject = null;
+            });
+          }
+        }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(mic || video 
+              ? "You have been granted media access! 🎤📹" 
+              : "Your media access has been revoked."),
+            backgroundColor: mic || video ? Colors.green : Colors.redAccent,
+          ),
+        );
+      }
+    };
+
     _classroomService.onMentorJoined = (mentorId, userName, {role}) {
       if (mounted) {
         final hostLabel = (role == 'admin') ? 'Faculty' : 'Alumnus';
@@ -237,6 +282,7 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
       roomId: widget.roomId,
       userName: auth.userName,
       role: classroomRole,
+      startWithMedia: classroomRole == ClassroomRole.mentor, // Students start without media
     );
 
     if (mounted) {
@@ -516,10 +562,11 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
             'isMe': true
           },
           ..._remoteRenderers.entries.map((e) {
-            final name = _classroomService.participants[e.key] ?? 'Participant';
+            final name = _classroomService.participants[e.key]?['userName'] ?? 'Participant';
             return {
+              'id': e.key,
               'name': name,
-              'role': 'Member', // Default role for others
+              'role': 'Member',
               'isMe': false
             };
           })
@@ -547,6 +594,29 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
                     fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
+              if (auth.role != UserRole.student)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Global Access:",
+                          style: TextStyle(color: Colors.white70, fontSize: 13)),
+                      TextButton.icon(
+                        icon: const Icon(Icons.security_update_good, size: 18),
+                        label: const Text("Grant All Access"),
+                        onPressed: () {
+                          _classroomService.updateAllStudentsPermission(true, true);
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text("Granted media access to all students")),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              const SizedBox(height: 8),
               Flexible(
                 child: ListView.builder(
                   shrinkWrap: true,
@@ -578,8 +648,61 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
                         style: const TextStyle(
                             color: Colors.white54, fontSize: 12),
                       ),
-                      trailing: const Icon(Icons.circle,
-                          color: Colors.green, size: 8),
+                      trailing: auth.role != UserRole.student && !isMe 
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  _studentPermissions[attendees[index]['id']]?['mic'] ?? false
+                                      ? Icons.mic
+                                      : Icons.mic_off,
+                                  color: _studentPermissions[attendees[index]['id']]?['mic'] ?? false
+                                      ? Colors.green
+                                      : Colors.white24,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  final studentId = attendees[index]['id'] as String;
+                                  final currentMic = _studentPermissions[studentId]?['mic'] ?? false;
+                                  final currentVid = _studentPermissions[studentId]?['video'] ?? false;
+                                  
+                                  setState(() {
+                                    _studentPermissions[studentId] = {
+                                      'mic': !currentMic,
+                                      'video': currentVid
+                                    };
+                                  });
+                                  _classroomService.updateStudentPermission(studentId, !currentMic, currentVid);
+                                },
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  _studentPermissions[attendees[index]['id']]?['video'] ?? false
+                                      ? Icons.videocam
+                                      : Icons.videocam_off,
+                                  color: _studentPermissions[attendees[index]['id']]?['video'] ?? false
+                                      ? Colors.green
+                                      : Colors.white24,
+                                  size: 20,
+                                ),
+                                onPressed: () {
+                                  final studentId = attendees[index]['id'] as String;
+                                  final currentMic = _studentPermissions[studentId]?['mic'] ?? false;
+                                  final currentVid = _studentPermissions[studentId]?['video'] ?? false;
+                                  
+                                  setState(() {
+                                    _studentPermissions[studentId] = {
+                                      'mic': currentMic,
+                                      'video': !currentVid
+                                    };
+                                  });
+                                  _classroomService.updateStudentPermission(studentId, currentMic, !currentVid);
+                                },
+                              ),
+                            ],
+                          )
+                        : const Icon(Icons.circle, color: Colors.green, size: 8),
                     );
                   },
                 ),
@@ -1034,19 +1157,13 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
                     icon: _isMuted ? Icons.mic_off : Icons.mic,
                     active: !_isMuted,
                     activeColor: Colors.blueAccent,
-                    onPressed: () {
-                      setState(() => _isMuted = !_isMuted);
-                      _classroomService.toggleAudio(!_isMuted);
-                    },
+                    onPressed: _toggleMute,
                   ),
                   _buildControlBtn(
                     icon: _isCameraOff ? Icons.videocam_off : Icons.videocam,
                     active: !_isCameraOff,
                     activeColor: Colors.blueAccent,
-                    onPressed: () {
-                      setState(() => _isCameraOff = !_isCameraOff);
-                      _classroomService.toggleVideo(!_isCameraOff);
-                    },
+                    onPressed: _toggleCamera,
                   ),
 
                   // Audio Output Selection Menu
@@ -1196,6 +1313,41 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _toggleMute() {
+    final auth = context.read<AuthProvider>();
+    if (auth.role == UserRole.student && !_canAccessMic) {
+      _showPermissionDenied("Microphone");
+      return;
+    }
+    setState(() {
+      _isMuted = !_isMuted;
+      _classroomService.toggleAudio(!_isMuted);
+    });
+  }
+
+  void _toggleCamera() {
+    final auth = context.read<AuthProvider>();
+    if (auth.role == UserRole.student && !_canAccessVideo) {
+      _showPermissionDenied("Camera");
+      return;
+    }
+    setState(() {
+      _isCameraOff = !_isCameraOff;
+      _classroomService.toggleVideo(!_isCameraOff);
+    });
+  }
+
+  void _showPermissionDenied(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("✋ Access Denied: You need permission from the host to use the $feature."),
+        backgroundColor: Colors.orange.shade800,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
   }

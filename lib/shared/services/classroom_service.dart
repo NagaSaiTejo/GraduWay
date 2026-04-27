@@ -37,6 +37,7 @@ class ClassroomService {
   Function()? onConnected;
   Function(List<dynamic> rooms)? onRoomListUpdate;
   Function(Map<String, dynamic> data)? onAnnouncementReceived;
+  Function(bool canAccessMic, bool canAccessVideo)? onPermissionUpdate;
 
   // Robust WebRTC Configuration using STUN & Free TURN for NAT Traversal
   final Map<String, dynamic> _rtcConfig = {
@@ -64,12 +65,13 @@ class ClassroomService {
     required String userName,
     ClassroomRole role = ClassroomRole.student,
     bool useMedia = true,
+    bool startWithMedia = true,
   }) async {
     _roomId = roomId;
     _role = role;
 
     // --- Media Setup ---
-    if (useMedia) {
+    if (useMedia && startWithMedia) {
       try {
         // Request Permissions (Required for Android/iOS)
         final camStatus = await Permission.camera.request();
@@ -199,6 +201,12 @@ class ClassroomService {
     _socket!.on('user-raised-hand', (data) => onHandRaised?.call(data['userName'] ?? 'Someone', data['isRaised'] ?? true));
     _socket!.on('room-list', (data) => onRoomListUpdate?.call(data as List<dynamic>));
     _socket!.on('new-announcement', (data) => onAnnouncementReceived?.call(Map<String, dynamic>.from(data as Map)));
+    
+    _socket!.on('media-permission-updated', (data) {
+      if (data['targetId'] == _socket!.id || data['targetId'] == 'all') {
+        onPermissionUpdate?.call(data['mic'] ?? false, data['video'] ?? false);
+      }
+    });
 
     if (!_socket!.connected) _socket!.connect();
   }
@@ -355,6 +363,64 @@ class ClassroomService {
       // ignore: deprecated_member_use
       await Helper.switchCamera(videoTrack);
     }
+  }
+
+  void updateStudentPermission(String studentId, bool mic, bool video) {
+    if (_role == ClassroomRole.mentor && _socket != null) {
+      _socket!.emit('update-media-permission', {
+        'roomId': _roomId,
+        'targetId': studentId,
+        'mic': mic,
+        'video': video,
+      });
+    }
+  }
+
+  void updateAllStudentsPermission(bool mic, bool video) {
+    if (_role == ClassroomRole.mentor && _socket != null) {
+      _socket!.emit('update-media-permission', {
+        'roomId': _roomId,
+        'targetId': 'all',
+        'mic': mic,
+        'video': video,
+      });
+    }
+  }
+
+  Future<void> startLocalStream() async {
+    try {
+      final camStatus = await Permission.camera.request();
+      final micStatus = await Permission.microphone.request();
+
+      if (camStatus == PermissionStatus.granted && micStatus == PermissionStatus.granted) {
+        localStream = await navigator.mediaDevices.getUserMedia({
+          'audio': true,
+          'video': {
+            'facingMode': 'user',
+            'width': 640,
+            'height': 480,
+          }
+        });
+        
+        // Add tracks to existing peer connections
+        peerConnections.forEach((id, pc) {
+          localStream!.getTracks().forEach((track) {
+            pc.addTrack(track, localStream!);
+          });
+        });
+        
+        dev.log('📹 [RTC] Local stream started after permission granted');
+      }
+    } catch (e) {
+      dev.log('❌ [RTC] Error starting local stream: $e');
+    }
+  }
+
+  void stopLocalStream() {
+    localStream?.getTracks().forEach((track) => track.stop());
+    localStream?.dispose();
+    localStream = null;
+    dev.log('🔇 [RTC] Local stream stopped');
   }
 
   Future<void> leaveRoom() async {

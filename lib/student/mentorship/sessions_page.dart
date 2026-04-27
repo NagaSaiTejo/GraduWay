@@ -1,11 +1,12 @@
 import 'package:graduway/theme/app_colors.dart';
 import 'package:graduway/widgets/interactive_classroom_page.dart';
+import 'package:graduway/student/mentorship/broadcast_streaming_page.dart' as student_broadcast;
+import 'package:graduway/alumni/mentorship/broadcast_streaming_page.dart' as alumni_broadcast;
 import 'package:graduway/alumni/shared/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:graduway/alumni/shared/providers/mentorship_provider.dart';
 import 'package:graduway/models/user_role.dart';
-import 'package:graduway/theme/app_theme.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class SessionsPage extends StatefulWidget {
@@ -15,11 +16,22 @@ class SessionsPage extends StatefulWidget {
   State<SessionsPage> createState() => _SessionsPageState();
 }
 
-class _SessionsPageState extends State<SessionsPage> {
+class _SessionsPageState extends State<SessionsPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final TextEditingController _joinController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      setState(() {}); // Rebuild to update FAB
+    });
+  }
+
+  @override
   void dispose() {
+    _tabController.dispose();
     _joinController.dispose();
     super.dispose();
   }
@@ -27,26 +39,31 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
-          title: const Text("Sessions & Classes"),
-          bottom: const TabBar(
+          title: const Text("Sessions & live streams"),
+          bottom: TabBar(
+            controller: _tabController,
             indicatorColor: AppColors.primary,
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
-            tabs: [
+            isScrollable: true,
+            tabs: const [
               Tab(text: "1-on-1 Mentorship"),
-              Tab(text: "Webinars & Classes"),
+              Tab(text: "Interactive Classes"),
+              Tab(text: "Live Broadcasts"),
             ],
           ),
         ),
         body: SafeArea(
           child: TabBarView(
+            controller: _tabController,
             children: [
               _buildMentorshipTab(context),
-              _buildWebinarsTab(context),
+              _buildInteractiveTab(context),
+              _buildBroadcastsTab(context),
             ],
           ),
         ),
@@ -58,32 +75,62 @@ class _SessionsPageState extends State<SessionsPage> {
   Widget? _buildFAB(BuildContext context) {
     final auth = context.read<AuthProvider>();
     final isStudent = auth.role == UserRole.student;
+    
+    String label;
+    IconData icon;
+    VoidCallback onPressed;
+
+    switch (_tabController.index) {
+      case 0: // Mentorship
+        label = isStudent ? "Request Session" : "Schedule Session";
+        icon = Icons.calendar_today_rounded;
+        onPressed = () => _showScheduleMentorshipDialog(context);
+        break;
+      case 1: // Interactive
+        label = isStudent ? "Join Interactive" : "Create Interactive";
+        icon = isStudent ? Icons.group_add_rounded : Icons.add_to_photos_rounded;
+        onPressed = () => isStudent ? _showJoinClassDialog(context, isInteractive: true) : _showCreateClassDialog(context, isInteractive: true);
+        break;
+      case 2: // Broadcast
+        label = isStudent ? "Join Broadcast" : "Start Live Stream";
+        icon = isStudent ? Icons.live_tv_rounded : Icons.videocam_rounded;
+        onPressed = () => isStudent ? _showJoinClassDialog(context, isInteractive: false) : _showCreateClassDialog(context, isInteractive: false);
+        break;
+      default:
+        return null;
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 80),
       child: FloatingActionButton.extended(
-        onPressed: () => isStudent ? _showJoinClassDialog(context) : _showCreateClassDialog(context),
+        onPressed: onPressed,
         backgroundColor: AppColors.primary,
-        icon: Icon(isStudent ? Icons.login_rounded : Icons.add_rounded, color: Colors.white),
+        icon: Icon(icon, color: Colors.white),
         label: Text(
-          isStudent ? "Join Live Class" : "Create Live Class", 
+          label, 
           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)
         ),
       ),
     );
   }
 
-  void _showJoinClassDialog(BuildContext context) {
+  void _showScheduleMentorshipDialog(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Scheduling feature coming soon!")),
+    );
+  }
+
+  void _showJoinClassDialog(BuildContext context, {required bool isInteractive}) {
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Join Live Class"),
+        title: Text(isInteractive ? "Join Interactive Class" : "Join Live Broadcast"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: "Enter Room Name (e.g. flutter-basics)",
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: isInteractive ? "Enter Room ID" : "Enter Stream ID",
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
         ),
@@ -94,15 +141,15 @@ class _SessionsPageState extends State<SessionsPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              final roomId = controller.text.trim();
-              if (roomId.isNotEmpty) {
+              final id = controller.text.trim();
+              if (id.isNotEmpty) {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => InteractiveClassroomPage(
-                      roomId: roomId.toLowerCase().replaceAll(' ', '-'),
-                    ),
+                    builder: (context) => isInteractive 
+                      ? InteractiveClassroomPage(roomId: id.toLowerCase().replaceAll(' ', '-'))
+                      : student_broadcast.BroadcastStreamingPage(streamId: id.toLowerCase().replaceAll(' ', '-')),
                   ),
                 );
               }
@@ -114,17 +161,17 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  void _showCreateClassDialog(BuildContext context) {
+  void _showCreateClassDialog(BuildContext context, {required bool isInteractive}) {
     final controller = TextEditingController();
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Create Live Class"),
+        title: Text(isInteractive ? "Create Interactive Class" : "Start Live Broadcast"),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            hintText: "Enter Class Title (e.g. Flutter Basics)",
-            border: OutlineInputBorder(),
+          decoration: InputDecoration(
+            hintText: isInteractive ? "Enter Class Title" : "Enter Stream Title",
+            border: const OutlineInputBorder(),
           ),
           autofocus: true,
         ),
@@ -134,25 +181,31 @@ class _SessionsPageState extends State<SessionsPage> {
             child: const Text("Cancel"),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               final title = controller.text.trim();
               if (title.isNotEmpty) {
                 final provider = context.read<MentorshipProvider>();
-                provider.startNewWebinar(title);
-                Navigator.pop(context);
+                final success = await provider.startNewWebinar(title);
+                if (!mounted) return;
                 
-                // Navigate to the newly created room
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => InteractiveClassroomPage(
-                      roomId: title.toLowerCase().replaceAll(' ', '-'),
+                if (success) {
+                  Navigator.pop(context);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => isInteractive
+                        ? InteractiveClassroomPage(roomId: title.toLowerCase().replaceAll(' ', '-'))
+                        : alumni_broadcast.BroadcastStreamingPage(streamId: title.toLowerCase().replaceAll(' ', '-')),
                     ),
-                  ),
-                );
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("Failed to create session. Is the server running?")),
+                  );
+                }
               }
             },
-            child: const Text("Start Class"),
+            child: Text(isInteractive ? "Start Class" : "Go Live"),
           ),
         ],
       ),
@@ -177,6 +230,17 @@ class _SessionsPageState extends State<SessionsPage> {
               duration: "45 mins",
               isLive: false,
               index: index,
+              onJoin: () {
+                // Join 1-on-1 Mentorship session
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InteractiveClassroomPage(
+                      roomId: "mentorship-${request.id}",
+                    ),
+                  ),
+                );
+              },
             );
           },
         );
@@ -184,7 +248,7 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  Widget _buildWebinarsTab(BuildContext context) {
+  Widget _buildInteractiveTab(BuildContext context) {
     return Consumer<MentorshipProvider>(
       builder: (context, provider, child) {
         final webinars = provider.webinars;
@@ -193,10 +257,10 @@ class _SessionsPageState extends State<SessionsPage> {
 
         return Column(
           children: [
-            if (isStudent) _buildJoinRoomSection(context),
+            if (isStudent) _buildJoinRoomSection(context, isInteractive: true),
             Expanded(
               child: webinars.isEmpty 
-                ? _buildEmptyState("No live or upcoming webinars.")
+                ? _buildEmptyState("No interactive classes available.")
                 : ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     itemCount: webinars.length,
@@ -204,12 +268,20 @@ class _SessionsPageState extends State<SessionsPage> {
                       final webinar = webinars[index];
                       return _buildSessionCard(
                         title: webinar['title'],
-                        subtitle: "Live Stream Class",
+                        subtitle: "Many-to-Many Interactive Class",
                         time: webinar['startTime'],
                         duration: "${webinar['attendees']} attending",
                         isLive: webinar['isLive'],
                         index: index,
-                        icon: Icons.cast_for_education_rounded,
+                        icon: Icons.groups_rounded,
+                        onJoin: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => InteractiveClassroomPage(
+                              roomId: webinar['title'].toLowerCase().replaceAll(' ', '-'),
+                            ),
+                          ),
+                        ),
                       );
                     },
                   ),
@@ -220,7 +292,52 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
-  Widget _buildJoinRoomSection(BuildContext context) {
+  Widget _buildBroadcastsTab(BuildContext context) {
+    return Consumer<MentorshipProvider>(
+      builder: (context, provider, child) {
+        // For demo, we show same webinars but with different interaction logic
+        final webinars = provider.webinars;
+        final auth = context.read<AuthProvider>();
+        final isStudent = auth.role == UserRole.student;
+
+        return Column(
+          children: [
+            if (isStudent) _buildJoinRoomSection(context, isInteractive: false),
+            Expanded(
+              child: webinars.isEmpty 
+                ? _buildEmptyState("No live broadcasts at the moment.")
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    itemCount: webinars.length,
+                    itemBuilder: (context, index) {
+                      final webinar = webinars[index];
+                      return _buildSessionCard(
+                        title: webinar['title'],
+                        subtitle: "One-Way Live Stream",
+                        time: webinar['startTime'],
+                        duration: "${webinar['attendees']} watching",
+                        isLive: webinar['isLive'],
+                        index: index,
+                        icon: Icons.podcasts_rounded,
+                        onJoin: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => student_broadcast.BroadcastStreamingPage(
+                              streamId: webinar['title'].toLowerCase().replaceAll(' ', '-'),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildJoinRoomSection(BuildContext context, {required bool isInteractive}) {
     return Container(
       margin: const EdgeInsets.all(24),
       padding: const EdgeInsets.all(20),
@@ -279,9 +396,13 @@ class _SessionsPageState extends State<SessionsPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => InteractiveClassroomPage(
-                            roomId: roomId.toLowerCase().replaceAll(' ', '-'),
-                          ),
+                          builder: (context) => isInteractive
+                              ? InteractiveClassroomPage(
+                                  roomId: roomId.toLowerCase().replaceAll(' ', '-'),
+                                )
+                              : BroadcastStreamingPage(
+                                  streamId: roomId.toLowerCase().replaceAll(' ', '-'),
+                                ),
                         ),
                       );
                     }
@@ -306,6 +427,7 @@ class _SessionsPageState extends State<SessionsPage> {
     required String duration,
     required bool isLive,
     required int index,
+    required VoidCallback onJoin,
     IconData icon = Icons.video_camera_front_rounded,
   }) {
     return Padding(
@@ -380,14 +502,7 @@ class _SessionsPageState extends State<SessionsPage> {
                     return ElevatedButton(
                       onPressed: () {
                         if (isLive) {
-                          Navigator.push(
-                            context ,
-                            MaterialPageRoute(
-                              builder: (context) => InteractiveClassroomPage(
-                                roomId: title.toLowerCase().replaceAll(' ', '-'),
-                              ),
-                            ),
-                          );
+                          onJoin();
                         } else {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Details coming soon")),
