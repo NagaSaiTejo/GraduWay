@@ -29,7 +29,7 @@ class _SessionsPageState extends State<SessionsPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         backgroundColor: AppColors.background,
         appBar: AppBar(
@@ -38,9 +38,11 @@ class _SessionsPageState extends State<SessionsPage> {
             indicatorColor: AppColors.primary,
             labelColor: AppColors.primary,
             unselectedLabelColor: AppColors.textSecondary,
+            isScrollable: true,
             tabs: [
               Tab(text: "1-on-1 Mentorship"),
-              Tab(text: "Webinars & Classes"),
+              Tab(text: "Interactive Classes"),
+              Tab(text: "Live Broadcasts"),
             ],
           ),
         ),
@@ -48,6 +50,7 @@ class _SessionsPageState extends State<SessionsPage> {
           child: TabBarView(
             children: [
               _buildMentorshipTab(context),
+              _buildInteractiveTab(context),
               _buildWebinarsTab(context),
             ],
           ),
@@ -184,40 +187,50 @@ class _SessionsPageState extends State<SessionsPage> {
     );
   }
 
+  Widget _buildInteractiveTab(BuildContext context) {
+    return Consumer<MentorshipProvider>(
+      builder: (context, provider, child) {
+        final classes = provider.webinars.where((w) => w['id'].toString().startsWith('int-')).toList();
+        return _buildSessionList(context, classes, "No upcoming interactive classes.");
+      },
+    );
+  }
+
   Widget _buildWebinarsTab(BuildContext context) {
     return Consumer<MentorshipProvider>(
       builder: (context, provider, child) {
-        final webinars = provider.webinars;
-        final auth = context.read<AuthProvider >();
-        final isStudent = auth.role == UserRole.student;
-
-        return Column(
-          children: [
-            if (isStudent) _buildJoinRoomSection(context),
-            Expanded(
-              child: webinars.isEmpty 
-                ? _buildEmptyState("No live or upcoming webinars.")
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: webinars.length,
-                    itemBuilder: (context, index) {
-                      final webinar = webinars[index];
-                      return _buildSessionCard(
-                        webinarId: webinar['id'],
-                        title: webinar['title'],
-                        subtitle: webinar['id'].toString().startsWith('brd-') ? "Live Stream Class" : "Interactive Class",
-                        time: webinar['startTime'],
-                        duration: "${webinar['attendees']} attending",
-                        isLive: webinar['isLive'],
-                        index: index,
-                        icon: Icons.cast_for_education_rounded,
-                      );
-                    },
-                  ),
-            ),
-          ],
-        );
+        final broadcasts = provider.webinars.where((w) => w['id'].toString().startsWith('brd-')).toList();
+        return _buildSessionList(context, broadcasts, "No live or upcoming broadcasts.");
       },
+    );
+  }
+
+  Widget _buildSessionList(BuildContext context, List<Map<String, dynamic>> sessions, String emptyMsg) {
+    return Column(
+      children: [
+        Expanded(
+          child: sessions.isEmpty 
+            ? _buildEmptyState(emptyMsg)
+            : ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: sessions.length,
+                itemBuilder: (context, index) {
+                  final webinar = sessions[index];
+                  final isBrd = webinar['id'].toString().startsWith('brd-');
+                  return _buildSessionCard(
+                    webinarId: webinar['id'],
+                    title: webinar['title'],
+                    subtitle: isBrd ? "One-Way Live Stream" : "Two-Way Interaction",
+                    time: webinar['startTime'],
+                    duration: "${webinar['attendees']} attending",
+                    isLive: webinar['isLive'],
+                    index: index,
+                    icon: isBrd ? Icons.podcasts_rounded : Icons.groups_rounded,
+                  );
+                },
+              ),
+        ),
+      ],
     );
   }
 

@@ -280,7 +280,10 @@ class ClassroomService {
     final pc = await _createPeerConnection(from, localName);
     await pc.setRemoteDescription(RTCSessionDescription(data['offer']['sdp'], data['offer']['type']));
     
-    RTCSessionDescription answer = await pc.createAnswer();
+    RTCSessionDescription answer = await pc.createAnswer({
+      'offerToReceiveAudio': 1,
+      'offerToReceiveVideo': 1,
+    });
     await pc.setLocalDescription(answer);
 
     _socket!.emit('answer', {

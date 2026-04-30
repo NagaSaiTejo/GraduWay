@@ -314,6 +314,9 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
   }
 
   Future<void> _cleanup() async {
+    if (mounted) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+    }
     await _localRenderer.dispose();
     for (var renderer in _remoteRenderers.values) {
       await renderer.dispose();
@@ -350,7 +353,18 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✋ Please use the 'LEAVE' button to exit the session."),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
+      child: Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
         flexibleSpace: ClipRect(
@@ -1279,8 +1293,43 @@ class _InteractiveClassroomPageState extends State<InteractiveClassroomPage> {
                   const SizedBox(width: 4),
 
                   ElevatedButton.icon(
-                    onPressed: () {
-                      if (mounted) Navigator.of(context).pop();
+                    onPressed: () async {
+                      final auth = context.read<AuthProvider>();
+                      final isMentor = auth.role == UserRole.mentor || auth.role == UserRole.admin;
+
+                      if (isMentor) {
+                        final shouldEnd = await showDialog<bool>(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text("End Session?"),
+                            content: const Text("Do you want to end this session for everyone or just leave?"),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: const Text("JUST LEAVE"),
+                              ),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
+                                child: const Text("END FOR ALL"),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (shouldEnd == null) return;
+                        if (shouldEnd) {
+                          // Handle end-for-all logic
+                          final mentorship = context.read<MentorshipProvider>();
+                          await mentorship.endWebinar(widget.roomId);
+                        }
+                      }
+
+                      await _cleanup();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).clearSnackBars();
+                        Navigator.of(context).pop();
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent,

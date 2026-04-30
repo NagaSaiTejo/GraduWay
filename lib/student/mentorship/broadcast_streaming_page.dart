@@ -159,6 +159,9 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   Future<void> _cleanup() async {
+    if (mounted) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+    }
     _classroomService.dispose();
     await _remoteRenderer.dispose();
   }
@@ -203,6 +206,15 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✋ Please use the 'EXIT' button to leave the stream."),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
@@ -413,9 +425,12 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
               ),
               // Exit Button
               TextButton(
-                onPressed: () async {
-                  await _classroomService.leaveRoom();
-                  if (mounted) Navigator.pop(context);
+                 onPressed: () async {
+                  await _cleanup();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text("Exit",
                     style: TextStyle(

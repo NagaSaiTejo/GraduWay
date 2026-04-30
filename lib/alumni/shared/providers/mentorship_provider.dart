@@ -125,7 +125,36 @@ class MentorshipProvider with ChangeNotifier {
     });
 
     _isLoading = false;
+    _seedMockWebinars();
     notifyListeners();
+  }
+
+  void _seedMockWebinars() {
+    if (_webinars.isNotEmpty) return;
+    
+    _webinars = [
+      {
+        'id': 'brd-flutter-live',
+        'title': 'Flutter Mastery Live',
+        'startTime': 'LIVE',
+        'isLive': true,
+        'attendees': 124,
+      },
+      {
+        'id': 'int-career-talk',
+        'title': 'Career Q&A with Senior Alumni',
+        'startTime': 'Today, 6:00 PM',
+        'isLive': false,
+        'attendees': 45,
+      },
+      {
+        'id': 'int-mobile-dev',
+        'title': 'Mobile Dev: React vs Flutter',
+        'startTime': 'Tomorrow, 10:00 AM',
+        'isLive': false,
+        'attendees': 89,
+      },
+    ];
   }
 
   /// Persists the current list of mentorship requests to local storage.

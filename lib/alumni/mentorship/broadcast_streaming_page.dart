@@ -144,6 +144,10 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   Future<void> _cleanup() async {
+    if (mounted) {
+      ScaffoldMessenger.of(context).clearSnackBars();
+    }
+    _timer?.cancel();
     _classroomService.dispose();
     await _localRenderer.dispose();
   }
@@ -194,6 +198,15 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("✋ Please use the 'DONE' button to end or exit the stream."),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
@@ -245,6 +258,7 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
   }
 
   Widget _buildErrorOverlay() {
+    final mentorship = context.read<MentorshipProvider>();
     return Positioned(
       bottom: 0,
       left: 0,
@@ -321,7 +335,14 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () async {
+                  await _cleanup();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).clearSnackBars();
+                    mentorship.endWebinar(widget.streamId);
+                    Navigator.pop(context);
+                  }
+                },
                       child: const Text("Go Back",
                           style: TextStyle(color: Colors.white)),
                     ),
@@ -427,9 +448,11 @@ class _BroadcastStreamingPageState extends State<BroadcastStreamingPage>
               // End Button
               TextButton(
                 onPressed: () async {
-                  context.read<MentorshipProvider>().endWebinar(widget.streamId);
-                  await _classroomService.leaveRoom();
-                  if (mounted) Navigator.pop(context);
+                  await _cleanup();
+                  if (mounted) {
+                    context.read<MentorshipProvider>().endWebinar(widget.streamId);
+                    Navigator.pop(context);
+                  }
                 },
                 child: const Text("Done",
                     style: TextStyle(
