@@ -63,7 +63,7 @@ void main() async {
 
   runApp(
     DevicePreview(
-      enabled: true,
+      enabled: kIsWeb,
       builder: (context) => ProviderScope(
         child: legacy_provider.MultiProvider(
           providers: legacyProviders,
