@@ -87,7 +87,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       final userCredential = await _authService.signIn(email, password);
       if (userCredential?.user != null) {
-        // Check MongoDB for user profile and role
         final student = await _dbService.getStudentByEmail(email);
         if (student != null) {
           state = AuthState(
@@ -127,7 +126,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
           return;
         }
 
-        // If user exists in Auth but not in DB (shouldn't happen with proper registration)
         throw Exception("User profile not found.");
       }
     } catch (e) {
@@ -174,6 +172,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
     );
   }
 
+  void updateUserProfile({required String name, required String bio}) {
+    state = state.copyWith(loginName: name, bio: bio);
+  }
+
   void logout() async {
     await _authService.signOut();
     state = const AuthState();
@@ -185,7 +187,213 @@ final authProvider = StateNotifierProvider<AuthNotifier, AuthState>(
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Real-time Data Providers (replacing mock)
+// Student Live State
+// ─────────────────────────────────────────────────────────────────────────────
+
+class StudentProgressState {
+  final int questionsAsked;
+  final int eventsAttended;
+  final int mentorSessions;
+  final int alumniProfilesViewed;
+  final List<String> viewedAlumniIds;
+  final List<String> earnedBadgeIds;
+  final List<BadgeNotification> pendingNotifications;
+  final String? localPhotoPath;
+  final String displayName;
+  final String bio;
+  final String targetCareer;
+
+  const StudentProgressState({
+    this.questionsAsked = 0,
+    this.eventsAttended = 0,
+    this.mentorSessions = 0,
+    this.alumniProfilesViewed = 0,
+    this.viewedAlumniIds = const [],
+    this.earnedBadgeIds = const [],
+    this.pendingNotifications = const [],
+    this.localPhotoPath,
+    this.displayName = 'User',
+    this.bio = '',
+    this.targetCareer = '',
+  });
+
+  int get careerScore {
+    final base = (questionsAsked * 5) +
+        (eventsAttended * 10) +
+        (mentorSessions * 15) +
+        (earnedBadgeIds.length * 8);
+    return base.clamp(0, 100);
+  }
+
+  StudentProgressState copyWith({
+    int? questionsAsked,
+    int? eventsAttended,
+    int? mentorSessions,
+    int? alumniProfilesViewed,
+    List<String>? viewedAlumniIds,
+    List<String>? earnedBadgeIds,
+    List<BadgeNotification>? pendingNotifications,
+    String? localPhotoPath,
+    String? displayName,
+    String? bio,
+    String? targetCareer,
+    bool clearPhoto = false,
+  }) {
+    return StudentProgressState(
+      questionsAsked: questionsAsked ?? this.questionsAsked,
+      eventsAttended: eventsAttended ?? this.eventsAttended,
+      mentorSessions: mentorSessions ?? this.mentorSessions,
+      alumniProfilesViewed: alumniProfilesViewed ?? this.alumniProfilesViewed,
+      viewedAlumniIds: viewedAlumniIds ?? this.viewedAlumniIds,
+      earnedBadgeIds: earnedBadgeIds ?? this.earnedBadgeIds,
+      pendingNotifications: pendingNotifications ?? this.pendingNotifications,
+      localPhotoPath:
+          clearPhoto ? null : (localPhotoPath ?? this.localPhotoPath),
+      displayName: displayName ?? this.displayName,
+      bio: bio ?? this.bio,
+      targetCareer: targetCareer ?? this.targetCareer,
+    );
+  }
+}
+
+class BadgeNotification {
+  final String badgeId;
+  final String title;
+  final String emoji;
+  const BadgeNotification(this.badgeId, this.title, this.emoji);
+}
+
+class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
+  StudentProgressNotifier() : super(const StudentProgressState());
+
+  void incrementQuestionsAsked() {
+    final newCount = state.questionsAsked + 1;
+    var newState = state.copyWith(questionsAsked: newCount);
+    if (newCount == 1) newState = _awardBadge(newState, 'b002', 'Curious Mind', '❓');
+    if (newCount == 5) newState = _awardBadge(newState, 'b008', 'Community Hero', '💬');
+    state = newState;
+  }
+
+  void attendEvent() {
+    final newCount = state.eventsAttended + 1;
+    var newState = state.copyWith(eventsAttended: newCount);
+    if (newCount == 1) newState = _awardBadge(newState, 'b004', 'Event Goer', '🎓');
+    state = newState;
+  }
+
+  void trackAlumniView(String alumniId) {
+    if (state.viewedAlumniIds.contains(alumniId)) return;
+    final newIds = [...state.viewedAlumniIds, alumniId];
+    var newState = state.copyWith(
+      alumniProfilesViewed: newIds.length,
+      viewedAlumniIds: newIds,
+    );
+    if (newIds.length == 1) newState = _awardBadge(newState, 'b001', 'First Connect', '🤝');
+    if (newIds.length == 5) newState = _awardBadge(newState, 'b007', 'Network Builder', '🌐');
+    state = newState;
+  }
+
+  void setTargetCareer(String career) {
+    var newState = state.copyWith(targetCareer: career);
+    if (!state.earnedBadgeIds.contains('b003')) {
+      newState = _awardBadge(newState, 'b003', 'Skill Seeker', '🎯');
+    }
+    state = newState;
+  }
+
+  void updateProfile(String name, String bio) {
+    state = state.copyWith(displayName: name, bio: bio);
+    if (name.isNotEmpty && bio.isNotEmpty && !state.earnedBadgeIds.contains('b009')) {
+      state = _awardBadge(state, 'b009', 'Goal Setter', '🏁');
+    }
+  }
+
+  void updateProfilePhoto(String? path) {
+    if (path == null) {
+      state = state.copyWith(clearPhoto: true);
+    } else {
+      state = state.copyWith(localPhotoPath: path);
+    }
+  }
+
+  void clearNotification(String badgeId) {
+    state = state.copyWith(
+      pendingNotifications: state.pendingNotifications
+          .where((n) => n.badgeId != badgeId)
+          .toList(),
+    );
+  }
+
+  StudentProgressState _awardBadge(
+      StudentProgressState s, String id, String title, String emoji) {
+    if (s.earnedBadgeIds.contains(id)) return s;
+    return s.copyWith(
+      earnedBadgeIds: [...s.earnedBadgeIds, id],
+      pendingNotifications: [
+        ...s.pendingNotifications,
+        BadgeNotification(id, title, emoji)
+      ],
+    );
+  }
+}
+
+final studentProgressProvider =
+    StateNotifierProvider<StudentProgressNotifier, StudentProgressState>(
+  (ref) => StudentProgressNotifier(),
+);
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Q&A State
+// ─────────────────────────────────────────────────────────────────────────────
+
+class QANotifier extends StateNotifier<List<QAModel>> {
+  final DatabaseService _dbService;
+  QANotifier(this._dbService) : super([]);
+
+  Future<void> fetchQA() async {
+    state = await _dbService.getAllQA();
+  }
+
+  void addQuestion(QAModel question) {
+    state = [question, ...state];
+  }
+
+  void addAnswer(String questionId, QAAnswer answer) {
+    state = state.map((q) {
+      if (q.id == questionId) {
+        return QAModel(
+          id: q.id,
+          question: q.question,
+          askedBy: q.askedBy,
+          askedById: q.askedById,
+          timestamp: q.timestamp,
+          upvotes: q.upvotes,
+          tags: q.tags,
+          answers: [...q.answers, answer],
+          isAnswered: true,
+        );
+      }
+      return q;
+    }).toList();
+  }
+}
+
+final qaProvider = StateNotifierProvider<QANotifier, List<QAModel>>(
+  (ref) => QANotifier(ref.read(databaseServiceProvider)),
+);
+
+final unansweredQAProvider = Provider<List<QAModel>>((ref) {
+  return ref.watch(qaProvider).where((q) => !q.isAnswered).toList();
+});
+
+final trendingQAProvider = Provider<List<QAModel>>((ref) {
+  final all = ref.watch(qaProvider);
+  final sorted = [...all]..sort((a, b) => b.upvotes.compareTo(a.upvotes));
+  return sorted.take(5).toList();
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Real-time Data Providers
 // ─────────────────────────────────────────────────────────────────────────────
 
 final alumniListProvider = FutureProvider<List<AlumniModel>>((ref) async {
@@ -193,7 +401,9 @@ final alumniListProvider = FutureProvider<List<AlumniModel>>((ref) async {
 });
 
 final qaListProvider = FutureProvider<List<QAModel>>((ref) async {
-  return ref.read(databaseServiceProvider).getAllQA();
+  final list = await ref.read(databaseServiceProvider).getAllQA();
+  ref.read(qaProvider.notifier).state = list;
+  return list;
 });
 
 final suggestedAlumniProvider = Provider<List<AlumniModel>>((ref) {
@@ -206,13 +416,12 @@ final suggestedAlumniProvider = Provider<List<AlumniModel>>((ref) {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Legacy/Mock providers (to be gradually replaced or updated to wrap new logic)
+// Filters & Other Providers
 // ─────────────────────────────────────────────────────────────────────────────
-
-final studentProgressProvider = StateProvider<int>((ref) => 0); // Simplified for now
 
 final alumniSearchProvider = StateProvider<String>((ref) => '');
 final selectedBranchProvider = StateProvider<String>((ref) => 'All');
+final careerGoalProvider = StateProvider<String>((ref) => '');
 
 final searchedAlumniProvider = Provider<List<AlumniModel>>((ref) {
   final query = ref.watch(alumniSearchProvider).toLowerCase();
@@ -233,3 +442,4 @@ final studentNavIndexProvider = StateProvider<int>((ref) => 0);
 final alumniNavIndexProvider = StateProvider<int>((ref) => 0);
 final adminNavIndexProvider = StateProvider<int>((ref) => 0);
 final hasSeenOnboardingProvider = StateProvider<bool>((ref) => false);
+final careerScoreProvider = Provider<int>((ref) => ref.watch(studentProgressProvider).careerScore);

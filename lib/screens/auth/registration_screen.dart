@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:uuid/uuid.dart';
 import '../../config/app_config.dart';
-import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../data/models/student_model.dart';
 import '../../data/models/alumni_model.dart';

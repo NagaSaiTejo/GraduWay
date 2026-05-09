@@ -5,15 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 
-// ─── Role detection by email domain ──────────────────────────────────────────
-
-UserRole _roleFromEmail(String email) {
-  final lower = email.trim().toLowerCase();
-  if (lower.endsWith('@admin.com')) return UserRole.admin;
-  if (lower.endsWith('@alum.com')) return UserRole.alumni;
-  return UserRole.student; // @stud.com or any other
-}
-
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 class LoginScreen extends ConsumerStatefulWidget {
