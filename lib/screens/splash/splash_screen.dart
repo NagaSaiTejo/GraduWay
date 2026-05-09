@@ -39,7 +39,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Positioned(
               top: -80,
               right: -80,
-              child: _buildOrb(200, AppColors.primary.withOpacity(0.3))
+              child: _buildOrb(200, AppColors.primary.withValues(alpha: 0.3))
                   .animate(onPlay: (c) => c.repeat(reverse: true))
                   .scaleXY(begin: 0.8, end: 1.2, duration: 3.seconds)
                   .blur(begin: const Offset(0, 0), end: const Offset(20, 20)),
@@ -47,7 +47,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Positioned(
               bottom: -100,
               left: -60,
-              child: _buildOrb(250, AppColors.secondary.withOpacity(0.2))
+              child: _buildOrb(250, AppColors.secondary.withValues(alpha: 0.2))
                   .animate(onPlay: (c) => c.repeat(reverse: true))
                   .scaleXY(begin: 0.9, end: 1.1, duration: 4.seconds)
                   .blur(begin: const Offset(0, 0), end: const Offset(15, 15)),
@@ -55,7 +55,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
             Positioned(
               bottom: 200,
               right: 30,
-              child: _buildOrb(100, AppColors.accent.withOpacity(0.2))
+              child: _buildOrb(100, AppColors.accent.withValues(alpha: 0.2))
                   .animate(onPlay: (c) => c.repeat(reverse: true))
                   .scaleXY(begin: 0.7, end: 1.3, duration: 2.5.seconds),
             ),
@@ -74,7 +74,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       borderRadius: BorderRadius.circular(28),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withOpacity(0.5),
+                          color: AppColors.primary.withValues(alpha: 0.5),
                           blurRadius: 30,
                           spreadRadius: 5,
                         ),
@@ -125,9 +125,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.accent.withOpacity(0.15),
+                      color: AppColors.accent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.accent.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
                     ),
                     child: const Text(
                       'Alumni • Students • Growth',
@@ -157,7 +157,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                     ),
                   )
                       .animate(onPlay: (c) => c.repeat())
-                      .shimmer(duration: 1.5.seconds, color: AppColors.primaryLight.withOpacity(0.6)),
+                      .shimmer(duration: 1.5.seconds, color: AppColors.primaryLight.withValues(alpha: 0.6)),
                   const SizedBox(height: 16),
                   Text(
                     'Connecting generations.\nBuilding futures.',

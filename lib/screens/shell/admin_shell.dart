@@ -27,7 +27,7 @@ class AdminShell extends ConsumerWidget {
           border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.admin.withOpacity(0.05),
+              color: AppColors.admin.withValues(alpha: 0.05),
               blurRadius: 20,
               offset: const Offset(0, -5),
             )

@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                   gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))
+                    BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))
                   ],
                 ),
                 child: Row(
@@ -147,13 +147,13 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 32),
 
-            // Top Alumni
+            // AI Suggested Alumni
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Top Alumni', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const Text('Suggested for You (AI) 🧠', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                   TextButton(
                     onPressed: () {
                       ref.read(studentNavIndexProvider.notifier).state = 1;
@@ -167,40 +167,51 @@ class HomeScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             SizedBox(
               height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: mockAlumni.length,
-                itemBuilder: (context, i) {
-                  final alu = mockAlumni[i];
-                  return GestureDetector(
-                    onTap: () => context.push('/alumni/${alu.id}'),
-                    child: Container(
-                      width: 140,
-                      margin: const EdgeInsets.only(right: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.bgCard,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        children: [
-                          CircleAvatar(radius: 28, backgroundImage: NetworkImage(alu.photoUrl)),
-                          const SizedBox(height: 12),
-                          Text(alu.name.split(' ').first, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                          Text(alu.company, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-                            child: Text('₹${alu.package}L', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
+              child: Consumer(
+                builder: (context, ref, child) {
+                  final suggestions = ref.watch(suggestedAlumniProvider);
+                  if (suggestions.isEmpty) {
+                    return const Center(child: Text('Add skills to get AI suggestions!', style: TextStyle(fontSize: 12, color: AppColors.textMuted)));
+                  }
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: suggestions.length,
+                    itemBuilder: (context, i) {
+                      final alu = suggestions[i];
+                      return GestureDetector(
+                        onTap: () => context.push('/alumni/${alu.id}'),
+                        child: Container(
+                          width: 140,
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgCard,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.border),
+                            boxShadow: [
+                              BoxShadow(color: AppColors.primary.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
-                  ).animate().fadeIn(delay: Duration(milliseconds: 400 + (i * 100)));
-                },
+                          child: Column(
+                            children: [
+                              CircleAvatar(radius: 28, backgroundImage: NetworkImage(alu.photoUrl.isEmpty ? 'https://i.pravatar.cc/150?img=${i+10}' : alu.photoUrl)),
+                              const SizedBox(height: 12),
+                              Text(alu.name.split(' ').first, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13), overflow: TextOverflow.ellipsis),
+                              Text(alu.company, style: const TextStyle(color: AppColors.textMuted, fontSize: 10), overflow: TextOverflow.ellipsis),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                                child: Text('₹${alu.package}L', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ).animate().fadeIn(delay: Duration(milliseconds: 400 + (i * 100)));
+                    },
+                  );
+                }
               ),
             ),
 
@@ -212,20 +223,31 @@ class HomeScreen extends ConsumerWidget {
               child: Text('Trending Q&A', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 16),
-            ...mockQA.take(2).map((q) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              child: Card(
-                child: ListTile(
-                  title: Text(q.question, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                  subtitle: Text('${q.answers.length} answers • ${q.upvotes} upvotes', style: const TextStyle(fontSize: 11)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {
-                    ref.read(studentNavIndexProvider.notifier).state = 2;
-                    context.go('/qa');
-                  },
-                ),
-              ),
-            )).toList().animate().fadeIn(delay: 600.ms),
+            Consumer(
+              builder: (context, ref, child) {
+                final qaAsync = ref.watch(qaListProvider);
+                return qaAsync.when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, s) => const SizedBox.shrink(),
+                  data: (questions) => Column(
+                    children: questions.take(2).map((q) => Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(q.question, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                          subtitle: Text('${q.answers.length} answers • ${q.upvotes} upvotes', style: const TextStyle(fontSize: 11)),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () {
+                            ref.read(studentNavIndexProvider.notifier).state = 2;
+                            context.go('/qa');
+                          },
+                        ),
+                      ),
+                    )).toList(),
+                  ),
+                );
+              }
+            ).animate().fadeIn(delay: 600.ms),
 
             const SizedBox(height: 100),
           ],
@@ -278,7 +300,7 @@ class HomeScreen extends ConsumerWidget {
               contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
               leading: Container(
                 width: 44, height: 44,
-                decoration: BoxDecoration(color: n.color.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: n.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
                 child: Icon(n.icon, color: n.color, size: 22),
               ),
               title: Text(n.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
@@ -320,9 +342,9 @@ class _QuickLink extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: color.withOpacity(0.2)),
+                border: Border.all(color: color.withValues(alpha: 0.2)),
               ),
               child: Icon(icon, color: color, size: 24),
             ),

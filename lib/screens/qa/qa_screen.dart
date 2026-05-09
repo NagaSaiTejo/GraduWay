@@ -30,7 +30,8 @@ class _QAScreenState extends ConsumerState<QAScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final questions = ref.watch(qaProvider);
+    final questionsAsync = ref.watch(qaListProvider);
+    final questions = questionsAsync.value ?? [];
     final filtered = _searchQuery.isEmpty
         ? questions
         : questions
@@ -95,30 +96,34 @@ class _QAScreenState extends ConsumerState<QAScreen> {
 
           // Question list
           Expanded(
-            child: filtered.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('🔍', style: TextStyle(fontSize: 48)),
-                        const SizedBox(height: 12),
-                        Text(
-                          _searchQuery.isEmpty ? 'No questions yet' : 'No results for "$_searchQuery"',
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
-                        ),
-                      ],
-                    ).animate().fadeIn(),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: filtered.length,
-                    itemBuilder: (context, i) {
-                      return _QuestionCard(question: filtered[i])
-                          .animate()
-                          .fadeIn(delay: Duration(milliseconds: i * 100))
-                          .slideY(begin: 0.1);
-                    },
-                  ),
+            child: questionsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Error: $err')),
+              data: (_) => filtered.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text('🔍', style: TextStyle(fontSize: 48)),
+                          const SizedBox(height: 12),
+                          Text(
+                            _searchQuery.isEmpty ? 'No questions yet' : 'No results for "$_searchQuery"',
+                            style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                          ),
+                        ],
+                      ).animate().fadeIn(),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.all(20),
+                      itemCount: filtered.length,
+                      itemBuilder: (context, i) {
+                        return _QuestionCard(question: filtered[i])
+                            .animate()
+                            .fadeIn(delay: Duration(milliseconds: i * 100))
+                            .slideY(begin: 0.1);
+                      },
+                    ),
+            ),
           ),
         ],
       ),
@@ -202,7 +207,8 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                   answers: [],
                   isAnswered: false,
                 );
-                ref.read(qaProvider.notifier).addQuestion(newQ);
+                ref.read(databaseServiceProvider).saveQA(newQ);
+                ref.invalidate(qaListProvider);
                 _questionController.clear();
                 _selectedTags.clear();
                 Navigator.pop(context);
@@ -240,7 +246,7 @@ class _QuestionCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(question.askedBy[0], style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 8),

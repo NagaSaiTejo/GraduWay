@@ -77,7 +77,7 @@ class BadgesScreen extends ConsumerWidget {
                         decoration: BoxDecoration(
                           gradient: AppColors.primaryGradient,
                           borderRadius: BorderRadius.circular(24),
-                          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 30, offset: const Offset(0, 12))],
+                          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 12))],
                         ),
                         child: Column(
                           children: [
@@ -159,7 +159,7 @@ class BadgesScreen extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(18),
                               border: Border.all(color: isEarned ? Colors.transparent : AppColors.border),
                               boxShadow: isEarned
-                                  ? [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 12)]
+                                  ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 12)]
                                   : [],
                             ),
                             child: Padding(
@@ -257,9 +257,9 @@ class _ProgressStat extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: color.withOpacity(0.2)),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
         child: Column(
           children: [
@@ -269,7 +269,7 @@ class _ProgressStat extends StatelessWidget {
             const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(value: progress, backgroundColor: color.withOpacity(0.2), valueColor: AlwaysStoppedAnimation(color), minHeight: 3),
+              child: LinearProgressIndicator(value: progress, backgroundColor: color.withValues(alpha: 0.2), valueColor: AlwaysStoppedAnimation(color), minHeight: 3),
             ),
           ],
         ),

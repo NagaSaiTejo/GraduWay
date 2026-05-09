@@ -34,7 +34,7 @@ class StudentShell extends ConsumerWidget {
           border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withOpacity(0.05),
+              color: AppColors.primary.withValues(alpha: 0.05),
               blurRadius: 20,
               offset: const Offset(0, -5),
             )

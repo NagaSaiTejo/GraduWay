@@ -68,7 +68,7 @@ class AdminOverviewScreen extends StatelessWidget {
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: AppColors.primary.withOpacity(0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                       ),
                     ),
                   ],
@@ -81,11 +81,11 @@ class AdminOverviewScreen extends StatelessWidget {
             const Text('System Reports', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 16),
             _ReportTile(
-              title: 'New Alumni Requests',
-              count: '5',
+              title: 'Pending Verifications',
+              count: 'New',
               color: AppColors.alumni,
               icon: Icons.person_add_rounded,
-              onTap: () => context.go('/admin-users'),
+              onTap: () => context.push('/admin-verification'),
             ),
             const SizedBox(height: 12),
             _ReportTile(
@@ -237,7 +237,7 @@ class _ReportTile extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
               child: Icon(icon, color: color, size: 20),
             ),
             const SizedBox(width: 16),

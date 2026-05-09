@@ -30,6 +30,7 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
   @override
   Widget build(BuildContext context) {
     final selectedBranch = ref.watch(selectedBranchProvider);
+    final alumniAsync = ref.watch(alumniListProvider);
     final alumni = ref.watch(searchedAlumniProvider);
     final query = ref.watch(alumniSearchProvider);
 
@@ -108,9 +109,10 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
 
               // Alumni list
               Expanded(
-                child: _isLoading
-                    ? _buildShimmer()
-                    : alumni.isEmpty
+                child: alumniAsync.when(
+                  loading: () => _buildShimmer(),
+                  error: (err, stack) => Center(child: Text('Error: $err')),
+                  data: (_) => alumni.isEmpty
                         ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -131,6 +133,7 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
                                 .fadeIn(duration: 350.ms)
                                 .slideX(begin: 0.15, end: 0, duration: 350.ms),
                           ),
+                ),
               ),
             ],
           ),
@@ -226,7 +229,7 @@ class _AlumniCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                         decoration: BoxDecoration(
-                            color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
+                            color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
                         child: Text(alumni.branch,
                             style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color)),
                       ),
@@ -253,7 +256,7 @@ class _AlumniCard extends StatelessWidget {
                     children: alumni.skills.take(3).map((s) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8)),
                       child: Text(s,
                           style: const TextStyle(fontSize: 9, color: AppColors.primaryLight),
@@ -274,9 +277,9 @@ class _AlumniCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.15),
+                      color: AppColors.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '₹${alumni.package}L',

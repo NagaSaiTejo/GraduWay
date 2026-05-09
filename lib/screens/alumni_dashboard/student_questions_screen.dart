@@ -86,7 +86,7 @@ class _QuestionList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.auto_awesome_rounded, size: 64, color: AppColors.textMuted.withOpacity(0.3)),
+            Icon(Icons.auto_awesome_rounded, size: 64, color: AppColors.textMuted.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               isUnansweredTab ? 'All caught up!' : 'No answers yet.',
@@ -126,7 +126,7 @@ class _AlumniQuestionCard extends ConsumerWidget {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: AppColors.secondary.withOpacity(0.1),
+                  backgroundColor: AppColors.secondary.withValues(alpha: 0.1),
                   child: Text(question.askedBy[0], style: const TextStyle(fontSize: 10, color: AppColors.secondary)),
                 ),
                 const SizedBox(width: 8),

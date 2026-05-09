@@ -91,10 +91,10 @@ class PlacementRealityScreen extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: AppColors.accent.withOpacity(0.1),
+                          color: AppColors.accent.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                              color: AppColors.accent.withOpacity(0.3)),
+                              color: AppColors.accent.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           children: [
@@ -172,7 +172,7 @@ class _StoryCardState extends State<_StoryCard> {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
               color: s.isAnon
-                  ? AppColors.accent.withOpacity(0.3)
+                  ? AppColors.accent.withValues(alpha: 0.3)
                   : AppColors.border),
         ),
         child: Column(
@@ -190,10 +190,10 @@ class _StoryCardState extends State<_StoryCard> {
                           width: 44,
                           height: 44,
                           decoration: BoxDecoration(
-                            color: AppColors.accent.withOpacity(0.15),
+                            color: AppColors.accent.withValues(alpha: 0.15),
                             shape: BoxShape.circle,
                             border: Border.all(
-                                color: AppColors.accent.withOpacity(0.4)),
+                                color: AppColors.accent.withValues(alpha: 0.4)),
                           ),
                           child: const Center(
                               child:
@@ -223,7 +223,7 @@ class _StoryCardState extends State<_StoryCard> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 4),
                         decoration: BoxDecoration(
-                            color: AppColors.success.withOpacity(0.15),
+                            color: AppColors.success.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(10)),
                         child: Text(s.package,
                             style: const TextStyle(

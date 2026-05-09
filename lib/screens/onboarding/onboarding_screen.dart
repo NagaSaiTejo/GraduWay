@@ -116,7 +116,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8))],
+          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))],
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -139,7 +139,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         decoration: BoxDecoration(
           gradient: const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFEF4444)]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.accent.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8))],
+          boxShadow: [BoxShadow(color: AppColors.accent.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))],
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -171,7 +171,7 @@ class _OnboardingPage extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: data.gradient),
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: data.gradient[0].withOpacity(0.35), blurRadius: 40, spreadRadius: 5)],
+              boxShadow: [BoxShadow(color: data.gradient[0].withValues(alpha: 0.35), blurRadius: 40, spreadRadius: 5)],
             ),
             child: Center(
               child: Text(data.emoji, style: const TextStyle(fontSize: 70)),

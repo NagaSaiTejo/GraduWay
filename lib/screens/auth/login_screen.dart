@@ -85,7 +85,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     )
@@ -162,7 +162,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  shadowColor: AppColors.primary.withOpacity(0.5),
+                  shadowColor: AppColors.primary.withValues(alpha: 0.5),
                   elevation: 8,
                 ),
                 child: _isLoading
@@ -178,7 +178,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               Center(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () => context.push('/register'),
                   child: const Text(
                     'New here? Create an account',
                     style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
@@ -210,23 +210,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    await Future.delayed(1000.ms);
-    if (!mounted) return;
+    try {
+      await ref.read(authProvider.notifier).login(email, password);
 
-    final role = _roleFromEmail(email);
+      if (!mounted) return;
 
-    if (role == UserRole.student) {
-      ref.read(authProvider.notifier).loginAsStudent(email: email);
-      context.go('/home');
-    } else if (role == UserRole.alumni) {
-      ref.read(authProvider.notifier).loginAsAlumni(email: email);
-      context.go('/alumni-home');
-    } else {
-      ref.read(authProvider.notifier).loginAsAdmin(email: email);
-      context.go('/admin-home');
+      final authState = ref.read(authProvider);
+      if (authState.role == UserRole.student) {
+        context.go('/home');
+      } else if (authState.role == UserRole.alumni) {
+        context.go('/alumni-home');
+      } else if (authState.role == UserRole.admin) {
+        context.go('/admin-home');
+      }
+    } catch (e) {
+      setState(() => _errorMessage = e.toString());
+    } finally {
+      setState(() => _isLoading = false);
     }
-
-    setState(() => _isLoading = false);
   }
 
   OverlayEntry _createOverlayEntry(BuildContext context) {
@@ -356,7 +357,7 @@ class _HintRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16, color: color),

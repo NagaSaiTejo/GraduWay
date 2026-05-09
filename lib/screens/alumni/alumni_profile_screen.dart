@@ -26,7 +26,7 @@ class AlumniProfileScreen extends StatelessWidget {
                 onTap: () => context.pop(),
                 child: Container(
                   margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: AppColors.bgCard.withOpacity(0.8), borderRadius: BorderRadius.circular(10)),
+                  decoration: BoxDecoration(color: AppColors.bgCard.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(10)),
                   child: const Icon(Icons.arrow_back_rounded, color: AppColors.textPrimary, size: 20),
                 ),
               ),
@@ -38,7 +38,7 @@ class AlumniProfileScreen extends StatelessWidget {
                     Container(
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          colors: [AppColors.primary.withOpacity(0.7), AppColors.bgDark],
+                          colors: [AppColors.primary.withValues(alpha: 0.7), AppColors.bgDark],
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                         ),
@@ -57,7 +57,7 @@ class AlumniProfileScreen extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(color: AppColors.primary, width: 3),
-                                  boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20)],
+                                  boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20)],
                                 ),
                                 child: CircleAvatar(radius: 45, backgroundImage: NetworkImage(alumni.photoUrl)),
                               ),
@@ -148,9 +148,9 @@ class AlumniProfileScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withOpacity(0.08),
+                        color: AppColors.primary.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.primary.withOpacity(0.2)),
+                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +198,7 @@ class AlumniProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: AppColors.primaryGradient,
                           borderRadius: BorderRadius.circular(20),
-                          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 8)],
+                          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 8)],
                         ),
                         child: Text(s, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
                       )).toList(),
@@ -236,9 +236,9 @@ class AlumniProfileScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(18),
                       decoration: BoxDecoration(
-                        color: AppColors.accent.withOpacity(0.08),
+                        color: AppColors.accent.withValues(alpha: 0.08),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.accent.withOpacity(0.25)),
+                        border: Border.all(color: AppColors.accent.withValues(alpha: 0.25)),
                       ),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,7 +270,7 @@ class AlumniProfileScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           gradient: AppColors.primaryGradient,
                           borderRadius: BorderRadius.circular(16),
-                          boxShadow: [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, offset: const Offset(0, 8))],
+                          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))],
                         ),
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -312,9 +312,9 @@ class _InfoPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

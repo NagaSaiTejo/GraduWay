@@ -1,3 +1,7 @@
+export 'student_model.dart';
+export 'alumni_model.dart';
+export 'admin_model.dart';
+
 // ─── Post (Alumni insights/tips) ─────────────────────────────────────────────
 class PostModel {
   final String id;
@@ -27,6 +31,40 @@ class PostModel {
     required this.isAnonymous,
     required this.postedAt,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      '_id': id,
+      'alumniId': alumniId,
+      'alumniName': alumniName,
+      'alumniCompany': alumniCompany,
+      'alumniPhotoUrl': alumniPhotoUrl,
+      'content': content,
+      'type': type,
+      'tags': tags,
+      'likes': likes,
+      'saves': saves,
+      'isAnonymous': isAnonymous,
+      'postedAt': postedAt.toIso8601String(),
+    };
+  }
+
+  factory PostModel.fromMap(Map<String, dynamic> map) {
+    return PostModel(
+      id: map['_id'] ?? '',
+      alumniId: map['alumniId'] ?? '',
+      alumniName: map['alumniName'] ?? '',
+      alumniCompany: map['alumniCompany'] ?? '',
+      alumniPhotoUrl: map['alumniPhotoUrl'] ?? '',
+      content: map['content'] ?? '',
+      type: map['type'] ?? '',
+      tags: List<String>.from(map['tags'] ?? []),
+      likes: map['likes'] ?? 0,
+      saves: map['saves'] ?? 0,
+      isAnonymous: map['isAnonymous'] ?? false,
+      postedAt: map['postedAt'] != null ? DateTime.parse(map['postedAt']) : DateTime.now(),
+    );
+  }
 }
 
 // ─── Q&A Question ─────────────────────────────────────────────────────────────
@@ -52,6 +90,34 @@ class QAModel {
     required this.answers,
     required this.isAnswered,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      '_id': id,
+      'question': question,
+      'askedBy': askedBy,
+      'askedById': askedById,
+      'timestamp': timestamp.toIso8601String(),
+      'upvotes': upvotes,
+      'tags': tags,
+      'answers': answers.map((x) => x.toMap()).toList(),
+      'isAnswered': isAnswered,
+    };
+  }
+
+  factory QAModel.fromMap(Map<String, dynamic> map) {
+    return QAModel(
+      id: map['_id'] ?? '',
+      question: map['question'] ?? '',
+      askedBy: map['askedBy'] ?? '',
+      askedById: map['askedById'] ?? '',
+      timestamp: map['timestamp'] != null ? DateTime.parse(map['timestamp']) : DateTime.now(),
+      upvotes: map['upvotes'] ?? 0,
+      tags: List<String>.from(map['tags'] ?? []),
+      answers: List<QAAnswer>.from(map['answers']?.map((x) => QAAnswer.fromMap(x)) ?? []),
+      isAnswered: map['isAnswered'] ?? false,
+    );
+  }
 }
 
 // ─── Q&A Answer ───────────────────────────────────────────────────────────────
@@ -77,6 +143,34 @@ class QAAnswer {
     required this.upvotes,
     required this.answeredAt,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      '_id': id,
+      'alumniId': alumniId,
+      'alumniName': alumniName,
+      'alumniCompany': alumniCompany,
+      'alumniPhotoUrl': alumniPhotoUrl,
+      'answer': answer,
+      'isBestAnswer': isBestAnswer,
+      'upvotes': upvotes,
+      'answeredAt': answeredAt.toIso8601String(),
+    };
+  }
+
+  factory QAAnswer.fromMap(Map<String, dynamic> map) {
+    return QAAnswer(
+      id: map['_id'] ?? '',
+      alumniId: map['alumniId'] ?? '',
+      alumniName: map['alumniName'] ?? '',
+      alumniCompany: map['alumniCompany'] ?? '',
+      alumniPhotoUrl: map['alumniPhotoUrl'] ?? '',
+      answer: map['answer'] ?? '',
+      isBestAnswer: map['isBestAnswer'] ?? false,
+      upvotes: map['upvotes'] ?? 0,
+      answeredAt: map['answeredAt'] != null ? DateTime.parse(map['answeredAt']) : DateTime.now(),
+    );
+  }
 }
 
 // ─── Event ────────────────────────────────────────────────────────────────────
@@ -102,6 +196,34 @@ class EventModel {
     required this.registeredCount,
     required this.isRsvped,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      '_id': id,
+      'title': title,
+      'description': description,
+      'hostAlumniName': hostAlumniName,
+      'hostCompany': hostCompany,
+      'eventDate': eventDate.toIso8601String(),
+      'type': type,
+      'registeredCount': registeredCount,
+      'isRsvped': isRsvped,
+    };
+  }
+
+  factory EventModel.fromMap(Map<String, dynamic> map) {
+    return EventModel(
+      id: map['_id'] ?? '',
+      title: map['title'] ?? '',
+      description: map['description'] ?? '',
+      hostAlumniName: map['hostAlumniName'] ?? '',
+      hostCompany: map['hostCompany'] ?? '',
+      eventDate: map['eventDate'] != null ? DateTime.parse(map['eventDate']) : DateTime.now(),
+      type: map['type'] ?? '',
+      registeredCount: map['registeredCount'] ?? 0,
+      isRsvped: map['isRsvped'] ?? false,
+    );
+  }
 }
 
 // ─── Badge ────────────────────────────────────────────────────────────────────

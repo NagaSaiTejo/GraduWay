@@ -50,7 +50,7 @@ class ProfileScreen extends ConsumerWidget {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: AppColors.primary.withOpacity(0.1),
+                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                           backgroundImage: localPhotoPath != null
                               ? FileImage(File(localPhotoPath)) as ImageProvider
                               : (photoUrl != null ? NetworkImage(photoUrl) : null),
@@ -152,7 +152,7 @@ class ProfileScreen extends ConsumerWidget {
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
               ),
               title: const Text('Take Photo', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -168,7 +168,7 @@ class ProfileScreen extends ConsumerWidget {
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.secondary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: AppColors.secondary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.photo_library_rounded, color: AppColors.secondary),
               ),
               title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -184,7 +184,7 @@ class ProfileScreen extends ConsumerWidget {
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.error.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.delete_rounded, color: AppColors.error),
               ),
               title: const Text('Remove Photo', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.error)),
@@ -330,7 +330,7 @@ class ProfileScreen extends ConsumerWidget {
                     return ListTile(
                       leading: Container(
                         width: 42, height: 42,
-                        decoration: BoxDecoration(color: n.color.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                        decoration: BoxDecoration(color: n.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
                         child: Icon(n.icon, color: n.color, size: 22),
                       ),
                       title: Text(n.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
@@ -515,9 +515,9 @@ class _RoleBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Text(
         label,
@@ -554,7 +554,7 @@ class _ProfileSettingTile extends StatelessWidget {
             color: color ?? AppColors.textPrimary,
           ),
         ),
-        trailing: Icon(Icons.chevron_right_rounded, color: color?.withOpacity(0.5) ?? AppColors.textMuted),
+        trailing: Icon(Icons.chevron_right_rounded, color: color?.withValues(alpha: 0.5) ?? AppColors.textMuted),
       ),
     );
   }

@@ -96,7 +96,7 @@ class AlumniHomeScreen extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: [
                   BoxShadow(
-                      color: AppColors.alumni.withOpacity(0.3),
+                      color: AppColors.alumni.withValues(alpha: 0.3),
                       blurRadius: 20,
                       offset: const Offset(0, 10))
                 ],
@@ -393,9 +393,9 @@ class _ImpactCard extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.08),
+          color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.15)),
+          border: Border.all(color: color.withValues(alpha: 0.15)),
         ),
         child: Column(
           children: [
@@ -444,7 +444,7 @@ class _QuickActionTile extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12)),
               child: Icon(icon, color: color, size: 24),
             ),
