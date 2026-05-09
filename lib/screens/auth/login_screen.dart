@@ -178,7 +178,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               Center(
                 child: TextButton(
-                  onPressed: () {},
+                  onPressed: () => _showRegistrationSheet(context),
                   child: const Text(
                     'New here? Create an account',
                     style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
@@ -253,6 +253,75 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
+  }
+
+  void _showRegistrationSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Create an Account',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Select your role to get started.',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 24),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFEFF3FF),
+                    child: Icon(Icons.school_outlined, color: AppColors.primary),
+                  ),
+                  title: const Text('Student', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Join as a current student', style: TextStyle(fontSize: 12)),
+                  onTap: () {
+                    context.pop();
+                    context.push('/register-student');
+                  },
+                ),
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.alumni.withOpacity(0.1),
+                    child: const Icon(Icons.work_outline, color: AppColors.alumni),
+                  ),
+                  title: const Text('Alumni', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Join as an alumni', style: TextStyle(fontSize: 12)),
+                  onTap: () {
+                    context.pop();
+                    context.push('/register-alumni');
+                  },
+                ),
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.admin.withOpacity(0.1),
+                    child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.admin),
+                  ),
+                  title: const Text('Admin', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Platform administrator', style: TextStyle(fontSize: 12)),
+                  onTap: () {
+                    context.pop();
+                    context.push('/register-admin');
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 

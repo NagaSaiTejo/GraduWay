@@ -98,7 +98,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   void loginAsAlumni({required String email}) {
     final name = _nameFromEmail(email);
-    final loggedInAlumni = mockAlumni.first;
+    final loggedInAlumni = mockAlumni.isNotEmpty ? mockAlumni.first : null;
     state = AuthState(
       role: UserRole.alumni,
       isLoggedIn: true,

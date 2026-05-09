@@ -5,6 +5,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../screens/splash/splash_screen.dart';
 import '../screens/onboarding/onboarding_screen.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/auth/student_registration_screen.dart';
+import '../screens/auth/alumni_registration_screen.dart';
+import '../screens/auth/admin_registration_screen.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/alumni/alumni_list_screen.dart';
 import '../screens/alumni/alumni_profile_screen.dart';
@@ -25,7 +28,7 @@ import '../screens/admin/admin_users_screen.dart';
 import '../providers/app_providers.dart';
 
 // Routes that do NOT require login
-const _publicRoutes = ['/splash', '/onboarding', '/login'];
+const _publicRoutes = ['/splash', '/onboarding', '/login', '/register-student', '/register-alumni', '/register-admin'];
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -62,6 +65,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
+      GoRoute(path: '/register-student', builder: (_, __) => const StudentRegistrationScreen()),
+      GoRoute(path: '/register-alumni', builder: (_, __) => const AlumniRegistrationScreen()),
+      GoRoute(path: '/register-admin', builder: (_, __) => const AdminRegistrationScreen()),
 
       // ─── Student Shell ──────────────────────────────────────────────────
       ShellRoute(
