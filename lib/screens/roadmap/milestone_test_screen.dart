@@ -37,13 +37,95 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
 
   // Generate 10 mock questions based on topic
   List<Map<String, dynamic>> _generateQuestions(String roadmap, int milestone) {
-    return List.generate(10, (i) {
-      return {
-        'question': 'Sample Question ${i + 1} for $roadmap Milestone ${milestone + 1}',
-        'options': ['Option A', 'Option B', 'Option C', 'Option D'],
-        'correctAnswer': 'Option A', // Always A for mock purposes
-      };
-    });
+    final List<Map<String, dynamic>> questionBank = [
+      {
+        'question': 'What is the primary language used to develop Flutter applications?',
+        'options': ['Java', 'Kotlin', 'Dart', 'Swift'],
+        'correctAnswer': 'Dart',
+      },
+      {
+        'question': 'Which widget is used to create a material design app in Flutter?',
+        'options': ['CupertinoApp', 'MaterialApp', 'WidgetsApp', 'Scaffold'],
+        'correctAnswer': 'MaterialApp',
+      },
+      {
+        'question': 'What does state refer to in Flutter?',
+        'options': ['The app lifecycle', 'Data that can change over time', 'The layout constraints', 'Network requests'],
+        'correctAnswer': 'Data that can change over time',
+      },
+      {
+        'question': 'Which of the following is a key feature of Flutter?',
+        'options': ['Hot Reload', 'DOM manipulation', 'Virtual DOM', 'JSX'],
+        'correctAnswer': 'Hot Reload',
+      },
+      {
+        'question': 'What is the function of the pubspec.yaml file?',
+        'options': ['Managing UI layouts', 'Defining routing', 'Managing dependencies', 'Compiling code'],
+        'correctAnswer': 'Managing dependencies',
+      },
+      {
+        'question': 'Which AWS service is used for scalable compute capacity?',
+        'options': ['S3', 'EC2', 'RDS', 'Lambda'],
+        'correctAnswer': 'EC2',
+      },
+      {
+        'question': 'What does S3 stand for in AWS?',
+        'options': ['Simple Storage Service', 'Scalable Storage System', 'Serverless Storage Solution', 'Secure System Service'],
+        'correctAnswer': 'Simple Storage Service',
+      },
+      {
+        'question': 'Which database type is DynamoDB?',
+        'options': ['Relational', 'NoSQL', 'Graph', 'Time-series'],
+        'correctAnswer': 'NoSQL',
+      },
+      {
+        'question': 'In ServiceNow, what is an Incident?',
+        'options': ['A planned change', 'An unplanned interruption to an IT service', 'A request for a new service', 'A database record'],
+        'correctAnswer': 'An unplanned interruption to an IT service',
+      },
+      {
+        'question': 'What is the primary role of a Load Balancer?',
+        'options': ['Store data', 'Distribute incoming network traffic', 'Compile code', 'Manage user authentication'],
+        'correctAnswer': 'Distribute incoming network traffic',
+      },
+      {
+        'question': 'Which data structure uses LIFO?',
+        'options': ['Queue', 'Stack', 'Tree', 'Graph'],
+        'correctAnswer': 'Stack',
+      },
+      {
+        'question': 'What is the time complexity of binary search?',
+        'options': ['O(1)', 'O(n)', 'O(log n)', 'O(n^2)'],
+        'correctAnswer': 'O(log n)',
+      },
+      {
+        'question': 'What is REST an acronym for?',
+        'options': ['Representational State Transfer', 'Remote State Transmission', 'Reliable Server Technology', 'Relational State Transfer'],
+        'correctAnswer': 'Representational State Transfer',
+      },
+      {
+        'question': 'Which HTTP method is used to create a new resource?',
+        'options': ['GET', 'POST', 'PUT', 'DELETE'],
+        'correctAnswer': 'POST',
+      },
+      {
+        'question': 'What does CI/CD stand for?',
+        'options': ['Continuous Integration / Continuous Deployment', 'Code Integration / Code Deployment', 'Constant Improvement / Constant Delivery', 'Centralized Integration / Centralized Deployment'],
+        'correctAnswer': 'Continuous Integration / Continuous Deployment',
+      }
+    ];
+
+    questionBank.shuffle();
+    final selectedQuestions = questionBank.take(10).toList();
+    
+    // Shuffle options for each question
+    for (var q in selectedQuestions) {
+      final options = List<String>.from(q['options'] as List);
+      options.shuffle();
+      q['options'] = options;
+    }
+
+    return selectedQuestions;
   }
 
   void _nextQuestion() {
@@ -70,7 +152,9 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
     final passed = _score >= 7; // 70% passing mark
 
     if (passed) {
-      final email = ref.read(authProvider).loginEmail;
+      final authState = ref.read(authProvider);
+      final email = authState.student?.email ?? authState.loginEmail;
+      
       try {
         final response = await http.post(
           Uri.parse('http://127.0.0.1:5000/api/roadmap/complete-milestone'),

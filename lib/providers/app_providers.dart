@@ -178,10 +178,15 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> selectRoadmap(String roadmapName) async {
     try {
+      final email = state.student?.email ?? state.loginEmail;
+      if (email.isEmpty) {
+        debugPrint('Cannot select roadmap: No email found in state.');
+        return;
+      }
       final response = await http.post(
         Uri.parse('http://127.0.0.1:5000/api/roadmap/select'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': state.loginEmail, 'roadmapName': roadmapName}),
+        body: jsonEncode({'email': email, 'roadmapName': roadmapName}),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -190,6 +195,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           activeRoadmap: data['activeRoadmap'],
           roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
         );
+      } else {
+        debugPrint('Failed to select roadmap: ${response.body}');
       }
     } catch (e) {
       debugPrint('Error selecting roadmap: $e');
@@ -198,10 +205,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   Future<void> exitRoadmap() async {
     try {
+      final email = state.student?.email ?? state.loginEmail;
+      if (email.isEmpty) return;
       final response = await http.post(
         Uri.parse('http://127.0.0.1:5000/api/roadmap/exit'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': state.loginEmail}),
+        body: jsonEncode({'email': email}),
       );
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -210,6 +219,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
           activeRoadmap: null,
           roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
         );
+      } else {
+        debugPrint('Failed to exit roadmap: ${response.body}');
       }
     } catch (e) {
       debugPrint('Error exiting roadmap: $e');
@@ -236,7 +247,7 @@ class StudentProgressState {
   final int alumniProfilesViewed;
   final List<String> viewedAlumniIds;
   final List<String> earnedBadgeIds;
-  final List<_BadgeNotification> pendingNotifications;
+  final List<BadgeNotification> pendingNotifications;
   final String? localPhotoPath; // profile photo from device
   final String displayName;
   final String bio;
@@ -271,7 +282,7 @@ class StudentProgressState {
     int? alumniProfilesViewed,
     List<String>? viewedAlumniIds,
     List<String>? earnedBadgeIds,
-    List<_BadgeNotification>? pendingNotifications,
+    List<BadgeNotification>? pendingNotifications,
     String? localPhotoPath,
     String? displayName,
     String? bio,
@@ -295,11 +306,11 @@ class StudentProgressState {
   }
 }
 
-class _BadgeNotification {
+class BadgeNotification {
   final String badgeId;
   final String title;
   final String emoji;
-  const _BadgeNotification(this.badgeId, this.title, this.emoji);
+  const BadgeNotification(this.badgeId, this.title, this.emoji);
 }
 
 class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
@@ -390,7 +401,7 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
       earnedBadgeIds: [...s.earnedBadgeIds, id],
       pendingNotifications: [
         ...s.pendingNotifications,
-        _BadgeNotification(id, title, emoji)
+        BadgeNotification(id, title, emoji)
       ],
     );
   }
@@ -417,35 +428,15 @@ class QANotifier extends StateNotifier<List<QAModel>> {
   }
 
   void upvoteQuestion(String questionId) {
-    state = state.map((q) {
-      if (q.id == questionId) {
-        return QAModel(
-          id: q.id,
-          question: q.question,
-          askedBy: q.askedBy,
-          askedById: q.askedById,
-          timestamp: q.timestamp,
-          upvotes: q.upvotes + 1,
-          tags: q.tags,
-          answers: q.answers,
-          isAnswered: q.isAnswered,
-        );
-      }
-      return q;
-    }).toList();
+    state = state
+        .map((q) => q.id == questionId ? q.copyWith(upvotes: q.upvotes + 1) : q)
+        .toList();
   }
 
   void addAnswer(String questionId, QAAnswer answer) {
     state = state.map((q) {
       if (q.id == questionId) {
-        return QAModel(
-          id: q.id,
-          question: q.question,
-          askedBy: q.askedBy,
-          askedById: q.askedById,
-          timestamp: q.timestamp,
-          upvotes: q.upvotes,
-          tags: q.tags,
+        return q.copyWith(
           answers: [...q.answers, answer],
           isAnswered: true,
         );

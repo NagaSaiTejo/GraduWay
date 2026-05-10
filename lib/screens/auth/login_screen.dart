@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -225,9 +227,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _handleLogin() async {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+    if (!_formKey.currentState!.validate()) return;
 
     final email = _emailController.text.trim();
     final password = _passController.text.trim();
@@ -237,9 +237,39 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
+    // ── Path 1: Try Firebase Auth (production) ─────────────────────────────
     try {
-      // HTTP call stays LOCAL — no AuthState changes until success,
-      // so GoRouter never resets the navigation stack to /splash.
+      final credential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      final uid = credential.user!.uid;
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (userDoc.exists) {
+        final data = userDoc.data()!;
+        ref.read(authProvider.notifier).setUser(
+          email: email,
+          roleStr: data['role'] as String,
+          user: {'id': uid, ...data},
+        );
+        return; // Firebase login succeeded — exit early
+      }
+    } on FirebaseAuthException catch (e) {
+      // Firebase not configured or user not in Firebase — fall through to backend
+      debugPrint('Firebase Auth skipped: ${e.code}');
+    } catch (e) {
+      // Firebase unavailable (no project configured) — fall through to backend
+      debugPrint('Firebase unavailable, using backend: $e');
+    }
+
+    // ── Path 2: Fall back to Node.js/MongoDB backend (development) ────────
+    try {
       final uri = Uri.parse('http://127.0.0.1:5000/api/auth/login');
       final response = await http.post(
         uri,
@@ -252,14 +282,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        // Only NOW update AuthState → triggers router to navigate to dashboard
         ref.read(authProvider.notifier).setUser(
           email: email,
           roleStr: data['role'] as String,
           user: data['user'] as Map<String, dynamic>,
         );
       } else {
-        // Show error inline — AuthState never changed, router stays put
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         setState(() =>
             _errorMessage = data['message'] as String? ?? 'Login failed. Please try again.');

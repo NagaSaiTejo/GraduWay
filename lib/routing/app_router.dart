@@ -29,36 +29,73 @@ import '../screens/messages/messaging_screen.dart';
 import '../providers/app_providers.dart';
 
 // Routes that do NOT require login
-const _publicRoutes = ['/splash', '/onboarding', '/login', '/register-student', '/register-alumni', '/register-admin'];
+const _publicRoutes = [
+  '/splash',
+  '/onboarding',
+  '/login',
+  '/register-student',
+  '/register-alumni',
+  '/register-admin'
+];
+
+/// A Notifier that only fires when the login/logout status changes
+/// (not when roadmap progress or other profile fields change).
+/// This prevents GoRouter from re-running redirect on every auth state change.
+class _AuthChangeNotifier extends ChangeNotifier {
+  bool _isLoggedIn;
+  UserRole? _role;
+
+  _AuthChangeNotifier(this._isLoggedIn, this._role);
+
+  void update(bool isLoggedIn, UserRole? role) {
+    // Only notify if login status or role actually changed
+    if (_isLoggedIn != isLoggedIn || _role != role) {
+      _isLoggedIn = isLoggedIn;
+      _role = role;
+      notifyListeners();
+    }
+  }
+}
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final initialAuth = ref.read(authProvider);
+  final authNotifier = _AuthChangeNotifier(
+    initialAuth.isLoggedIn,
+    initialAuth.role,
+  );
 
-  return GoRouter(
+  // Only notify when login state or role changes — NOT when roadmap data changes
+  ref.listen<AuthState>(authProvider, (prev, next) {
+    authNotifier.update(next.isLoggedIn, next.role);
+  });
+
+  final router = GoRouter(
     initialLocation: '/splash',
     debugLogDiagnostics: false,
+    refreshListenable: authNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
       final isLoggedIn = authState.isLoggedIn;
       final hasSeenOnboarding = ref.read(hasSeenOnboardingProvider);
       final isPublic =
           _publicRoutes.any((r) => state.matchedLocation.startsWith(r));
 
-      // 1. If not logged in and not on a public route, go to splash or login
+      // 1. If not logged in and not on a public route → go to login
       if (!isLoggedIn && !isPublic) return '/login';
 
-      // 2. If trying to go to onboarding but already seen it, go to login
+      // 2. If on onboarding but already seen it
       if (state.matchedLocation == '/onboarding' && hasSeenOnboarding) {
         return isLoggedIn ? null : '/login';
       }
 
-      // 3. If logged in and on login/onboarding, go to role-specific home
-      if (isLoggedIn &&
-          (state.matchedLocation == '/login' ||
-              state.matchedLocation == '/onboarding')) {
+      // 3. If logged in and still on a public landing page → push to dashboard
+      if (isLoggedIn && isPublic) {
         if (authState.role == UserRole.student) return '/home';
         if (authState.role == UserRole.alumni) return '/alumni-home';
         if (authState.role == UserRole.admin) return '/admin-home';
       }
+
+      // 4. Already on a valid private page — do nothing
       return null;
     },
     routes: [
@@ -66,9 +103,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
           path: '/onboarding', builder: (_, __) => const OnboardingScreen()),
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
-      GoRoute(path: '/register-student', builder: (_, __) => const StudentRegistrationScreen()),
-      GoRoute(path: '/register-alumni', builder: (_, __) => const AlumniRegistrationScreen()),
-      GoRoute(path: '/register-admin', builder: (_, __) => const AdminRegistrationScreen()),
+      GoRoute(
+          path: '/register-student',
+          builder: (_, __) => const StudentRegistrationScreen()),
+      GoRoute(
+          path: '/register-alumni',
+          builder: (_, __) => const AlumniRegistrationScreen()),
+      GoRoute(
+          path: '/register-admin',
+          builder: (_, __) => const AdminRegistrationScreen()),
 
       // ─── Student Shell ──────────────────────────────────────────────────
       ShellRoute(
@@ -95,8 +138,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (_, __) => const StudentQuestionsScreen()),
           GoRoute(
               path: '/alumni-profile',
-              builder: (_, __) =>
-                  const ProfileScreen()), // reuse profile for now
+              builder: (_, __) => const ProfileScreen()),
         ],
       ),
 
@@ -112,11 +154,11 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (_, __) => const AdminUsersScreen()),
           GoRoute(
               path: '/admin-profile',
-              builder: (_, __) => const ProfileScreen()), // reuse profile
+              builder: (_, __) => const ProfileScreen()),
         ],
       ),
 
-      // ─── Sub-screens (accessible by all/specific roles) ───────────────
+      // ─── Sub-screens ────────────────────────────────────────────────────
       GoRoute(
         path: '/alumni/:id',
         builder: (context, state) {
@@ -132,7 +174,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           path: '/skill-package',
           builder: (_, __) => const SkillPackageScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
-      GoRoute(path: '/messages', builder: (_, __) => const MessagingListScreen()),
+      GoRoute(
+          path: '/messages',
+          builder: (_, __) => const MessagingListScreen()),
     ],
   );
+
+  return router;
 });

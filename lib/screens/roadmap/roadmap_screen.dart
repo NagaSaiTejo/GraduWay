@@ -143,68 +143,79 @@ class RoadmapScreen extends ConsumerWidget {
                 ),
               ).animate().fadeIn(),
             if (effectiveGoal != null) ...[
-              Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.05),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.1)),
-                ),
-                child: Row(
-                  children: [
-                    const Text('⚡', style: TextStyle(fontSize: 32)),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('$effectiveGoal Progress',
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 15)),
-                          const SizedBox(height: 4),
-                          Text(
-                              '$completedSteps of $totalSteps milestones completed',
-                              style: const TextStyle(
-                                  fontSize: 12, color: AppColors.textMuted)),
-                          const SizedBox(height: 10),
-                          LinearPercentIndicator(
-                            lineHeight: 8,
-                            percent: overallPct,
-                            backgroundColor: AppColors.border,
-                            progressColor: AppColors.primary,
-                            barRadius: const Radius.circular(4),
-                            padding: EdgeInsets.zero,
-                          ),
-                        ],
+              if (activeRoadmap != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      const Text('⚡', style: TextStyle(fontSize: 32)),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('$effectiveGoal Progress',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w700, fontSize: 15)),
+                            const SizedBox(height: 4),
+                            Text(
+                                '$completedSteps of $totalSteps milestones completed',
+                                style: const TextStyle(
+                                    fontSize: 12, color: AppColors.textMuted)),
+                            const SizedBox(height: 10),
+                            LinearPercentIndicator(
+                              lineHeight: 8,
+                              percent: overallPct,
+                              backgroundColor: AppColors.border,
+                              progressColor: AppColors.primary,
+                              barRadius: const Radius.circular(4),
+                              padding: EdgeInsets.zero,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    Text('${(overallPct * 100).toInt()}%',
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                            fontSize: 18)),
-                  ],
-                ),
-              ).animate().fadeIn().slideY(begin: 0.1),
-              const SizedBox(height: 28),
+                      const SizedBox(width: 12),
+                      Text('${(overallPct * 100).toInt()}%',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                              fontSize: 18)),
+                    ],
+                  ),
+                ).animate().fadeIn().slideY(begin: 0.1),
+                const SizedBox(height: 28),
+              ],
               if (activeRoadmap == null)
                 Container(
                   width: double.infinity,
                   margin: const EdgeInsets.only(bottom: 24),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      ref.read(authProvider.notifier).selectRoadmap(effectiveGoal);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Text('Start $effectiveGoal Roadmap', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                  ),
+                  child: Consumer(builder: (context, ref, child) {
+                    return ElevatedButton(
+                      onPressed: () async {
+                        final nav = Navigator.of(context, rootNavigator: true);
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (c) => const Center(child: CircularProgressIndicator()),
+                        );
+                        await ref.read(authProvider.notifier).selectRoadmap(effectiveGoal);
+                        nav.pop(); // hide loading
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text('Start $effectiveGoal Roadmap', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    );
+                  }),
                 ),
               const Text('Milestone Roadmap',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),

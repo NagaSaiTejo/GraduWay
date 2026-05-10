@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../data/mock/alumni_data.dart';
+import 'mentorship_request_button.dart';
 
-class AlumniProfileScreen extends StatelessWidget {
+class AlumniProfileScreen extends ConsumerWidget {
   final String alumniId;
   const AlumniProfileScreen({super.key, required this.alumniId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final alumni = mockAlumni.firstWhere((a) => a.id == alumniId, orElse: () => mockAlumni.first);
 
     return Scaffold(
@@ -260,6 +262,14 @@ class AlumniProfileScreen extends StatelessWidget {
                     ).animate().fadeIn(delay: 500.ms),
 
                     const SizedBox(height: 32),
+
+                    // Mentorship request — real-time Firestore status
+                    MentorshipRequestButton(alumni: alumni)
+                        .animate()
+                        .fadeIn(delay: 550.ms)
+                        .slideY(begin: 0.2, end: 0),
+
+                    const SizedBox(height: 12),
 
                     // Ask question button
                     GestureDetector(

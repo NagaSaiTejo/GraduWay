@@ -209,6 +209,19 @@ router.post('/login', async (req, res) => {
     }
 
     const { user, role } = matchedEntry;
+
+    // Safely serialize roadmapProgress regardless of whether it's a Map, plain object, or undefined
+    let roadmapProgressObj = {};
+    try {
+      if (user.roadmapProgress instanceof Map) {
+        roadmapProgressObj = Object.fromEntries(user.roadmapProgress);
+      } else if (user.roadmapProgress && typeof user.roadmapProgress === 'object') {
+        roadmapProgressObj = user.roadmapProgress;
+      }
+    } catch (_) {
+      roadmapProgressObj = {};
+    }
+
     res.status(200).json({
       message: 'Login successful',
       role,
@@ -222,7 +235,7 @@ router.post('/login', async (req, res) => {
         currentYear: user.currentYear ?? null,
         rollNumber: user.rollNumber ?? null,
         activeRoadmap: user.activeRoadmap ?? null,
-        roadmapProgress: user.roadmapProgress ? Object.fromEntries(user.roadmapProgress) : {},
+        roadmapProgress: roadmapProgressObj,
         // Alumni specific
         company: user.company ?? null,
         jobRole: user.role ?? null,
