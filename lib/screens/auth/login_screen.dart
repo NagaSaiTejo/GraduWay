@@ -19,6 +19,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   bool _showPassword = false;
   String? _errorMessage;
@@ -78,7 +79,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
-                      color: AppColors.primary.withOpacity(0.3),
+                      color: AppColors.primary.withValues(alpha: 0.3),
                       blurRadius: 15,
                       offset: const Offset(0, 5),
                     )
@@ -102,34 +103,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               const SizedBox(height: 40),
 
-              // Email field
-              TextField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'Email Address',
-                  prefixIcon: Icon(Icons.email_outlined),
-                  hintText: 'e.g. name@stud.com',
-                ),
-                onChanged: (_) => setState(() => _errorMessage = null),
-              ).animate().fadeIn(delay: 300.ms),
+              // Form
+              Form(
+                key: _formKey,
+                child: Column(
+                  children: [
+                    // Email field
+                    TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(
+                        labelText: 'Email Address',
+                        prefixIcon: Icon(Icons.email_outlined),
+                        hintText: 'e.g. name@stud.com',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) return 'Email is required';
+                        if (!value.contains('@')) return 'Enter a valid email';
+                        return null;
+                      },
+                      onChanged: (_) => setState(() => _errorMessage = null),
+                    ).animate().fadeIn(delay: 300.ms),
 
-              const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-              // Password field
-              TextField(
-                controller: _passController,
-                obscureText: !_showPassword,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline_rounded),
-                  suffixIcon: IconButton(
-                    icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                    onPressed: () => setState(() => _showPassword = !_showPassword),
-                  ),
+                    // Password field
+                    TextFormField(
+                      controller: _passController,
+                      obscureText: !_showPassword,
+                      decoration: InputDecoration(
+                        labelText: 'Password',
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        suffixIcon: IconButton(
+                          icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
+                          onPressed: () => setState(() => _showPassword = !_showPassword),
+                        ),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) return 'Password is required';
+                        if (value.length < 6) return 'Password must be at least 6 characters';
+                        return null;
+                      },
+                      onChanged: (_) => setState(() => _errorMessage = null),
+                    ).animate().fadeIn(delay: 400.ms),
+                  ],
                 ),
-                onChanged: (_) => setState(() => _errorMessage = null),
-              ).animate().fadeIn(delay: 400.ms),
+              ),
 
               // ── Error message (always in layout, animated in/out) ─────────
               AnimatedContainer(
@@ -145,7 +164,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
+                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
                 ),
                 child: _errorMessage != null
                     ? Row(
@@ -175,7 +194,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
-                  shadowColor: AppColors.primary.withOpacity(0.5),
+                  shadowColor: AppColors.primary.withValues(alpha: 0.5),
                   elevation: 8,
                 ),
                 child: _isLoading
@@ -206,17 +225,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _handleLogin() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     final email = _emailController.text.trim();
     final password = _passController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      setState(() => _errorMessage = 'Please enter both email and password.');
-      return;
-    }
-    if (!email.contains('@')) {
-      setState(() => _errorMessage = 'Please enter a valid email address.');
-      return;
-    }
 
     setState(() {
       _isLoading = true;
@@ -325,7 +339,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: AppColors.alumni.withOpacity(0.1),
+                    backgroundColor: AppColors.alumni.withValues(alpha: 0.1),
                     child: const Icon(Icons.work_outline, color: AppColors.alumni),
                   ),
                   title: const Text('Alumni', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -337,7 +351,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: AppColors.admin.withOpacity(0.1),
+                    backgroundColor: AppColors.admin.withValues(alpha: 0.1),
                     child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.admin),
                   ),
                   title: const Text('Admin', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -456,7 +470,7 @@ class _HintRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(icon, size: 16, color: color),

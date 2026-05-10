@@ -102,7 +102,7 @@ class AppColors {
   // ── Shadows ───────────────────────────────────────────────────────────────
   static List<BoxShadow> get cardShadow => [
     BoxShadow(
-      color: const Color(0xFF4F46E5).withOpacity(0.06),
+      color: const Color(0xFF4F46E5).withValues(alpha: 0.06),
       blurRadius: 16,
       offset: const Offset(0, 4),
     ),
@@ -110,7 +110,7 @@ class AppColors {
 
   static List<BoxShadow> get elevatedShadow => [
     BoxShadow(
-      color: const Color(0xFF4F46E5).withOpacity(0.18),
+      color: const Color(0xFF4F46E5).withValues(alpha: 0.18),
       blurRadius: 24,
       offset: const Offset(0, 8),
     ),

@@ -2,16 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../widgets/custom_app_bar.dart';
+import 'milestone_test_screen.dart';
 
 class RoadmapScreen extends ConsumerWidget {
   const RoadmapScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final goal = ref.watch(careerGoalProvider);
+    final authState = ref.watch(authProvider);
+    final student = authState.student;
+    final activeRoadmap = student?.activeRoadmap;
+    final progressMap = student?.roadmapProgress ?? {};
+
+    // Legacy fallback for UI goal selector if no active roadmap
+    final fallbackGoal = ref.watch(careerGoalProvider);
+    final effectiveGoal = activeRoadmap ?? fallbackGoal;
 
     final goals = [
       const _GoalOption('Flutter', '📱', AppColors.primary),
@@ -25,78 +34,87 @@ class RoadmapScreen extends ConsumerWidget {
     ];
 
     final roadmapData = _buildRoadmaps();
-    final items = roadmapData[goal] ?? [];
-    final effectiveGoal = goal.isEmpty ? null : goal;
+    final items = roadmapData[effectiveGoal] ?? [];
 
-    // Compute real progress: only locked items with progress == 0 means 0%
-    // User can tap checkmark on each step to mark complete (future feature — for now 0%)
-    const completedSteps = 0;
+    final completedSteps = progressMap[effectiveGoal] ?? 0;
     final totalSteps = items.length;
-    final overallPct = totalSteps > 0 ? (completedSteps / totalSteps) : 0.0;
+    final overallPct = totalSteps > 0 ? ((completedSteps.clamp(0, totalSteps)) / totalSteps) : 0.0;
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Career Roadmap'),
+      appBar: AppBar(
+        title: const Text('Career Roadmap', style: TextStyle(color: AppColors.textPrimary)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: AppColors.textPrimary),
+        actions: [
+          if (activeRoadmap != null)
+            TextButton.icon(
+              onPressed: () => _showExitDialog(context, ref),
+              icon: const Icon(Icons.exit_to_app, color: AppColors.error),
+              label: const Text('Exit Path', style: TextStyle(color: AppColors.error)),
+            ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Choose Your Path',
-                style: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 13,
-                    color: AppColors.textMuted)),
-            const SizedBox(height: 12),
-            SizedBox(
-              height: 44,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: goals.map((g) {
-                  final sel = goal == g.label;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: GestureDetector(
-                      onTap: () {
-                        if (!sel) {
-                          ref.read(careerGoalProvider.notifier).state = g.label;
-                          // Award Skill Seeker badge on first goal selection
-                          ref
-                              .read(studentProgressProvider.notifier)
-                              .setTargetCareer(g.label);
-                        }
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 14, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: sel ? g.color : AppColors.bgCard,
-                          borderRadius: BorderRadius.circular(22),
-                          border: Border.all(
-                              color: sel ? g.color : AppColors.border),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(g.emoji, style: const TextStyle(fontSize: 14)),
-                            const SizedBox(width: 6),
-                            Text(g.label,
-                                style: TextStyle(
-                                  color: sel
-                                      ? Colors.white
-                                      : AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                )),
-                          ],
+            if (activeRoadmap == null) ...[
+              const Text('Choose Your Path',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: AppColors.textMuted)),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 44,
+                child: ListView(
+                  scrollDirection: Axis.horizontal,
+                  children: goals.map((g) {
+                    final sel = effectiveGoal == g.label;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () {
+                          if (!sel) {
+                            ref.read(careerGoalProvider.notifier).state = g.label;
+                          }
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: sel ? g.color : AppColors.bgCard,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(
+                                color: sel ? g.color : AppColors.border),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(g.emoji, style: const TextStyle(fontSize: 14)),
+                              const SizedBox(width: 6),
+                              Text(g.label,
+                                  style: TextStyle(
+                                    color: sel
+                                        ? Colors.white
+                                        : AppColors.textPrimary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 13,
+                                  )),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                }).toList(),
+                    );
+                  }).toList(),
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
+              const SizedBox(height: 24),
+            ],
+            
             if (effectiveGoal == null)
               Container(
                 width: double.infinity,
@@ -171,6 +189,23 @@ class RoadmapScreen extends ConsumerWidget {
                 ),
               ).animate().fadeIn().slideY(begin: 0.1),
               const SizedBox(height: 28),
+              if (activeRoadmap == null)
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      ref.read(authProvider.notifier).selectRoadmap(effectiveGoal);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('Start $effectiveGoal Roadmap', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
+                ),
               const Text('Milestone Roadmap',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
               const SizedBox(height: 6),
@@ -182,6 +217,13 @@ class RoadmapScreen extends ConsumerWidget {
               ...List.generate(items.length, (i) {
                 final item = items[i];
                 final isLast = i == items.length - 1;
+                
+                final isCompleted = i < completedSteps;
+                final isCurrent = i == completedSteps && activeRoadmap != null;
+                final isLocked = i > completedSteps || activeRoadmap == null;
+
+                final primaryColor = isCompleted ? AppColors.success : (isCurrent ? AppColors.primary : AppColors.border);
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Row(
@@ -193,25 +235,24 @@ class RoadmapScreen extends ConsumerWidget {
                             width: 44,
                             height: 44,
                             decoration: BoxDecoration(
-                              color: item.isComplete
+                              color: isCompleted
                                   ? AppColors.success
-                                  : AppColors.bgCard,
+                                  : (isCurrent ? AppColors.primary.withValues(alpha: 0.1) : AppColors.bgCard),
                               shape: BoxShape.circle,
                               border: Border.all(
-                                color: item.isComplete
-                                    ? AppColors.success
-                                    : AppColors.border,
+                                color: primaryColor,
                                 width: 2,
                               ),
                             ),
                             child: Center(
-                                child: Text(item.emoji,
-                                    style: const TextStyle(fontSize: 20))),
+                                child: isCompleted 
+                                ? const Icon(Icons.check, color: Colors.white)
+                                : Text(item.emoji, style: const TextStyle(fontSize: 20))),
                           ),
                           if (!isLast)
                             Container(
                                 width: 2,
-                                height: 80,
+                                height: isCurrent ? 120 : 80,
                                 color: AppColors.border.withValues(alpha: 0.5)),
                         ],
                       ),
@@ -268,22 +309,54 @@ class RoadmapScreen extends ConsumerWidget {
                                           color: AppColors.textMuted)),
                                   const SizedBox(height: 6),
                                   ...item.resources.map((r) => Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 2),
-                                        child: Row(
-                                          children: [
-                                            const Text('• ',
-                                                style: TextStyle(
-                                                    color: AppColors.primary)),
-                                            Expanded(
+                                        padding: const EdgeInsets.only(bottom: 4),
+                                        child: InkWell(
+                                          onTap: () async {
+                                            final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(r)}');
+                                            if (await canLaunchUrl(url)) {
+                                              await launchUrl(url, mode: LaunchMode.externalApplication);
+                                            }
+                                          },
+                                          child: Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text('• ', style: TextStyle(color: AppColors.primary)),
+                                              Expanded(
                                                 child: Text(r,
                                                     style: const TextStyle(
                                                         fontSize: 11,
-                                                        color: AppColors
-                                                            .primary))),
-                                          ],
+                                                        color: AppColors.primary,
+                                                        decoration: TextDecoration.underline)),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       )),
+                                ],
+                                if (isCurrent && activeRoadmap != null) ...[
+                                  const SizedBox(height: 16),
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => MilestoneTestScreen(
+                                              roadmapName: activeRoadmap,
+                                              milestoneIndex: i,
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColors.primary,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                      ),
+                                      child: const Text('Take Test to Complete', style: TextStyle(fontWeight: FontWeight.bold)),
+                                    ),
+                                  ),
                                 ],
                               ],
                             ),
@@ -301,6 +374,30 @@ class RoadmapScreen extends ConsumerWidget {
             const SizedBox(height: 80),
           ],
         ),
+      ),
+    );
+  }
+
+  void _showExitDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Exit Roadmap?'),
+        content: const Text('Are you sure you want to stop this roadmap? Your progress will be saved.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(authProvider.notifier).exitRoadmap();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error, foregroundColor: Colors.white),
+            child: const Text('Exit Roadmap'),
+          ),
+        ],
       ),
     );
   }

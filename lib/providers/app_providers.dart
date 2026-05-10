@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
@@ -84,6 +87,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (roleStr == 'student') {
       role = UserRole.student;
+      final progressMap = user['roadmapProgress'] as Map<String, dynamic>? ?? {};
+      final parsedProgress = progressMap.map((k, v) => MapEntry(k, (v as num).toInt()));
+
       studentModel = StudentModel(
         id: user['id'] as String,
         name: name,
@@ -92,12 +98,14 @@ class AuthNotifier extends StateNotifier<AuthState> {
         year: (user['currentYear'] as num?)?.toInt() ?? 0,
         targetCareer: '',
         skills: const [],
-        careerScore: 0,
+        careerScore: (user['careerScore'] as num?)?.toInt() ?? 0,
         earnedBadges: const [],
         questionsAsked: 0,
         mentorSessionsAttended: 0,
         photoUrl: profileImageUrl ?? '',
         rollNumber: user['rollNumber'] as String? ?? '',
+        activeRoadmap: user['activeRoadmap'] as String?,
+        roadmapProgress: parsedProgress,
       );
     } else if (roleStr == 'alumni') {
       role = UserRole.alumni;
@@ -142,6 +150,70 @@ class AuthNotifier extends StateNotifier<AuthState> {
   /// Save name and bio edits from the Edit Profile sheet (works for all roles).
   void updateUserProfile({required String name, required String bio}) {
     state = state.copyWith(loginName: name, bio: bio);
+  }
+
+  /// Update the student's roadmap state after an API call
+  void updateRoadmapState({required String? activeRoadmap, required Map<String, int> roadmapProgress, int? careerScore}) {
+    if (state.student != null) {
+      final updatedStudent = StudentModel(
+        id: state.student!.id,
+        name: state.student!.name,
+        email: state.student!.email,
+        branch: state.student!.branch,
+        year: state.student!.year,
+        targetCareer: state.student!.targetCareer,
+        skills: state.student!.skills,
+        careerScore: careerScore ?? state.student!.careerScore,
+        earnedBadges: state.student!.earnedBadges,
+        questionsAsked: state.student!.questionsAsked,
+        mentorSessionsAttended: state.student!.mentorSessionsAttended,
+        photoUrl: state.student!.photoUrl,
+        rollNumber: state.student!.rollNumber,
+        activeRoadmap: activeRoadmap,
+        roadmapProgress: roadmapProgress,
+      );
+      state = state.copyWith(student: updatedStudent);
+    }
+  }
+
+  Future<void> selectRoadmap(String roadmapName) async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/roadmap/select'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': state.loginEmail, 'roadmapName': roadmapName}),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final progressMap = data['roadmapProgress'] as Map<String, dynamic>;
+        updateRoadmapState(
+          activeRoadmap: data['activeRoadmap'],
+          roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error selecting roadmap: $e');
+    }
+  }
+
+  Future<void> exitRoadmap() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://127.0.0.1:5000/api/roadmap/exit'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': state.loginEmail}),
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final progressMap = data['roadmapProgress'] as Map<String, dynamic>;
+        updateRoadmapState(
+          activeRoadmap: null,
+          roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error exiting roadmap: $e');
+    }
   }
 
   void logout() {

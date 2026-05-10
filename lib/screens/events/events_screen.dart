@@ -56,7 +56,7 @@ class _EventsScreenState extends State<EventsScreen> {
                         decoration: BoxDecoration(
                           gradient: AppColors.cardGradient,
                           borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: isRsvped ? AppColors.success.withOpacity(0.4) : AppColors.border),
+                          border: Border.all(color: isRsvped ? AppColors.success.withValues(alpha: 0.4) : AppColors.border),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,7 +68,7 @@ class _EventsScreenState extends State<EventsScreen> {
                                 children: [
                                   Container(
                                     width: 48, height: 48,
-                                    decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(14)),
+                                    decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(14)),
                                     child: Center(child: Text(emoji, style: const TextStyle(fontSize: 24))),
                                   ),
                                   const SizedBox(width: 12),
@@ -78,7 +78,7 @@ class _EventsScreenState extends State<EventsScreen> {
                                       children: [
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(8)),
+                                          decoration: BoxDecoration(color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(8)),
                                           child: Text(event.type.replaceAll('_', ' ').toUpperCase(), style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w700, letterSpacing: 0.5)),
                                         ),
                                         const SizedBox(height: 4),
@@ -132,10 +132,10 @@ class _EventsScreenState extends State<EventsScreen> {
                                   height: 44,
                                   decoration: BoxDecoration(
                                     gradient: isRsvped ? null : AppColors.primaryGradient,
-                                    color: isRsvped ? AppColors.success.withOpacity(0.15) : null,
+                                    color: isRsvped ? AppColors.success.withValues(alpha: 0.15) : null,
                                     borderRadius: BorderRadius.circular(12),
-                                    border: isRsvped ? Border.all(color: AppColors.success.withOpacity(0.4)) : null,
-                                    boxShadow: isRsvped ? [] : [BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 10)],
+                                    border: isRsvped ? Border.all(color: AppColors.success.withValues(alpha: 0.4)) : null,
+                                    boxShadow: isRsvped ? [] : [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 10)],
                                   ),
                                   child: Center(
                                     child: Text(

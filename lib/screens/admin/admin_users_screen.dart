@@ -103,7 +103,7 @@ class _UserListView extends StatelessWidget {
             contentPadding:
                 const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             leading: CircleAvatar(
-              backgroundColor: AppColors.primary.withOpacity(0.1),
+              backgroundColor: AppColors.primary.withValues(alpha: 0.1),
               child: Text(name[0],
                   style: const TextStyle(
                       color: AppColors.primary, fontWeight: FontWeight.bold)),

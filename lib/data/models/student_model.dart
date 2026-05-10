@@ -12,6 +12,8 @@ class StudentModel {
   final int mentorSessionsAttended;
   final String photoUrl;
   final String rollNumber;
+  final String? activeRoadmap;
+  final Map<String, int> roadmapProgress;
 
   const StudentModel({
     required this.id,
@@ -27,5 +29,7 @@ class StudentModel {
     required this.mentorSessionsAttended,
     required this.photoUrl,
     required this.rollNumber,
+    this.activeRoadmap,
+    this.roadmapProgress = const {},
   });
 }

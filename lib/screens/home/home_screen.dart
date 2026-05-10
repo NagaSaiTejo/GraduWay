@@ -69,7 +69,7 @@ class HomeScreen extends ConsumerWidget {
                   gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withOpacity(0.3), blurRadius: 20, offset: const Offset(0, 10))
+                    BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))
                   ],
                 ),
                 child: Row(
@@ -122,9 +122,17 @@ class HomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 children: [
                   _QuickLink(
+                    icon: Icons.message_rounded,
+                    label: 'Messages',
+                    color: AppColors.primary,
+                    onTap: () {
+                      context.push('/messages');
+                    },
+                  ),
+                  _QuickLink(
                     icon: Icons.quiz_rounded,
                     label: 'Ask AI/Alum',
-                    color: AppColors.primary,
+                    color: AppColors.secondary,
                     onTap: () {
                       ref.read(studentNavIndexProvider.notifier).state = 2;
                       context.go('/qa');
@@ -133,14 +141,14 @@ class HomeScreen extends ConsumerWidget {
                   _QuickLink(
                     icon: Icons.map_rounded,
                     label: 'Roadmap',
-                    color: AppColors.secondary,
+                    color: AppColors.accent,
                     onTap: () {
                       ref.read(studentNavIndexProvider.notifier).state = 3;
                       context.go('/roadmap');
                     },
                   ),
-                  _QuickLink(icon: Icons.currency_rupee_rounded, label: 'Packages', color: AppColors.accent, onTap: () => context.push('/skill-package')),
-                  _QuickLink(icon: Icons.history_edu_rounded, label: 'Stories', color: AppColors.error, onTap: () => context.push('/placement')),
+                  _QuickLink(icon: Icons.currency_rupee_rounded, label: 'Packages', color: AppColors.error, onTap: () => context.push('/skill-package')),
+                  _QuickLink(icon: Icons.history_edu_rounded, label: 'Stories', color: AppColors.textSecondary, onTap: () => context.push('/placement')),
                 ],
               ),
             ).animate().fadeIn(delay: 300.ms),
@@ -193,7 +201,7 @@ class HomeScreen extends ConsumerWidget {
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
+                            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
                             child: Text('₹${alu.package}L', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
                           ),
                         ],
@@ -278,7 +286,7 @@ class HomeScreen extends ConsumerWidget {
               contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
               leading: Container(
                 width: 44, height: 44,
-                decoration: BoxDecoration(color: n.color.withOpacity(0.12), borderRadius: BorderRadius.circular(12)),
+                decoration: BoxDecoration(color: n.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
                 child: Icon(n.icon, color: n.color, size: 22),
               ),
               title: Text(n.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
@@ -320,9 +328,9 @@ class _QuickLink extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: color.withOpacity(0.2)),
+                border: Border.all(color: color.withValues(alpha: 0.2)),
               ),
               child: Icon(icon, color: color, size: 24),
             ),

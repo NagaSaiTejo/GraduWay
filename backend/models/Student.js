@@ -16,6 +16,10 @@ const studentSchema = new mongoose.Schema({
   resumeUrl: { type: String },
   profileImageUrl: { type: String },
 
+  // Roadmap Tracking
+  activeRoadmap: { type: String, default: null },
+  roadmapProgress: { type: Map, of: Number, default: {} },
+
   // App usage stats
   careerScore: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }

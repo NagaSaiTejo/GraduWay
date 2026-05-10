@@ -386,14 +386,14 @@ class _ProfileImagePicker extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 52,
-              backgroundColor: accentColor.withOpacity(0.1),
+              backgroundColor: accentColor.withValues(alpha: 0.1),
               backgroundImage: image != null
                   ? (kIsWeb
                       ? NetworkImage(image!.path)
                       : FileImage(File(image!.path))) as ImageProvider
                   : null,
               child: image == null
-                  ? Icon(Icons.person, size: 52, color: accentColor.withOpacity(0.5))
+                  ? Icon(Icons.person, size: 52, color: accentColor.withValues(alpha: 0.5))
                   : null,
             ),
             Positioned(
@@ -442,7 +442,7 @@ class _FilePicker extends StatelessWidget {
           border: Border.all(
               color: fileName != null ? accentColor : Colors.grey.shade300),
           borderRadius: BorderRadius.circular(12),
-          color: fileName != null ? accentColor.withOpacity(0.05) : null,
+          color: fileName != null ? accentColor.withValues(alpha: 0.05) : null,
         ),
         child: Row(
           children: [

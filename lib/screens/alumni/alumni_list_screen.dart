@@ -226,7 +226,7 @@ class _AlumniCard extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                         decoration: BoxDecoration(
-                            color: color.withOpacity(0.15), borderRadius: BorderRadius.circular(6)),
+                            color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
                         child: Text(alumni.branch,
                             style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color)),
                       ),
@@ -253,7 +253,7 @@ class _AlumniCard extends StatelessWidget {
                     children: alumni.skills.take(3).map((s) => Container(
                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                       decoration: BoxDecoration(
-                          color: AppColors.primary.withOpacity(0.1),
+                          color: AppColors.primary.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(8)),
                       child: Text(s,
                           style: const TextStyle(fontSize: 9, color: AppColors.primaryLight),
@@ -274,9 +274,9 @@ class _AlumniCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.15),
+                      color: AppColors.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.success.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '₹${alumni.package}L',

@@ -263,14 +263,14 @@ class _ProfileImagePicker extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 52,
-              backgroundColor: accentColor.withOpacity(0.1),
+              backgroundColor: accentColor.withValues(alpha: 0.1),
               backgroundImage: image != null
                   ? (kIsWeb
                       ? NetworkImage(image!.path)
                       : FileImage(File(image!.path))) as ImageProvider
                   : null,
               child: image == null
-                  ? Icon(Icons.person, size: 52, color: accentColor.withOpacity(0.5))
+                  ? Icon(Icons.person, size: 52, color: accentColor.withValues(alpha: 0.5))
                   : null,
             ),
             Positioned(

@@ -221,6 +221,8 @@ router.post('/login', async (req, res) => {
         branch: user.branch ?? null,
         currentYear: user.currentYear ?? null,
         rollNumber: user.rollNumber ?? null,
+        activeRoadmap: user.activeRoadmap ?? null,
+        roadmapProgress: user.roadmapProgress ? Object.fromEntries(user.roadmapProgress) : {},
         // Alumni specific
         company: user.company ?? null,
         jobRole: user.role ?? null,

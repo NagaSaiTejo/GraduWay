@@ -25,7 +25,11 @@ mongoose
 
 // Routes
 const authRoutes = require('./routes/authRoutes');
+const roadmapRoutes = require('./routes/roadmapRoutes');
+const messageRoutes = require('./routes/messageRoutes');
 app.use('/api/auth', authRoutes);
+app.use('/api/roadmap', roadmapRoutes);
+app.use('/api/messages', messageRoutes);
 
 // Health Check
 app.get('/api/health', (req, res) => {
