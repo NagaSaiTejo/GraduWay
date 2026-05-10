@@ -1,6 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
 import '../data/models/student_model.dart';
@@ -70,98 +68,75 @@ class AuthState {
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState());
 
-  // ─── Real MongoDB Login ────────────────────────────────────────────────────
-  Future<void> login({required String email, required String password}) async {
-    state = state.copyWith(isLoggingIn: true, loginError: null);
+  // Called ONLY on successful login — no state change during loading,
+  // so GoRouter never rebuilds/resets to /splash while awaiting the HTTP call.
+  void setUser({
+    required String email,
+    required String roleStr,
+    required Map<String, dynamic> user,
+  }) {
+    final name = user['name'] as String? ?? email.split('@').first;
+    final profileImageUrl = user['profileImageUrl'] as String?;
 
-    try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/login');
-      final response = await http.post(
-        uri,
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
+    UserRole role;
+    StudentModel? studentModel;
+    AlumniModel? alumniModel;
+
+    if (roleStr == 'student') {
+      role = UserRole.student;
+      studentModel = StudentModel(
+        id: user['id'] as String,
+        name: name,
+        email: email,
+        branch: user['branch'] as String? ?? '',
+        year: (user['currentYear'] as num?)?.toInt() ?? 0,
+        targetCareer: '',
+        skills: const [],
+        careerScore: 0,
+        earnedBadges: const [],
+        questionsAsked: 0,
+        mentorSessionsAttended: 0,
+        photoUrl: profileImageUrl ?? '',
+        rollNumber: user['rollNumber'] as String? ?? '',
       );
-
-      final data = jsonDecode(response.body) as Map<String, dynamic>;
-
-      if (response.statusCode == 200) {
-        final roleStr = data['role'] as String;
-        final user = data['user'] as Map<String, dynamic>;
-        final name = user['name'] as String? ?? email.split('@').first;
-        final profileImageUrl = user['profileImageUrl'] as String?;
-
-        UserRole role;
-        StudentModel? studentModel;
-        AlumniModel? alumniModel;
-
-        if (roleStr == 'student') {
-          role = UserRole.student;
-          studentModel = StudentModel(
-            id: user['id'] as String,
-            name: name,
-            email: email,
-            branch: user['branch'] as String? ?? '',
-            year: (user['currentYear'] as num?)?.toInt() ?? 0,
-            targetCareer: '',
-            skills: const [],
-            careerScore: 0,
-            earnedBadges: const [],
-            questionsAsked: 0,
-            mentorSessionsAttended: 0,
-            photoUrl: profileImageUrl ?? '',
-            rollNumber: user['rollNumber'] as String? ?? '',
-          );
-        } else if (roleStr == 'alumni') {
-          role = UserRole.alumni;
-          alumniModel = AlumniModel(
-            id: user['id'] as String,
-            name: name,
-            email: email,
-            company: user['company'] as String? ?? '',
-            role: user['jobRole'] as String? ?? '',
-            batch: (user['passoutYear'] as num?)?.toString() ?? '',
-            branch: '',
-            skills: const [],
-            linkedIn: '',
-            photoUrl: profileImageUrl ?? '',
-            advice: '',
-            story: '',
-            isVerified: false,
-            menteeCount: 0,
-            rating: 0.0,
-            anonConfession: '',
-            interviewRounds: const [],
-            targetRole: '',
-            location: '',
-            package: 0.0,
-            yearsOfExp: 0,
-          );
-        } else {
-          role = UserRole.admin;
-        }
-
-        state = AuthState(
-          role: role,
-          isLoggedIn: true,
-          loginEmail: email,
-          loginName: name,
-          student: studentModel,
-          alumni: alumniModel,
-          profileImageUrl: profileImageUrl,
-          isLoggingIn: false,
-        );
-      } else {
-        state = state.copyWith(
-          isLoggingIn: false,
-          loginError: data['message'] as String? ?? 'Login failed.',
-        );
-      }
-    } catch (e) {
-      state = state.copyWith(
-        isLoggingIn: false,
-        loginError: 'Could not connect to server. Is the backend running?',
+    } else if (roleStr == 'alumni') {
+      role = UserRole.alumni;
+      alumniModel = AlumniModel(
+        id: user['id'] as String,
+        name: name,
+        email: email,
+        company: user['company'] as String? ?? '',
+        role: user['jobRole'] as String? ?? '',
+        batch: (user['passoutYear'] as num?)?.toString() ?? '',
+        branch: '',
+        skills: const [],
+        linkedIn: '',
+        photoUrl: profileImageUrl ?? '',
+        advice: '',
+        story: '',
+        isVerified: false,
+        menteeCount: 0,
+        rating: 0.0,
+        anonConfession: '',
+        interviewRounds: const [],
+        targetRole: '',
+        location: '',
+        package: 0.0,
+        yearsOfExp: 0,
       );
+    } else {
+      role = UserRole.admin;
     }
+
+    state = AuthState(
+      role: role,
+      isLoggedIn: true,
+      loginEmail: email,
+      loginName: name,
+      student: studentModel,
+      alumni: alumniModel,
+      profileImageUrl: profileImageUrl,
+    );
   }
 
   /// Save name and bio edits from the Edit Profile sheet (works for all roles).

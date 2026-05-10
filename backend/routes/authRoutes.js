@@ -11,11 +11,23 @@ const router = express.Router();
 const fileUrl = (req, filePath) =>
   filePath ? `http://127.0.0.1:5000/${filePath.replace(/\\/g, '/')}` : null;
 
-// ─── Register Student ────────────────────────────────────────────────────────
+// Helper: check if an email is already used in ANY collection
+const emailExistsAnywhere = async (email) => {
+  const [s, a, ad] = await Promise.all([
+    Student.findOne({ email }).lean(),
+    Alumni.findOne({ email }).lean(),
+    Admin.findOne({ email }).lean(),
+  ]);
+  if (s) return 'student';
+  if (a) return 'alumni';
+  if (ad) return 'admin';
+  return null;
+};
+
 router.post('/register/student', (req, res) => {
+  console.log('--- Student Registration Attempt ---');
   uploadStudentFiles(req, res, async (err) => {
     if (err) {
-      // Multer error (file too large or wrong type)
       return res.status(400).json({ message: err.message });
     }
     try {
@@ -25,10 +37,14 @@ router.post('/register/student', (req, res) => {
         return res.status(400).json({ message: 'All required fields must be filled.' });
       }
 
-      const existingUser = await Student.findOne({ email });
-      if (existingUser) return res.status(400).json({ message: 'Email already registered.' });
+      // Check email uniqueness across ALL collections
+      const existingRole = await emailExistsAnywhere(email);
+      if (existingRole) {
+        return res.status(400).json({
+          message: `This email is already registered as a ${existingRole}. Please use a different email.`,
+        });
+      }
 
-      // Frontend also validates size, but do a hard server-side check
       if (req.files?.profileImage?.[0] && req.files.profileImage[0].size > 2 * 1024 * 1024) {
         return res.status(400).json({ message: 'Profile image must be under 2 MB.' });
       }
@@ -51,6 +67,7 @@ router.post('/register/student', (req, res) => {
       });
 
       await newStudent.save();
+      console.log('Student registered successfully:', email);
       res.status(201).json({
         message: 'Student registered successfully',
         user: { id: newStudent._id, email, role: 'student' },
@@ -63,6 +80,7 @@ router.post('/register/student', (req, res) => {
 
 // ─── Register Alumni ─────────────────────────────────────────────────────────
 router.post('/register/alumni', (req, res) => {
+  console.log('--- Alumni Registration Attempt ---');
   uploadProfileImage(req, res, async (err) => {
     if (err) return res.status(400).json({ message: err.message });
     try {
@@ -72,8 +90,13 @@ router.post('/register/alumni', (req, res) => {
         return res.status(400).json({ message: 'All required fields must be filled.' });
       }
 
-      const existingUser = await Alumni.findOne({ email });
-      if (existingUser) return res.status(400).json({ message: 'Email already registered.' });
+      // Check email uniqueness across ALL collections
+      const existingRole = await emailExistsAnywhere(email);
+      if (existingRole) {
+        return res.status(400).json({
+          message: `This email is already registered as a ${existingRole}. Please use a different email.`,
+        });
+      }
 
       if (req.file && req.file.size > 2 * 1024 * 1024) {
         return res.status(400).json({ message: 'Profile image must be under 2 MB.' });
@@ -92,6 +115,7 @@ router.post('/register/alumni', (req, res) => {
       });
 
       await newAlumni.save();
+      console.log('Alumni registered successfully:', email);
       res.status(201).json({
         message: 'Alumni registered successfully',
         user: { id: newAlumni._id, email, role: 'alumni' },
@@ -104,6 +128,7 @@ router.post('/register/alumni', (req, res) => {
 
 // ─── Register Admin ──────────────────────────────────────────────────────────
 router.post('/register/admin', (req, res) => {
+  console.log('--- Admin Registration Attempt ---');
   uploadProfileImage(req, res, async (err) => {
     if (err) return res.status(400).json({ message: err.message });
     try {
@@ -114,8 +139,13 @@ router.post('/register/admin', (req, res) => {
         return res.status(403).json({ message: 'Invalid Admin Verification Code.' });
       }
 
-      const existingUser = await Admin.findOne({ email });
-      if (existingUser) return res.status(400).json({ message: 'Email already registered.' });
+      // Check email uniqueness across ALL collections
+      const existingRole = await emailExistsAnywhere(email);
+      if (existingRole) {
+        return res.status(400).json({
+          message: `This email is already registered as a ${existingRole}. Please use a different email.`,
+        });
+      }
 
       if (req.file && req.file.size > 2 * 1024 * 1024) {
         return res.status(400).json({ message: 'Profile image must be under 2 MB.' });
@@ -129,6 +159,7 @@ router.post('/register/admin', (req, res) => {
       const newAdmin = new Admin({ name, email, password: hashedPassword, profileImageUrl });
 
       await newAdmin.save();
+      console.log('Admin registered successfully:', email);
       res.status(201).json({
         message: 'Admin registered successfully',
         user: { id: newAdmin._id, email, role: 'admin' },
@@ -141,34 +172,43 @@ router.post('/register/admin', (req, res) => {
 
 // ─── Login (All Roles) ───────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
+  console.log('--- Login Attempt ---', req.body.email);
   try {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
 
-    // Search all three collections
-    let user = await Student.findOne({ email });
-    let role = 'student';
+    // Search ALL three collections simultaneously
+    const [studentUser, alumniUser, adminUser] = await Promise.all([
+      Student.findOne({ email }).lean(),
+      Alumni.findOne({ email }).lean(),
+      Admin.findOne({ email }).lean(),
+    ]);
 
-    if (!user) {
-      user = await Alumni.findOne({ email });
-      role = 'alumni';
-    }
-    if (!user) {
-      user = await Admin.findOne({ email });
-      role = 'admin';
-    }
+    // Build list of all matches (in case same email was registered in multiple roles)
+    const matches = [];
+    if (studentUser) matches.push({ user: studentUser, role: 'student' });
+    if (alumniUser) matches.push({ user: alumniUser, role: 'alumni' });
+    if (adminUser) matches.push({ user: adminUser, role: 'admin' });
 
-    if (!user) {
+    if (matches.length === 0) {
       return res.status(404).json({ message: 'No account found with this email.' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    // If same email registered in multiple roles (shouldn't happen with new checks,
+    // but handle old data gracefully): try password against each match in order
+    let matchedEntry = null;
+    for (const entry of matches) {
+      const isMatch = await bcrypt.compare(password, entry.user.password);
+      if (isMatch) { matchedEntry = entry; break; }
+    }
+
+    if (!matchedEntry) {
       return res.status(401).json({ message: 'Incorrect password.' });
     }
 
+    const { user, role } = matchedEntry;
     res.status(200).json({
       message: 'Login successful',
       role,
@@ -184,6 +224,7 @@ router.post('/login', async (req, res) => {
         // Alumni specific
         company: user.company ?? null,
         jobRole: user.role ?? null,
+        passoutYear: user.passoutYear ?? null,
       },
     });
   } catch (error) {

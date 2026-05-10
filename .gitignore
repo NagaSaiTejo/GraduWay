@@ -50,6 +50,7 @@ backend/.env
 backend/.env.local
 backend/.env.production
 backend/.env.*
+backend/node_modules
 
 # Node modules — reinstall with `npm install`
 backend/node_modules/

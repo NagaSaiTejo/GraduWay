@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 
@@ -221,28 +223,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    // Call the real backend login
-    await ref.read(authProvider.notifier).login(email: email, password: password);
+    try {
+      // HTTP call stays LOCAL — no AuthState changes until success,
+      // so GoRouter never resets the navigation stack to /splash.
+      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/login');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
 
-    if (!mounted) return;
-    setState(() => _isLoading = false);
+      if (!mounted) return;
+      setState(() => _isLoading = false);
 
-    final authState = ref.read(authProvider);
-
-    if (authState.loginError != null) {
-      setState(() => _errorMessage = authState.loginError);
-      return;
-    }
-
-    // Navigate based on role
-    if (authState.role == UserRole.student) {
-      context.go('/home');
-    } else if (authState.role == UserRole.alumni) {
-      context.go('/alumni-home');
-    } else if (authState.role == UserRole.admin) {
-      context.go('/admin-home');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        // Only NOW update AuthState → triggers router to navigate to dashboard
+        ref.read(authProvider.notifier).setUser(
+          email: email,
+          roleStr: data['role'] as String,
+          user: data['user'] as Map<String, dynamic>,
+        );
+      } else {
+        // Show error inline — AuthState never changed, router stays put
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        setState(() =>
+            _errorMessage = data['message'] as String? ?? 'Login failed. Please try again.');
+      }
+    } catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Could not connect to server.\nMake sure the backend is running.';
+      });
     }
   }
+
 
   OverlayEntry _createOverlayEntry(BuildContext context) {
     final renderBox = context.findRenderObject() as RenderBox;
