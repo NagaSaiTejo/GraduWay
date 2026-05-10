@@ -30,7 +30,7 @@ class AdminOverviewScreen extends StatelessWidget {
               mainAxisSpacing: 12,
               crossAxisSpacing: 12,
               childAspectRatio: 1.5,
-              children: [
+              children: const [
                 _StatCard(label: 'Total Students', value: '1,240', icon: Icons.school_rounded, color: AppColors.primary),
                 _StatCard(label: 'Verified Alumni', value: '156', icon: Icons.verified_user_rounded, color: AppColors.alumni),
                 _StatCard(label: 'Active Q&A', value: '432', icon: Icons.forum_rounded, color: AppColors.secondary),
@@ -205,7 +205,7 @@ class _StatCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 8),
-          Text(value, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
           const SizedBox(height: 2),
           Text(label, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
         ],

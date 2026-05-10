@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../core/api_config.dart';
 
 class MessagingListScreen extends ConsumerStatefulWidget {
   const MessagingListScreen({super.key});
@@ -25,7 +26,7 @@ class _MessagingListScreenState extends ConsumerState<MessagingListScreen> {
   Future<void> _fetchConnections() async {
     final email = ref.read(authProvider).loginEmail;
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/messages/connections/$email'));
+      final response = await http.get(Uri.parse(ApiConfig.connections(email)));
       if (response.statusCode == 200) {
         setState(() {
           _connections = jsonDecode(response.body);
@@ -102,7 +103,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _fetchMessages() async {
     final senderEmail = ref.read(authProvider).loginEmail;
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/messages/$senderEmail/${widget.receiverEmail}'));
+      final response = await http.get(Uri.parse(ApiConfig.chatHistory(senderEmail, widget.receiverEmail)));
       if (response.statusCode == 200) {
         setState(() {
           _messages = jsonDecode(response.body);
@@ -145,7 +146,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     try {
       await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/messages/send'),
+        Uri.parse(ApiConfig.messagingSend),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'senderEmail': senderEmail,

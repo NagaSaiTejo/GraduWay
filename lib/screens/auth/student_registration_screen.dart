@@ -10,6 +10,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/platform_pdf_picker.dart';
+import '../../core/api_config.dart';
+import '../../services/firebase_service.dart';
 
 class StudentRegistrationScreen extends StatefulWidget {
   const StudentRegistrationScreen({super.key});
@@ -120,7 +122,24 @@ class _StudentRegistrationScreenState
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/student');
+      // ── Step 1: Register in Firebase (Real-time/Auth) ──
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+      
+      await FirebaseService.registerUser(
+        email: email,
+        password: password,
+        role: 'student',
+        userData: {
+          'name': _nameController.text.trim(),
+          'rollNumber': _rollNumberController.text.trim(),
+          'branch': _selectedBranch,
+          'currentYear': _selectedYear,
+        },
+      );
+
+      // ── Step 2: Register in Node.js/MongoDB (Relational) ──
+      final uri = Uri.parse(ApiConfig.registerStudent);
       final request = http.MultipartRequest('POST', uri);
 
       // Text fields
@@ -269,7 +288,7 @@ class _StudentRegistrationScreenState
                 Row(children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedBranch,
+                      initialValue: _selectedBranch,
                       decoration: _dropdownDecoration('Branch', Icons.account_tree_outlined),
                       items: ['CSE', 'ECE', 'MECH', 'CIVIL', 'IT', 'EEE']
                           .map((b) => DropdownMenuItem(value: b, child: Text(b)))
@@ -280,7 +299,7 @@ class _StudentRegistrationScreenState
                   const SizedBox(width: 16),
                   Expanded(
                     child: DropdownButtonFormField<int>(
-                      value: _selectedYear,
+                      initialValue: _selectedYear,
                       decoration: _dropdownDecoration('Year', Icons.school_outlined),
                       items: [1, 2, 3, 4]
                           .map((y) =>

@@ -14,9 +14,9 @@ class AlumniShell extends ConsumerWidget {
     final currentIndex = ref.watch(alumniNavIndexProvider);
 
     final tabs = [
-      _NavTab(icon: Icons.dashboard_rounded, label: 'Dashboard', path: '/alumni-home'),
-      _NavTab(icon: Icons.question_answer_rounded, label: 'Questions', path: '/alumni-questions'),
-      _NavTab(icon: Icons.person_rounded, label: 'Profile', path: '/alumni-profile'),
+      const _NavTab(icon: Icons.dashboard_rounded, label: 'Dashboard', path: '/alumni-home'),
+      const _NavTab(icon: Icons.question_answer_rounded, label: 'Questions', path: '/alumni-questions'),
+      const _NavTab(icon: Icons.person_rounded, label: 'Profile', path: '/alumni-profile'),
     ];
 
     return Scaffold(

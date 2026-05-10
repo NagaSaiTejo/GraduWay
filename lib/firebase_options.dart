@@ -43,7 +43,7 @@ class DefaultFirebaseOptions {
   // TODO: Replace with your actual Firebase project configuration
   // Run: flutterfire configure --project=your-firebase-project-id
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyGraduWayWebApiKeyPlaceholder',
+    apiKey: const String.fromEnvironment('FIREBASE_WEB_API_KEY', defaultValue: 'AIzaSyGraduWayWebApiKeyPlaceholder'),
     appId: '1:123456789:web:graduway-placeholder',
     messagingSenderId: '123456789',
     projectId: 'graduway-aditya-college',
@@ -53,7 +53,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyGraduWayAndroidApiKeyPlaceholder',
+    apiKey: const String.fromEnvironment('FIREBASE_ANDROID_API_KEY', defaultValue: 'AIzaSyGraduWayAndroidApiKeyPlaceholder'),
     appId: '1:123456789:android:graduway-android-placeholder',
     messagingSenderId: '123456789',
     projectId: 'graduway-aditya-college',
@@ -61,7 +61,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyGraduWayIosApiKeyPlaceholder',
+    apiKey: const String.fromEnvironment('FIREBASE_IOS_API_KEY', defaultValue: 'AIzaSyGraduWayIosApiKeyPlaceholder'),
     appId: '1:123456789:ios:graduway-ios-placeholder',
     messagingSenderId: '123456789',
     projectId: 'graduway-aditya-college',
@@ -70,7 +70,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyGraduWayMacosApiKeyPlaceholder',
+    apiKey: const String.fromEnvironment('FIREBASE_MACOS_API_KEY', defaultValue: 'AIzaSyGraduWayMacosApiKeyPlaceholder'),
     appId: '1:123456789:ios:graduway-macos-placeholder',
     messagingSenderId: '123456789',
     projectId: 'graduway-aditya-college',
@@ -79,7 +79,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyGraduWayWindowsApiKeyPlaceholder',
+    apiKey: const String.fromEnvironment('FIREBASE_WINDOWS_API_KEY', defaultValue: 'AIzaSyGraduWayWindowsApiKeyPlaceholder'),
     appId: '1:123456789:web:graduway-windows-placeholder',
     messagingSenderId: '123456789',
     projectId: 'graduway-aditya-college',

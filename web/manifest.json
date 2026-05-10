@@ -1,6 +1,6 @@
 {
-    "name": "alumsync",
-    "short_name": "alumsync",
+    "name": "graduway",
+    "short_name": "graduway",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

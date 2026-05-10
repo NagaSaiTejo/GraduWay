@@ -145,7 +145,7 @@ class AlumniProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Their advice
-                    _SectionHeader(title: '💡 Advice to You'),
+                    const _SectionHeader(title: '💡 Advice to You'),
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(18),
@@ -175,7 +175,7 @@ class AlumniProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Placement story
-                    _SectionHeader(title: '📖 Their Journey'),
+                    const _SectionHeader(title: '📖 Their Journey'),
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(18),
@@ -190,7 +190,7 @@ class AlumniProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Skills
-                    _SectionHeader(title: '🛠️ Skills That Got Them There'),
+                    const _SectionHeader(title: '🛠️ Skills That Got Them There'),
                     const SizedBox(height: 12),
                     Wrap(
                       spacing: 8,
@@ -209,7 +209,7 @@ class AlumniProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Interview rounds
-                    _SectionHeader(title: '🎯 Interview Process'),
+                    const _SectionHeader(title: '🎯 Interview Process'),
                     const SizedBox(height: 12),
                     ...alumni.interviewRounds.asMap().entries.map((e) {
                       final i = e.key;
@@ -220,7 +220,7 @@ class AlumniProfileScreen extends ConsumerWidget {
                           children: [
                             Container(
                               width: 28, height: 28,
-                              decoration: BoxDecoration(gradient: AppColors.primaryGradient, shape: BoxShape.circle),
+                              decoration: const BoxDecoration(gradient: AppColors.primaryGradient, shape: BoxShape.circle),
                               child: Center(child: Text('${i + 1}', style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w700))),
                             ),
                             const SizedBox(width: 12),
@@ -233,7 +233,7 @@ class AlumniProfileScreen extends ConsumerWidget {
                     const SizedBox(height: 24),
 
                     // Anonymous confession
-                    _SectionHeader(title: '🤫 What They Really Felt'),
+                    const _SectionHeader(title: '🤫 What They Really Felt'),
                     const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(18),

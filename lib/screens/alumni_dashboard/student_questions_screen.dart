@@ -38,7 +38,7 @@ class _StudentQuestionsScreenState extends ConsumerState<StudentQuestionsScreen>
     final myAnswers = allQuestions.where((q) => q.answers.any((a) => a.alumniId == alumni?.id)).toList();
 
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'Student Questions',
         showBackButton: false,
       ),

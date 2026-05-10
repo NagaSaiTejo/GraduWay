@@ -69,13 +69,13 @@ class AlumniHomeScreen extends ConsumerWidget {
                     icon: Icons.people_outline,
                     color: AppColors.primary),
                 const SizedBox(width: 12),
-                _ImpactCard(
+                const _ImpactCard(
                     label: 'Answers',
                     value: '42',
                     icon: Icons.question_answer_outlined,
                     color: AppColors.alumni),
                 const SizedBox(width: 12),
-                _ImpactCard(
+                const _ImpactCard(
                     label: 'Views',
                     value: '1.2k',
                     icon: Icons.remove_red_eye_outlined,
@@ -300,8 +300,9 @@ class AlumniHomeScreen extends ConsumerWidget {
                       firstDate: DateTime.now(),
                       lastDate: DateTime.now().add(const Duration(days: 90)),
                     );
-                    if (picked != null)
+                    if (picked != null) {
                       setModalState(() => selectedDate = picked);
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(

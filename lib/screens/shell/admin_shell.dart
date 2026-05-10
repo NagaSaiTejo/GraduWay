@@ -14,9 +14,9 @@ class AdminShell extends ConsumerWidget {
     final currentIndex = ref.watch(adminNavIndexProvider);
 
     final tabs = [
-      _NavTab(icon: Icons.analytics_rounded, label: 'Overview', path: '/admin-home'),
-      _NavTab(icon: Icons.manage_accounts_rounded, label: 'Users', path: '/admin-users'),
-      _NavTab(icon: Icons.person_rounded, label: 'Profile', path: '/admin-profile'),
+      const _NavTab(icon: Icons.analytics_rounded, label: 'Overview', path: '/admin-home'),
+      const _NavTab(icon: Icons.manage_accounts_rounded, label: 'Users', path: '/admin-users'),
+      const _NavTab(icon: Icons.person_rounded, label: 'Profile', path: '/admin-profile'),
     ];
 
     return Scaffold(

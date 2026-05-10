@@ -14,11 +14,11 @@ class StudentShell extends ConsumerWidget {
     final currentIndex = ref.watch(studentNavIndexProvider);
 
     final tabs = [
-      _NavTab(icon: Icons.home_rounded, label: 'Home', path: '/home'),
-      _NavTab(icon: Icons.people_alt_rounded, label: 'Alumni', path: '/alumni'),
-      _NavTab(icon: Icons.quiz_rounded, label: 'Ask', path: '/qa'),
-      _NavTab(icon: Icons.map_rounded, label: 'Roadmap', path: '/roadmap'),
-      _NavTab(icon: Icons.emoji_events_rounded, label: 'Badges', path: '/badges'),
+      const _NavTab(icon: Icons.home_rounded, label: 'Home', path: '/home'),
+      const _NavTab(icon: Icons.people_alt_rounded, label: 'Alumni', path: '/alumni'),
+      const _NavTab(icon: Icons.quiz_rounded, label: 'Ask', path: '/qa'),
+      const _NavTab(icon: Icons.map_rounded, label: 'Roadmap', path: '/roadmap'),
+      const _NavTab(icon: Icons.emoji_events_rounded, label: 'Badges', path: '/badges'),
     ];
 
     return Scaffold(

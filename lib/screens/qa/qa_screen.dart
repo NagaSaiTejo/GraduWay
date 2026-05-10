@@ -179,8 +179,11 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                   selected: isSelected,
                   onSelected: (val) {
                     setState(() {
-                      if (val) _selectedTags.add(tag);
-                      else _selectedTags.remove(tag);
+                      if (val) {
+                        _selectedTags.add(tag);
+                      } else {
+                        _selectedTags.remove(tag);
+                      }
                     });
                   },
                 );

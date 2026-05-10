@@ -8,6 +8,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../core/api_config.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -270,7 +271,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // ── Path 2: Fall back to Node.js/MongoDB backend (development) ────────
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/login');
+      final uri = Uri.parse(ApiConfig.login);
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -312,11 +313,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         top: offset.dy + size.height, // Position right below the app bar
         right: 20,
         width: 280, // Made it a bit smaller/slimmer
-        child: Material(
+        child: const Material(
           color: Colors.transparent,
           child: Opacity(
             opacity: 0.9, // Semi-transparent
-            child: const _CredentialHintCard(),
+            child: _CredentialHintCard(),
           ),
         ),
       ),
@@ -412,10 +413,10 @@ class _CredentialHintCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFDDE3FF), width: 1.5),
       ),
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primary),
               SizedBox(width: 6),
@@ -430,42 +431,42 @@ class _CredentialHintCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           // Student
           _HintRow(
             icon: Icons.school_outlined,
             role: 'Student',
             color: AppColors.primary,
-            lines: const [
+            lines: [
               'Email ending with  @stud.com',
               'e.g.  yourname@stud.com',
               'Password: anything',
             ],
           ),
 
-          const Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
+          Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
 
           // Alumni
           _HintRow(
             icon: Icons.work_outline_rounded,
             role: 'Alumni',
             color: AppColors.alumni,
-            lines: const [
+            lines: [
               'Email ending with  @alum.com',
               'e.g.  yourname@alum.com',
               'Password: anything',
             ],
           ),
 
-          const Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
+          Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
 
           // Admin
           _HintRow(
             icon: Icons.admin_panel_settings_outlined,
             role: 'Admin',
             color: AppColors.admin,
-            lines: const [
+            lines: [
               'Email ending with  @admin.com',
               'e.g.  yourname@admin.com',
               'Password: anything',

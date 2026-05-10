@@ -18,25 +18,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentPage = 0;
 
   final List<_OnboardData> _pages = [
-    _OnboardData(
+    const _OnboardData(
       emoji: '🎓',
       title: 'Learn from\nYour Seniors',
       subtitle: 'Get real guidance from Aditya College alumni who cracked top companies. Not random YouTube advice — actual experiences from your college.',
-      gradient: [const Color(0xFF4F46E5), const Color(0xFF7C3AED)],
+      gradient: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
       tag: 'ALUMNI GUIDANCE',
     ),
-    _OnboardData(
+    const _OnboardData(
       emoji: '🚀',
       title: 'Build the Right\nSkill Path',
       subtitle: 'Understand exactly which skills give the best packages from our college. Skill → Package mapping based on real alumni data.',
-      gradient: [const Color(0xFF7C3AED), const Color(0xFFEC4899)],
+      gradient: [Color(0xFF7C3AED), Color(0xFFEC4899)],
       tag: 'CAREER ROADMAP',
     ),
-    _OnboardData(
+    const _OnboardData(
       emoji: '🏆',
       title: 'Get Placed &\nGrow Continuously',
       subtitle: 'From 1st year to final year, GraduWay evolves with you — placement prep, mentorship, job referrals, and career tracking.',
-      gradient: [const Color(0xFFF59E0B), const Color(0xFFEF4444)],
+      gradient: [Color(0xFFF59E0B), Color(0xFFEF4444)],
       tag: 'LIFELONG GROWTH',
     ),
   ];
@@ -85,7 +85,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     SmoothPageIndicator(
                       controller: _controller,
                       count: _pages.length,
-                      effect: ExpandingDotsEffect(
+                      effect: const ExpandingDotsEffect(
                         activeDotColor: AppColors.primary,
                         dotColor: AppColors.border,
                         dotHeight: 8,

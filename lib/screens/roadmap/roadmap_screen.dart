@@ -5,7 +5,6 @@ import 'package:percent_indicator/linear_percent_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../widgets/custom_app_bar.dart';
 import 'milestone_test_screen.dart';
 
 class RoadmapScreen extends ConsumerWidget {
@@ -114,274 +113,246 @@ class RoadmapScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
             ],
-            
-            if (effectiveGoal == null)
+            ...[
+            if (activeRoadmap != null) ...[
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(32),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppColors.bgCard,
+                  color: AppColors.primary.withValues(alpha: 0.05),
                   borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.border),
+                  border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.1)),
                 ),
-                child: const Column(
+                child: Row(
                   children: [
-                    Text('🗺️', style: TextStyle(fontSize: 48)),
-                    SizedBox(height: 16),
-                    Text('Select a career path above',
-                        style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary)),
-                    SizedBox(height: 6),
-                    Text(
-                        'Your personalized roadmap will appear here, curated by Aditya alumni who have walked this path.',
-                        style:
-                            TextStyle(color: AppColors.textMuted, fontSize: 13),
-                        textAlign: TextAlign.center),
-                  ],
-                ),
-              ).animate().fadeIn(),
-            if (effectiveGoal != null) ...[
-              if (activeRoadmap != null) ...[
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.1)),
-                  ),
-                  child: Row(
-                    children: [
-                      const Text('⚡', style: TextStyle(fontSize: 32)),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('$effectiveGoal Progress',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.w700, fontSize: 15)),
-                            const SizedBox(height: 4),
-                            Text(
-                                '$completedSteps of $totalSteps milestones completed',
-                                style: const TextStyle(
-                                    fontSize: 12, color: AppColors.textMuted)),
-                            const SizedBox(height: 10),
-                            LinearPercentIndicator(
-                              lineHeight: 8,
-                              percent: overallPct,
-                              backgroundColor: AppColors.border,
-                              progressColor: AppColors.primary,
-                              barRadius: const Radius.circular(4),
-                              padding: EdgeInsets.zero,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text('${(overallPct * 100).toInt()}%',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.primary,
-                              fontSize: 18)),
-                    ],
-                  ),
-                ).animate().fadeIn().slideY(begin: 0.1),
-                const SizedBox(height: 28),
-              ],
-              if (activeRoadmap == null)
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  child: Consumer(builder: (context, ref, child) {
-                    return ElevatedButton(
-                      onPressed: () async {
-                        final nav = Navigator.of(context, rootNavigator: true);
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (c) => const Center(child: CircularProgressIndicator()),
-                        );
-                        await ref.read(authProvider.notifier).selectRoadmap(effectiveGoal);
-                        nav.pop(); // hide loading
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      ),
-                      child: Text('Start $effectiveGoal Roadmap', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    );
-                  }),
-                ),
-              const Text('Milestone Roadmap',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 6),
-              Text(
-                  '${items.length} steps • Curated by alumni at ${_getCompany(effectiveGoal)}',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textMuted)),
-              const SizedBox(height: 20),
-              ...List.generate(items.length, (i) {
-                final item = items[i];
-                final isLast = i == items.length - 1;
-                
-                final isCompleted = i < completedSteps;
-                final isCurrent = i == completedSteps && activeRoadmap != null;
-                final isLocked = i > completedSteps || activeRoadmap == null;
-
-                final primaryColor = isCompleted ? AppColors.success : (isCurrent ? AppColors.primary : AppColors.border);
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 4),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
+                    const Text('⚡', style: TextStyle(fontSize: 32)),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: isCompleted
-                                  ? AppColors.success
-                                  : (isCurrent ? AppColors.primary.withValues(alpha: 0.1) : AppColors.bgCard),
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: primaryColor,
-                                width: 2,
-                              ),
-                            ),
-                            child: Center(
-                                child: isCompleted 
-                                ? const Icon(Icons.check, color: Colors.white)
-                                : Text(item.emoji, style: const TextStyle(fontSize: 20))),
+                          Text('$effectiveGoal Progress',
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 15)),
+                          const SizedBox(height: 4),
+                          Text(
+                              '$completedSteps of $totalSteps milestones completed',
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.textMuted)),
+                          const SizedBox(height: 10),
+                          LinearPercentIndicator(
+                            lineHeight: 8,
+                            percent: overallPct,
+                            backgroundColor: AppColors.border,
+                            progressColor: AppColors.primary,
+                            barRadius: const Radius.circular(4),
+                            padding: EdgeInsets.zero,
                           ),
-                          if (!isLast)
-                            Container(
-                                width: 2,
-                                height: isCurrent ? 120 : 80,
-                                color: AppColors.border.withValues(alpha: 0.5)),
                         ],
                       ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 28),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: AppColors.bgCard,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: AppColors.border),
+                    ),
+                    const SizedBox(width: 12),
+                    Text('${(overallPct * 100).toInt()}%',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            fontSize: 18)),
+                  ],
+                ),
+              ).animate().fadeIn().slideY(begin: 0.1),
+              const SizedBox(height: 28),
+            ],
+            if (activeRoadmap == null)
+              Container(
+                width: double.infinity,
+                margin: const EdgeInsets.only(bottom: 24),
+                child: Consumer(builder: (context, ref, child) {
+                  return ElevatedButton(
+                    onPressed: () async {
+                      final nav = Navigator.of(context, rootNavigator: true);
+                      showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (c) => const Center(child: CircularProgressIndicator()),
+                      );
+                      await ref.read(authProvider.notifier).selectRoadmap(effectiveGoal);
+                      nav.pop(); // hide loading
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    child: Text('Start $effectiveGoal Roadmap', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                  );
+                }),
+              ),
+            const Text('Milestone Roadmap',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            Text(
+                '${items.length} steps • Curated by alumni at ${_getCompany(effectiveGoal)}',
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textMuted)),
+            const SizedBox(height: 20),
+            ...List.generate(items.length, (i) {
+              final item = items[i];
+              final isLast = i == items.length - 1;
+              
+              final isCompleted = i < completedSteps;
+              final isCurrent = i == completedSteps && activeRoadmap != null;
+              final isLocked = i > completedSteps || activeRoadmap == null;
+
+              final primaryColor = isCompleted ? AppColors.success : (isCurrent ? AppColors.primary : AppColors.border);
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      children: [
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: isCompleted
+                                ? AppColors.success
+                                : (isCurrent ? AppColors.primary.withValues(alpha: 0.1) : AppColors.bgCard),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: primaryColor,
+                              width: 2,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                        child: Text(item.title,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.w700,
-                                                fontSize: 14))),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 3),
-                                      decoration: BoxDecoration(
-                                          color: AppColors.bgPage,
-                                          borderRadius:
-                                              BorderRadius.circular(8)),
-                                      child: Text(item.duration,
+                          ),
+                          child: Center(
+                              child: isCompleted 
+                              ? const Icon(Icons.check, color: Colors.white)
+                              : Text(item.emoji, style: const TextStyle(fontSize: 20))),
+                        ),
+                        if (!isLast)
+                          Container(
+                              width: 2,
+                              height: isCurrent ? 120 : 80,
+                              color: AppColors.border.withValues(alpha: 0.5)),
+                      ],
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 28),
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgCard,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Expanded(
+                                      child: Text(item.title,
                                           style: const TextStyle(
-                                              fontSize: 10,
-                                              color: AppColors.textMuted,
-                                              fontWeight: FontWeight.w600)),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 6),
-                                Text(item.description,
-                                    style: const TextStyle(
-                                        color: AppColors.textSecondary,
-                                        fontSize: 12,
-                                        height: 1.5)),
-                                if (item.resources.isNotEmpty) ...[
-                                  const SizedBox(height: 10),
-                                  const Divider(height: 1),
-                                  const SizedBox(height: 10),
-                                  const Text('📚 Resources',
-                                      style: TextStyle(
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.w700,
-                                          color: AppColors.textMuted)),
-                                  const SizedBox(height: 6),
-                                  ...item.resources.map((r) => Padding(
-                                        padding: const EdgeInsets.only(bottom: 4),
-                                        child: InkWell(
-                                          onTap: () async {
-                                            final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(r)}');
-                                            if (await canLaunchUrl(url)) {
-                                              await launchUrl(url, mode: LaunchMode.externalApplication);
-                                            }
-                                          },
-                                          child: Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              const Text('• ', style: TextStyle(color: AppColors.primary)),
-                                              Expanded(
-                                                child: Text(r,
-                                                    style: const TextStyle(
-                                                        fontSize: 11,
-                                                        color: AppColors.primary,
-                                                        decoration: TextDecoration.underline)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )),
-                                ],
-                                if (isCurrent && activeRoadmap != null) ...[
-                                  const SizedBox(height: 16),
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => MilestoneTestScreen(
-                                              roadmapName: activeRoadmap,
-                                              milestoneIndex: i,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: AppColors.primary,
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                      ),
-                                      child: const Text('Take Test to Complete', style: TextStyle(fontWeight: FontWeight.bold)),
-                                    ),
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 14))),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                        color: AppColors.bgPage,
+                                        borderRadius:
+                                            BorderRadius.circular(8)),
+                                    child: Text(item.duration,
+                                        style: const TextStyle(
+                                            fontSize: 10,
+                                            color: AppColors.textMuted,
+                                            fontWeight: FontWeight.w600)),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 6),
+                              Text(item.description,
+                                  style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 12,
+                                      height: 1.5)),
+                              if (item.resources.isNotEmpty) ...[
+                                const SizedBox(height: 10),
+                                const Divider(height: 1),
+                                const SizedBox(height: 10),
+                                const Text('📚 Resources',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textMuted)),
+                                const SizedBox(height: 6),
+                                ...item.resources.map((r) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 4),
+                                      child: InkWell(
+                                        onTap: () async {
+                                          final url = Uri.parse('https://www.google.com/search?q=${Uri.encodeComponent(r)}');
+                                          if (await canLaunchUrl(url)) {
+                                            await launchUrl(url, mode: LaunchMode.externalApplication);
+                                          }
+                                        },
+                                        child: Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            const Text('• ', style: TextStyle(color: AppColors.primary)),
+                                            Expanded(
+                                              child: Text(r,
+                                                  style: const TextStyle(
+                                                      fontSize: 11,
+                                                      color: AppColors.primary,
+                                                      decoration: TextDecoration.underline)),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )),
                               ],
-                            ),
+                              if (isCurrent) ...[
+                                const SizedBox(height: 16),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MilestoneTestScreen(
+                                            roadmapName: activeRoadmap,
+                                            milestoneIndex: i,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppColors.primary,
+                                      foregroundColor: Colors.white,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    ),
+                                    child: const Text('Take Test to Complete', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
                       ),
-                    ],
-                  )
-                      .animate()
-                      .fadeIn(delay: Duration(milliseconds: i * 120))
-                      .slideX(begin: 0.1),
-                );
-              }),
-            ],
+                    ),
+                  ],
+                )
+                    .animate()
+                    .fadeIn(delay: Duration(milliseconds: i * 120))
+                    .slideX(begin: 0.1),
+              );
+            }),
+          ],
             const SizedBox(height: 80),
           ],
         ),

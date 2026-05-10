@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
+import '../../core/api_config.dart';
+import '../../services/firebase_service.dart';
 
 class AdminRegistrationScreen extends StatefulWidget {
   const AdminRegistrationScreen({super.key});
@@ -59,7 +61,21 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/admin');
+      // ── Step 1: Register in Firebase (Real-time/Auth) ──
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+
+      await FirebaseService.registerUser(
+        email: email,
+        password: password,
+        role: 'admin',
+        userData: {
+          'name': _nameController.text.trim(),
+        },
+      );
+
+      // ── Step 2: Register in Node.js/MongoDB (Relational) ──
+      final uri = Uri.parse(ApiConfig.registerAdmin);
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['name'] = _nameController.text.trim();

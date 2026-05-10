@@ -111,10 +111,10 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
                 child: _isLoading
                     ? _buildShimmer()
                     : alumni.isEmpty
-                        ? Center(
+                        ? const Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
+                              children: [
                                 Text('🔍', style: TextStyle(fontSize: 48)),
                                 SizedBox(height: 12),
                                 Text('No alumni found',

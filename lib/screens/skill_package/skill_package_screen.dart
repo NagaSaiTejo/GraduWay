@@ -86,7 +86,7 @@ class _SkillPackageScreenState extends State<SkillPackageScreen> {
                             gridData: FlGridData(
                               show: true,
                               drawVerticalLine: false,
-                              getDrawingHorizontalLine: (_) => FlLine(color: AppColors.border, strokeWidth: 0.5),
+                              getDrawingHorizontalLine: (_) => const FlLine(color: AppColors.border, strokeWidth: 0.5),
                             ),
                             borderData: FlBorderData(show: false),
                             titlesData: FlTitlesData(

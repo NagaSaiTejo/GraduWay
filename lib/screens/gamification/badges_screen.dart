@@ -58,12 +58,12 @@ class BadgesScreen extends ConsumerWidget {
                       Row(
                         children: [
                           Expanded(
-                            child: Column(
+                            child: const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Text('Your Progress 🏆', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                const SizedBox(height: 4),
-                                const Text('Career readiness score & badge collection', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                Text('Your Progress 🏆', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+                                SizedBox(height: 4),
+                                Text('Career readiness score & badge collection', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                               ],
                             ).animate().fadeIn(duration: 400.ms),
                           ),
@@ -123,9 +123,9 @@ class BadgesScreen extends ConsumerWidget {
 
                       const SizedBox(height: 28),
 
-                      Align(
+                      const Align(
                         alignment: Alignment.centerLeft,
-                        child: const Text('Your Badges', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                        child: Text('Your Badges', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                       ).animate().fadeIn(delay: 350.ms),
                       const SizedBox(height: 4),
                       Align(

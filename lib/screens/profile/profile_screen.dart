@@ -286,10 +286,10 @@ class ProfileScreen extends ConsumerWidget {
 
   void _showNotificationsSheet(BuildContext context) {
     final notifs = [
-      _NotifItem(icon: Icons.chat_bubble_rounded, color: AppColors.primary, title: 'Ravi Kumar answered your question', sub: 'Check out insights on FAANG prep!', time: '2h ago'),
-      _NotifItem(icon: Icons.event_rounded, color: AppColors.secondary, title: 'Webinar tomorrow at 6 PM', sub: 'System Design with Priya Lakshmi — WebDev track', time: '5h ago'),
-      _NotifItem(icon: Icons.emoji_events_rounded, color: AppColors.accent, title: 'New Badge Earned! 🏆', sub: 'You earned "First Question Asked"', time: 'Yesterday'),
-      _NotifItem(icon: Icons.people_rounded, color: AppColors.alumni, title: 'Alumni Ajay started following your progress', sub: 'He\'s available for mentorship!', time: '2 days ago'),
+      const _NotifItem(icon: Icons.chat_bubble_rounded, color: AppColors.primary, title: 'Ravi Kumar answered your question', sub: 'Check out insights on FAANG prep!', time: '2h ago'),
+      const _NotifItem(icon: Icons.event_rounded, color: AppColors.secondary, title: 'Webinar tomorrow at 6 PM', sub: 'System Design with Priya Lakshmi — WebDev track', time: '5h ago'),
+      const _NotifItem(icon: Icons.emoji_events_rounded, color: AppColors.accent, title: 'New Badge Earned! 🏆', sub: 'You earned "First Question Asked"', time: 'Yesterday'),
+      const _NotifItem(icon: Icons.people_rounded, color: AppColors.alumni, title: 'Alumni Ajay started following your progress', sub: 'He\'s available for mentorship!', time: '2 days ago'),
     ];
 
     showModalBottomSheet(

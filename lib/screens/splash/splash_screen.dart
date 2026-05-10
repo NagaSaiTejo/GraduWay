@@ -107,7 +107,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
 
                   const SizedBox(height: 8),
 
-                  Text(
+                  const Text(
                     'Aditya Engineering College',
                     style: TextStyle(
                       fontSize: 14,
@@ -159,7 +159,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       .animate(onPlay: (c) => c.repeat())
                       .shimmer(duration: 1.5.seconds, color: AppColors.primaryLight.withValues(alpha: 0.6)),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     'Connecting generations.\nBuilding futures.',
                     textAlign: TextAlign.center,
                     style: TextStyle(

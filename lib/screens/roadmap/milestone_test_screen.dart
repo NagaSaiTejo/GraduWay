@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../core/api_config.dart';
 
 class MilestoneTestScreen extends ConsumerStatefulWidget {
   final String roadmapName;
@@ -157,7 +158,7 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
       
       try {
         final response = await http.post(
-          Uri.parse('http://127.0.0.1:5000/api/roadmap/complete-milestone'),
+          Uri.parse(ApiConfig.roadmapCompleteMilestone),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'email': email,

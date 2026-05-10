@@ -7,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
+import '../../core/api_config.dart';
+import '../../services/firebase_service.dart';
 
 class AlumniRegistrationScreen extends StatefulWidget {
   const AlumniRegistrationScreen({super.key});
@@ -64,7 +66,26 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/alumni');
+      // ── Step 1: Register in Firebase (Real-time/Auth) ──
+      final email = _emailController.text.trim();
+      final password = _passwordController.text;
+
+      await FirebaseService.registerUser(
+        email: email,
+        password: password,
+        role: 'alumni',
+        userData: {
+          'name': _nameController.text.trim(),
+          'passoutYear': _batchController.text.trim(),
+          'company': _companyController.text.trim(),
+          'role': _roleController.text.trim(),
+          'isVerified': true, // Mock verification for now
+          'rating': 4.5,
+        },
+      );
+
+      // ── Step 2: Register in Node.js/MongoDB (Relational) ──
+      final uri = Uri.parse(ApiConfig.registerAlumni);
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['name'] = _nameController.text.trim();

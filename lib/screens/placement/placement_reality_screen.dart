@@ -1,14 +1,204 @@
-// ignore_for_file: unused_import
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import '../../theme/app_colors.dart';
-import '../../data/mock/alumni_data.dart';
 import '../../widgets/custom_app_bar.dart';
+import '../../providers/firestore_providers.dart';
+import '../../theme/app_colors.dart';
 
-class PlacementRealityScreen extends StatelessWidget {
+class PlacementRealityScreen extends ConsumerWidget {
   const PlacementRealityScreen({super.key});
 
-  final _stories = const [
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(placementStatsProvider);
+
+    return Scaffold(
+      appBar: const CustomAppBar(
+        title: 'Placement Reality 🎭',
+        showBackButton: true,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+        child: SafeArea(
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                              'No sugar-coating. Real data and stories from Aditya alumni.',
+                              style: TextStyle(
+                                  fontSize: 13, color: AppColors.textSecondary))
+                          .animate()
+                          .fadeIn(delay: 100.ms),
+                      const SizedBox(height: 16),
+
+                      // Statistics Overview Section
+                      statsAsync.when(
+                        data: (stats) => _StatsOverview(stats: stats),
+                        loading: () => const Center(
+                            child: CircularProgressIndicator(
+                                color: AppColors.primary)),
+                        error: (e, _) => const SizedBox.shrink(),
+                      ).animate().fadeIn(delay: 150.ms),
+
+                      const SizedBox(height: 24),
+
+                      // Disclaimer banner
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: AppColors.accent.withValues(alpha: 0.3)),
+                        ),
+                        child: Row(
+                          children: [
+                        const Text('⚠️', style: TextStyle(fontSize: 20)),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            'These are real experiences from Aditya College alumni. Some are anonymous to protect privacy.',
+                            style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary,
+                                height: 1.4),
+                          ),
+                        ),
+                          ],
+                        ),
+                      ).animate().fadeIn(delay: 200.ms),
+
+                      const SizedBox(height: 24),
+                      const Text('Alumni Insights & Stories',
+                          style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary)),
+                      const SizedBox(height: 16),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, i) =>
+                        _StoryCard(story: _PlacementStories.stories[i], index: i),
+                    childCount: _PlacementStories.stories.length,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatsOverview extends StatelessWidget {
+  final Map<String, dynamic> stats;
+  const _StatsOverview({required this.stats});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Placement Rate',
+                value: '${stats['placementRate']}%',
+                subtitle: 'Aditya Avg',
+                color: Colors.blue,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _StatCard(
+                title: 'Avg Package',
+                value: '₹${stats['avgPackage']}L',
+                subtitle: 'Annual CTC',
+                color: Colors.green,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Total Alumni',
+                value: '${stats['totalAlumni']}+',
+                subtitle: 'In Directory',
+                color: Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _StatCard(
+                title: 'Companies',
+                value: '${stats['companiesRepresented']}',
+                subtitle: 'Hiring Partners',
+                color: Colors.purple,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _StatCard extends StatelessWidget {
+  final String title, value, subtitle;
+  final Color color;
+  const _StatCard(
+      {required this.title,
+      required this.value,
+      required this.subtitle,
+      required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.bgCard,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+          const SizedBox(height: 4),
+          Text(value,
+              style: TextStyle(
+                  fontSize: 20, fontWeight: FontWeight.w900, color: color)),
+          const SizedBox(height: 2),
+          Text(subtitle,
+              style: const TextStyle(
+                  fontSize: 10,
+                  color: AppColors.textSecondary,
+                  fontStyle: FontStyle.italic)),
+        ],
+      ),
+    );
+  }
+}
+
+class _PlacementStories {
+  static const stories = [
     _Story(
       name: 'Ravi Kumar Reddy',
       company: 'Amazon',
@@ -60,79 +250,6 @@ class PlacementRealityScreen extends StatelessWidget {
       isAnon: false,
     ),
   ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const CustomAppBar(
-        title: 'Placement Reality 🎭',
-        showBackButton: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                              'No sugar-coating. Real stories from Aditya alumni.',
-                              style: TextStyle(
-                                  fontSize: 13, color: AppColors.textSecondary))
-                          .animate()
-                          .fadeIn(delay: 100.ms),
-                      const SizedBox(height: 16),
-
-                      // Disclaimer banner
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppColors.accent.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                              color: AppColors.accent.withValues(alpha: 0.3)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Text('⚠️', style: TextStyle(fontSize: 20)),
-                            const SizedBox(width: 10),
-                            const Expanded(
-                              child: Text(
-                                'These are real experiences from Aditya College alumni. Some are anonymous to protect privacy.',
-                                style: TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                    height: 1.4),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: 200.ms),
-
-                      const SizedBox(height: 24),
-                    ],
-                  ),
-                ),
-              ),
-              SliverPadding(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, i) => _StoryCard(story: _stories[i], index: i),
-                    childCount: _stories.length,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 class _Story {
@@ -206,7 +323,7 @@ class _StoryCardState extends State<_StoryCard> {
                       const SizedBox(width: 12),
                       Expanded(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(s.name,
                                 style: const TextStyle(
@@ -276,3 +393,4 @@ class _StoryCardState extends State<_StoryCard> {
         .slideY(begin: 0.1, end: 0, duration: 350.ms);
   }
 }
+

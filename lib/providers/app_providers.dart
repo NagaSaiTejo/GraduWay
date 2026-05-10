@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
-import '../data/models/student_model.dart';
 import '../data/mock/alumni_data.dart';
 import '../data/mock/placement_data.dart';
+import '../core/api_config.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth State
@@ -184,7 +183,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/roadmap/select'),
+        Uri.parse(ApiConfig.roadmapSelect),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'roadmapName': roadmapName}),
       );
@@ -208,7 +207,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final email = state.student?.email ?? state.loginEmail;
       if (email.isEmpty) return;
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/roadmap/exit'),
+        Uri.parse(ApiConfig.roadmapExit),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );
@@ -321,11 +320,13 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
     final newCount = state.questionsAsked + 1;
     var newState = state.copyWith(questionsAsked: newCount);
     // Award badge: first question
-    if (newCount == 1)
+    if (newCount == 1) {
       newState = _awardBadge(newState, 'b002', 'Curious Mind', '❓');
+    }
     // Award badge: 5 questions
-    if (newCount == 5)
+    if (newCount == 5) {
       newState = _awardBadge(newState, 'b008', 'Community Hero', '💬');
+    }
     state = newState;
   }
 
@@ -333,8 +334,9 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
   void attendEvent() {
     final newCount = state.eventsAttended + 1;
     var newState = state.copyWith(eventsAttended: newCount);
-    if (newCount == 1)
+    if (newCount == 1) {
       newState = _awardBadge(newState, 'b004', 'Event Goer', '🎓');
+    }
     state = newState;
   }
 
@@ -346,10 +348,12 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
       alumniProfilesViewed: newIds.length,
       viewedAlumniIds: newIds,
     );
-    if (newIds.length == 1)
+    if (newIds.length == 1) {
       newState = _awardBadge(newState, 'b001', 'First Connect', '🤝');
-    if (newIds.length == 5)
+    }
+    if (newIds.length == 5) {
       newState = _awardBadge(newState, 'b007', 'Network Builder', '🌐');
+    }
     state = newState;
   }
 
