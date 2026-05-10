@@ -1,0 +1,95 @@
+Analyzing app...
+
+   info • Don't invoke 'print' in production code • lib/main.dart:15:5 • avoid_print
+   info • The import of '../data/models/alumni_model.dart' is unnecessary because all of the used elements are also provided by the import of '../data/models/models.dart' • lib/providers/app_providers.dart:2:8 • unnecessary_import
+   info • The import of '../data/models/student_model.dart' is unnecessary because all of the used elements are also provided by the import of '../data/models/models.dart' • lib/providers/app_providers.dart:4:8 • unnecessary_import
+   info • The import of '../data/models/admin_model.dart' is unnecessary because all of the used elements are also provided by the import of '../data/models/models.dart' • lib/providers/app_providers.dart:5:8 • unnecessary_import
+warning • The declaration '_nameFromEmail' isn't referenced • lib/providers/app_providers.dart:71:8 • unused_element
+warning • The member 'state' can only be used within 'package:state_notifier/state_notifier.dart' or a test • lib/providers/app_providers.dart:405:33 • invalid_use_of_visible_for_testing_member
+warning • The member 'state' can only be used within instance members of subclasses of 'StateNotifier' • lib/providers/app_providers.dart:405:33 • invalid_use_of_protected_member
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/admin/admin_overview_screen.dart:33:25 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_overview_screen.dart:34:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_overview_screen.dart:35:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_overview_screen.dart:36:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_overview_screen.dart:37:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_overview_screen.dart:208:30 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_users_screen.dart:45:20 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_users_screen.dart:46:27 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/admin/admin_users_screen.dart:68:25 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_users_screen.dart:69:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/admin/admin_users_screen.dart:70:17 • prefer_const_constructors
+   info • Use 'const' for final variables initialized to a constant value • lib/screens/admin/admin_users_screen.dart:87:5 • prefer_const_declarations
+warning • Unused import: '../../theme/app_colors.dart' • lib/screens/admin/admin_verification_screen.dart:4:8 • unused_import
+warning • The value of the field '_isLoading' isn't used • lib/screens/alumni/alumni_list_screen.dart:18:8 • unused_field
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_list_screen.dart:116:27 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_list_screen.dart:117:36 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_profile_screen.dart:146:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_profile_screen.dart:176:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_profile_screen.dart:191:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_profile_screen.dart:210:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_profile_screen.dart:221:43 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni/alumni_profile_screen.dart:234:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni_dashboard/alumni_home_screen.dart:72:17 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni_dashboard/alumni_home_screen.dart:78:17 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/screens/alumni_dashboard/alumni_home_screen.dart:304:23 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/screens/alumni_dashboard/student_questions_screen.dart:41:15 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/auth/login_screen.dart:234:16 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/auth/login_screen.dart:236:18 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/auth/login_screen.dart:265:14 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/auth/login_screen.dart:267:19 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/auth/login_screen.dart:286:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/auth/login_screen.dart:300:11 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/auth/login_screen.dart:314:11 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/screens/auth/registration_screen.dart:64:23 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/auth/registration_screen.dart:65:14 • curly_braces_in_flow_control_structures
+   info • Don't use 'BuildContext's across async gaps • lib/screens/auth/registration_screen.dart:278:28 • use_build_context_synchronously
+   info • Use 'const' with the constructor to improve performance • lib/screens/gamification/badges_screen.dart:61:36 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/gamification/badges_screen.dart:63:41 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/gamification/badges_screen.dart:126:23 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/home/home_screen.dart:88:21 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/home/home_screen.dart:89:30 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/home/home_screen.dart:91:35 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/home/home_screen.dart:266:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/home/home_screen.dart:267:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/home/home_screen.dart:268:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/onboarding/onboarding_screen.dart:21:5 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/onboarding/onboarding_screen.dart:28:5 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/onboarding/onboarding_screen.dart:35:5 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/onboarding/onboarding_screen.dart:88:31 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/placement/placement_reality_screen.dart:99:32 • prefer_const_constructors
+   info • Use 'const' literals as arguments to constructors of '@immutable' classes • lib/screens/placement/placement_reality_screen.dart:100:37 • prefer_const_literals_to_create_immutables
+   info • Use 'const' with the constructor to improve performance • lib/screens/profile/profile_screen.dart:289:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/profile/profile_screen.dart:290:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/profile/profile_screen.dart:291:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/profile/profile_screen.dart:292:7 • prefer_const_constructors
+   info • Statements in an if should be enclosed in a block • lib/screens/qa/qa_screen.dart:187:32 • curly_braces_in_flow_control_structures
+   info • Statements in an if should be enclosed in a block • lib/screens/qa/qa_screen.dart:188:28 • curly_braces_in_flow_control_structures
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/admin_shell.dart:17:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/admin_shell.dart:18:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/admin_shell.dart:19:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/alumni_shell.dart:17:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/alumni_shell.dart:18:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/alumni_shell.dart:19:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/student_shell.dart:17:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/student_shell.dart:18:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/student_shell.dart:19:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/student_shell.dart:20:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/shell/student_shell.dart:21:7 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/skill_package/skill_package_screen.dart:89:64 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/splash/splash_screen.dart:110:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/splash/splash_screen.dart:112:28 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/splash/splash_screen.dart:162:19 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/screens/splash/splash_screen.dart:165:28 • prefer_const_constructors
+   info • Don't invoke 'print' in production code • lib/services/auth_service.dart:12:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/auth_service.dart:21:7 • avoid_print
+   info • The import of '../data/models/student_model.dart' is unnecessary because all of the used elements are also provided by the import of '../data/models/models.dart' • lib/services/database_service.dart:3:8 • unnecessary_import
+   info • The import of '../data/models/alumni_model.dart' is unnecessary because all of the used elements are also provided by the import of '../data/models/models.dart' • lib/services/database_service.dart:4:8 • unnecessary_import
+   info • The import of '../data/models/admin_model.dart' is unnecessary because all of the used elements are also provided by the import of '../data/models/models.dart' • lib/services/database_service.dart:5:8 • unnecessary_import
+   info • Don't invoke 'print' in production code • lib/services/database_service.dart:20:7 • avoid_print
+   info • Don't invoke 'print' in production code • lib/services/database_service.dart:22:7 • avoid_print
+warning • The declaration '_posts' isn't referenced • lib/services/database_service.dart:30:20 • unused_element
+warning • The declaration '_events' isn't referenced • lib/services/database_service.dart:31:20 • unused_element
+   info • 'save' is deprecated and shouldn't be used. Since version 4.2. Use insertOne() or replaceOne() instead • lib/services/database_service.dart:75:19 • deprecated_member_use
+   info • 'useMaterial3' is deprecated and shouldn't be used. Use a ThemeData constructor (.from, .light, or .dark) instead. These constructors all have a useMaterial3 argument, and they set appropriate default values based on its value. See the useMaterial3 API documentation for full details. This feature was deprecated after v3.13.0-0.2.pre • lib/theme/app_theme.dart:11:7 • deprecated_member_use
+
+91 issues found. (ran in 3.3s)

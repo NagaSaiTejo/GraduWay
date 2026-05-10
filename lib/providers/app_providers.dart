@@ -350,6 +350,10 @@ class QANotifier extends StateNotifier<List<QAModel>> {
   final DatabaseService _dbService;
   QANotifier(this._dbService) : super([]);
 
+  void updateQA(List<QAModel> list) {
+    state = list;
+  }
+
   Future<void> fetchQA() async {
     state = await _dbService.getAllQA();
   }
@@ -402,7 +406,7 @@ final alumniListProvider = FutureProvider<List<AlumniModel>>((ref) async {
 
 final qaListProvider = FutureProvider<List<QAModel>>((ref) async {
   final list = await ref.read(databaseServiceProvider).getAllQA();
-  ref.read(qaProvider.notifier).state = list;
+  ref.read(qaProvider.notifier).updateQA(list);
   return list;
 });
 
