@@ -43,3 +43,24 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# ─── Backend / Node.js ───────────────────────────────────────────────────────
+# Environment variables — NEVER commit these (contains DB password, secret keys)
+backend/.env
+backend/.env.local
+backend/.env.production
+backend/.env.*
+
+# Node modules — reinstall with `npm install`
+backend/node_modules/
+
+# Uploaded user files — these are generated at runtime, not source code
+backend/uploads/
+
+# npm debug logs
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+
+# Lock file is OK to commit (pinned versions), but node_modules is not
+# backend/package-lock.json  ← keep this tracked

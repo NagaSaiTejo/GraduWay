@@ -1,13 +1,19 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
 
 class AlumniRegistrationScreen extends StatefulWidget {
   const AlumniRegistrationScreen({super.key});
 
   @override
-  State<AlumniRegistrationScreen> createState() => _AlumniRegistrationScreenState();
+  State<AlumniRegistrationScreen> createState() =>
+      _AlumniRegistrationScreenState();
 }
 
 class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
@@ -18,8 +24,10 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
   final _companyController = TextEditingController();
   final _roleController = TextEditingController();
   final _batchController = TextEditingController();
-  
+
   bool _isLoading = false;
+  XFile? _profileImage;
+  static const int _maxImageBytes = 2 * 1024 * 1024; // 2 MB
 
   @override
   void dispose() {
@@ -32,23 +40,80 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
     super.dispose();
   }
 
-  void _handleRegister() async {
-    if (!_formKey.currentState!.validate()) return;
+  Future<void> _pickProfileImage() async {
+    final picker = ImagePicker();
+    // imageQuality is not supported on Flutter Web — skip it to avoid delays
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked == null) return;
+    final bytes = await picked.readAsBytes();
+    if (bytes.length > _maxImageBytes) {
+      _showError('Profile image must be under 2 MB. Please choose a smaller image.');
+      return;
+    }
+    setState(() => _profileImage = picked);
+  }
 
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: Colors.redAccent),
+    );
+  }
+
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
 
-    // TODO: Connect to MongoDB Node.js backend
-    // POST /api/auth/register/alumni
-    
-    await Future.delayed(const Duration(seconds: 2)); // Simulate network request
-    
-    if (!mounted) return;
-    setState(() => _isLoading = false);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registration successful! Please login.')),
-    );
-    context.pop();
+    try {
+      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/alumni');
+      final request = http.MultipartRequest('POST', uri);
+
+      request.fields['name'] = _nameController.text.trim();
+      request.fields['email'] = _emailController.text.trim();
+      request.fields['password'] = _passwordController.text;
+      request.fields['passoutYear'] = _batchController.text.trim();
+      request.fields['company'] = _companyController.text.trim();
+      request.fields['role'] = _roleController.text.trim();
+
+      // Profile image — set correct MIME type so multer accepts it
+      if (_profileImage != null) {
+        final bytes = await _profileImage!.readAsBytes();
+        final ext = _profileImage!.name.split('.').last.toLowerCase();
+        final mimeType = ext == 'png' ? 'image/png'
+            : ext == 'gif' ? 'image/gif'
+            : ext == 'webp' ? 'image/webp'
+            : 'image/jpeg';
+        request.files.add(http.MultipartFile.fromBytes(
+          'profileImage',
+          bytes,
+          filename: _profileImage!.name,
+          contentType: MediaType.parse(mimeType),
+        ));
+      }
+
+      final streamed = await request.send();
+      final response = await http.Response.fromStream(streamed);
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful! Please login.')),
+        );
+        context.pop();
+      } else {
+        _showError(_parseMessage(response.body));
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      _showError('Could not connect to server. Please ensure backend is running.');
+    }
+  }
+
+  String _parseMessage(String json) {
+    final match = RegExp(r'"message"\s*:\s*"([^"]+)"').firstMatch(json);
+    return match?.group(1) ?? 'Registration failed.';
   }
 
   @override
@@ -56,7 +121,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Alumni Registration', style: TextStyle(color: AppColors.textPrimary)),
+        title: const Text('Alumni Registration',
+            style: TextStyle(color: AppColors.textPrimary)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -69,22 +135,35 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Join as an Alumni',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppColors.alumni),
-                ).animate().fadeIn().slideY(),
+                const Text('Join as an Alumni',
+                    style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.alumni))
+                    .animate()
+                    .fadeIn()
+                    .slideY(),
                 const SizedBox(height: 8),
                 const Text(
-                  'Give back to your college community and guide the next generation.',
-                  style: TextStyle(color: AppColors.textSecondary),
-                ).animate().fadeIn(delay: 100.ms),
-                const SizedBox(height: 32),
+                    'Give back to your college community and guide the next generation.',
+                    style: TextStyle(color: AppColors.textSecondary))
+                    .animate()
+                    .fadeIn(delay: 100.ms),
+                const SizedBox(height: 28),
+
+                // Profile Image
+                _ProfileImagePicker(
+                  image: _profileImage,
+                  onTap: _pickProfileImage,
+                  accentColor: AppColors.alumni,
+                ).animate().fadeIn(delay: 150.ms),
+                const SizedBox(height: 24),
 
                 _buildTextField(
                   controller: _nameController,
                   label: 'Full Name',
                   icon: Icons.person_outline,
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
+                  validator: (v) => v!.isEmpty ? 'Please enter your name' : null,
                 ).animate().fadeIn(delay: 200.ms),
                 const SizedBox(height: 16),
 
@@ -93,12 +172,12 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   label: 'Email Address',
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
-                  validator: (val) {
-                    if (val == null || val.isEmpty) return 'Please enter your email';
-                    if (!val.contains('@')) return 'Please enter a valid email';
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Please enter your email';
+                    if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
-                ).animate().fadeIn(delay: 300.ms),
+                ).animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 16),
 
                 _buildTextField(
@@ -106,40 +185,33 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   label: 'Password',
                   icon: Icons.lock_outline,
                   obscureText: true,
-                  validator: (val) => val != null && val.length < 6 ? 'Password must be at least 6 characters' : null,
-                ).animate().fadeIn(delay: 400.ms),
+                  validator: (v) => v != null && v.length < 6 ? 'Min 6 characters' : null,
+                ).animate().fadeIn(delay: 300.ms),
                 const SizedBox(height: 16),
 
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(
-                        controller: _batchController,
-                        label: 'Passout Year',
-                        icon: Icons.calendar_today_outlined,
-                        keyboardType: TextInputType.number,
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-                      ).animate().fadeIn(delay: 500.ms),
-                    ),
-                  ],
-                ),
+                _buildTextField(
+                  controller: _batchController,
+                  label: 'Passout Year (e.g. 2022)',
+                  icon: Icons.calendar_today_outlined,
+                  keyboardType: TextInputType.number,
+                  validator: (v) => v!.isEmpty ? 'Required' : null,
+                ).animate().fadeIn(delay: 350.ms),
                 const SizedBox(height: 16),
 
                 _buildTextField(
                   controller: _companyController,
                   label: 'Current Company',
                   icon: Icons.business_outlined,
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter your company' : null,
-                ).animate().fadeIn(delay: 600.ms),
+                  validator: (v) => v!.isEmpty ? 'Please enter your company' : null,
+                ).animate().fadeIn(delay: 400.ms),
                 const SizedBox(height: 16),
 
                 _buildTextField(
                   controller: _roleController,
                   label: 'Job Title / Role',
                   icon: Icons.work_outline,
-                  validator: (val) => val == null || val.isEmpty ? 'Please enter your role' : null,
-                ).animate().fadeIn(delay: 700.ms),
-
+                  validator: (v) => v!.isEmpty ? 'Please enter your role' : null,
+                ).animate().fadeIn(delay: 450.ms),
                 const SizedBox(height: 40),
 
                 SizedBox(
@@ -149,13 +221,16 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                     onPressed: _isLoading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.alumni,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(color: Colors.white)
-                        : const Text('Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                        : const Text('Register',
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.bold)),
                   ),
-                ).animate().fadeIn(delay: 800.ms),
+                ).animate().fadeIn(delay: 500.ms),
               ],
             ),
           ),
@@ -180,12 +255,62 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Shared Widgets ───────────────────────────────────────────────────────────
+
+class _ProfileImagePicker extends StatelessWidget {
+  final XFile? image;
+  final VoidCallback onTap;
+  final Color accentColor;
+
+  const _ProfileImagePicker({
+    required this.image,
+    required this.onTap,
+    required this.accentColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Stack(
+          children: [
+            CircleAvatar(
+              radius: 52,
+              backgroundColor: accentColor.withOpacity(0.1),
+              backgroundImage: image != null
+                  ? (kIsWeb
+                      ? NetworkImage(image!.path)
+                      : FileImage(File(image!.path))) as ImageProvider
+                  : null,
+              child: image == null
+                  ? Icon(Icons.person, size: 52, color: accentColor.withOpacity(0.5))
+                  : null,
+            ),
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: accentColor,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                ),
+                child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+              ),
+            ),
+          ],
         ),
       ),
     );

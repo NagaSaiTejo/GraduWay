@@ -1,4 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
 import '../data/models/student_model.dart';
@@ -16,15 +18,12 @@ class AuthState {
   final bool isLoggedIn;
   final StudentModel? student;
   final AlumniModel? alumni;
-
-  /// The email the user typed at login
   final String loginEmail;
-
-  /// Name derived from email (part before @), or updated via Edit Profile
   final String loginName;
-
-  /// Bio set via Edit Profile
   final String bio;
+  final String? profileImageUrl;
+  final String? loginError;
+  final bool isLoggingIn;
 
   const AuthState({
     this.role = UserRole.guest,
@@ -34,6 +33,9 @@ class AuthState {
     this.loginEmail = '',
     this.loginName = '',
     this.bio = '',
+    this.profileImageUrl,
+    this.loginError,
+    this.isLoggingIn = false,
   });
 
   AuthState copyWith({
@@ -44,6 +46,9 @@ class AuthState {
     String? loginEmail,
     String? loginName,
     String? bio,
+    String? profileImageUrl,
+    String? loginError,
+    bool? isLoggingIn,
   }) {
     return AuthState(
       role: role ?? this.role,
@@ -53,69 +58,110 @@ class AuthState {
       loginEmail: loginEmail ?? this.loginEmail,
       loginName: loginName ?? this.loginName,
       bio: bio ?? this.bio,
+      profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      loginError: loginError,
+      isLoggingIn: isLoggingIn ?? this.isLoggingIn,
     );
   }
 }
 
-/// Extracts the part before @ from an email, capitalised nicely.
-String _nameFromEmail(String email) {
-  final local = email.split('@').first;
-  // Replace dots/underscores/digits with spaces, then title-case each word
-  final words = local.replaceAll(RegExp(r'[._\-]+'), ' ').split(' ');
-  return words.map((w) {
-    if (w.isEmpty) return '';
-    return w[0].toUpperCase() + w.substring(1);
-  }).join(' ');
-}
+
 
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState());
 
-  void loginAsStudent({required String email}) {
-    final name = _nameFromEmail(email);
-    state = AuthState(
-      role: UserRole.student,
-      isLoggedIn: true,
-      loginEmail: email,
-      loginName: name,
-      student: StudentModel(
-        id: 's_current',
-        name: name,
-        email: email,
-        branch: 'CSE',
-        year: 3,
-        targetCareer: '',
-        skills: const [],
-        careerScore: 0,
-        earnedBadges: const [],
-        questionsAsked: 0,
-        mentorSessionsAttended: 0,
-        photoUrl: 'https://i.pravatar.cc/150?img=52',
-        rollNumber: '21K81A0512',
-      ),
-    );
-  }
+  // ─── Real MongoDB Login ────────────────────────────────────────────────────
+  Future<void> login({required String email, required String password}) async {
+    state = state.copyWith(isLoggingIn: true, loginError: null);
 
-  void loginAsAlumni({required String email}) {
-    final name = _nameFromEmail(email);
-    final loggedInAlumni = mockAlumni.isNotEmpty ? mockAlumni.first : null;
-    state = AuthState(
-      role: UserRole.alumni,
-      isLoggedIn: true,
-      loginEmail: email,
-      loginName: name,
-      alumni: loggedInAlumni,
-    );
-  }
+    try {
+      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/login');
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email, 'password': password}),
+      );
 
-  void loginAsAdmin({required String email}) {
-    final name = _nameFromEmail(email);
-    state = AuthState(
-      role: UserRole.admin,
-      isLoggedIn: true,
-      loginEmail: email,
-      loginName: name,
-    );
+      final data = jsonDecode(response.body) as Map<String, dynamic>;
+
+      if (response.statusCode == 200) {
+        final roleStr = data['role'] as String;
+        final user = data['user'] as Map<String, dynamic>;
+        final name = user['name'] as String? ?? email.split('@').first;
+        final profileImageUrl = user['profileImageUrl'] as String?;
+
+        UserRole role;
+        StudentModel? studentModel;
+        AlumniModel? alumniModel;
+
+        if (roleStr == 'student') {
+          role = UserRole.student;
+          studentModel = StudentModel(
+            id: user['id'] as String,
+            name: name,
+            email: email,
+            branch: user['branch'] as String? ?? '',
+            year: (user['currentYear'] as num?)?.toInt() ?? 0,
+            targetCareer: '',
+            skills: const [],
+            careerScore: 0,
+            earnedBadges: const [],
+            questionsAsked: 0,
+            mentorSessionsAttended: 0,
+            photoUrl: profileImageUrl ?? '',
+            rollNumber: user['rollNumber'] as String? ?? '',
+          );
+        } else if (roleStr == 'alumni') {
+          role = UserRole.alumni;
+          alumniModel = AlumniModel(
+            id: user['id'] as String,
+            name: name,
+            email: email,
+            company: user['company'] as String? ?? '',
+            role: user['jobRole'] as String? ?? '',
+            batch: (user['passoutYear'] as num?)?.toString() ?? '',
+            branch: '',
+            skills: const [],
+            linkedIn: '',
+            photoUrl: profileImageUrl ?? '',
+            advice: '',
+            story: '',
+            isVerified: false,
+            menteeCount: 0,
+            rating: 0.0,
+            anonConfession: '',
+            interviewRounds: const [],
+            targetRole: '',
+            location: '',
+            package: 0.0,
+            yearsOfExp: 0,
+          );
+        } else {
+          role = UserRole.admin;
+        }
+
+        state = AuthState(
+          role: role,
+          isLoggedIn: true,
+          loginEmail: email,
+          loginName: name,
+          student: studentModel,
+          alumni: alumniModel,
+          profileImageUrl: profileImageUrl,
+          isLoggingIn: false,
+        );
+      } else {
+        state = state.copyWith(
+          isLoggingIn: false,
+          loginError: data['message'] as String? ?? 'Login failed.',
+        );
+      }
+    } catch (e) {
+      state = state.copyWith(
+        isLoggingIn: false,
+        loginError: 'Could not connect to server. Is the backend running?',
+      );
+    }
   }
 
   /// Save name and bio edits from the Edit Profile sheet (works for all roles).

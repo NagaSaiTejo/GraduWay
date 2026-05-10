@@ -5,15 +5,6 @@ import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 
-// ─── Role detection by email domain ──────────────────────────────────────────
-
-UserRole _roleFromEmail(String email) {
-  final lower = email.trim().toLowerCase();
-  if (lower.endsWith('@admin.com')) return UserRole.admin;
-  if (lower.endsWith('@alum.com')) return UserRole.alumni;
-  return UserRole.student; // @stud.com or any other
-}
-
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -138,26 +129,46 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onChanged: (_) => setState(() => _errorMessage = null),
               ).animate().fadeIn(delay: 400.ms),
 
-              // Error message
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    const Icon(Icons.error_outline, color: Colors.redAccent, size: 16),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        _errorMessage!,
-                        style: const TextStyle(color: Colors.redAccent, fontSize: 13),
-                      ),
-                    ),
-                  ],
+              // ── Error message (always in layout, animated in/out) ─────────
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 250),
+                curve: Curves.easeOut,
+                height: _errorMessage != null ? null : 0,
+                padding: _errorMessage != null
+                    ? const EdgeInsets.symmetric(horizontal: 12, vertical: 10)
+                    : EdgeInsets.zero,
+                margin: _errorMessage != null
+                    ? const EdgeInsets.only(top: 10)
+                    : EdgeInsets.zero,
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.redAccent.withOpacity(0.4)),
                 ),
-              ],
+                child: _errorMessage != null
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(Icons.error_outline_rounded,
+                              color: Colors.redAccent, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _errorMessage!,
+                              style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w500),
+                            ),
+                          ),
+                        ],
+                      )
+                    : const SizedBox.shrink(),
+              ),
 
               const SizedBox(height: 24),
 
-              // Sign In button
+              // Sign In button — no animate() to prevent replay on setState
               ElevatedButton(
                 onPressed: _isLoading ? null : _handleLogin,
                 style: ElevatedButton.styleFrom(
@@ -172,7 +183,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
                     : const Text('Sign In'),
-              ).animate().fadeIn(delay: 500.ms).slideY(begin: 0.1),
+              ),
 
               const SizedBox(height: 24),
 
@@ -210,23 +221,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
 
-    await Future.delayed(1000.ms);
+    // Call the real backend login
+    await ref.read(authProvider.notifier).login(email: email, password: password);
+
     if (!mounted) return;
+    setState(() => _isLoading = false);
 
-    final role = _roleFromEmail(email);
+    final authState = ref.read(authProvider);
 
-    if (role == UserRole.student) {
-      ref.read(authProvider.notifier).loginAsStudent(email: email);
-      context.go('/home');
-    } else if (role == UserRole.alumni) {
-      ref.read(authProvider.notifier).loginAsAlumni(email: email);
-      context.go('/alumni-home');
-    } else {
-      ref.read(authProvider.notifier).loginAsAdmin(email: email);
-      context.go('/admin-home');
+    if (authState.loginError != null) {
+      setState(() => _errorMessage = authState.loginError);
+      return;
     }
 
-    setState(() => _isLoading = false);
+    // Navigate based on role
+    if (authState.role == UserRole.student) {
+      context.go('/home');
+    } else if (authState.role == UserRole.alumni) {
+      context.go('/alumni-home');
+    } else if (authState.role == UserRole.admin) {
+      context.go('/admin-home');
+    }
   }
 
   OverlayEntry _createOverlayEntry(BuildContext context) {
