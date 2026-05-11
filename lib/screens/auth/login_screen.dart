@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -239,6 +240,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // ── Path 1: Try Firebase Auth (production) ─────────────────────────────
     try {
+      // Check if Firebase is actually initialized before trying to use it
+      Firebase.app(); 
+      
       final credential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
@@ -249,7 +253,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .get();
 
       if (!mounted) return;
-      setState(() => _isLoading = false);
 
       if (userDoc.exists) {
         final data = userDoc.data()!;
@@ -258,14 +261,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           roleStr: data['role'] as String,
           user: {'id': uid, ...data},
         );
+        setState(() => _isLoading = false);
         return; // Firebase login succeeded — exit early
       }
-    } on FirebaseAuthException catch (e) {
-      // Firebase not configured or user not in Firebase — fall through to backend
-      debugPrint('Firebase Auth skipped: ${e.code}');
     } catch (e) {
-      // Firebase unavailable (no project configured) — fall through to backend
-      debugPrint('Firebase unavailable, using backend: $e');
+      // Firebase unavailable (no app or auth error) — fall through to backend
+      debugPrint('Firebase login skipped/failed, using backend: $e');
     }
 
     // ── Path 2: Fall back to Node.js/MongoDB backend (development) ────────

@@ -1,15 +1,29 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
 import '../data/mock/placement_data.dart';
 import '../data/mock/alumni_data.dart';
 
+/// Helper to check if Firebase is initialized before accessing services.
+/// This prevents [core/no-app] errors when running in local/dev mode without keys.
+bool _isFirebaseReady() {
+  try {
+    Firebase.app();
+    return true;
+  } catch (_) {
+    return false;
+  }
+}
+
 // ─── Alumni from Firestore ────────────────────────────────────────────────────
 /// Real-time alumni stream from Firestore.
 /// Falls back to mock data if Firestore is unavailable (dev mode).
 final alumniStreamProvider = StreamProvider<List<AlumniModel>>((ref) {
+  if (!_isFirebaseReady()) return Stream.value(mockAlumni);
+
   return FirebaseFirestore.instance
       .collection('alumni')
       .where('isVerified', isEqualTo: true)
@@ -25,6 +39,8 @@ final alumniStreamProvider = StreamProvider<List<AlumniModel>>((ref) {
 /// Real-time Q&A stream from Firestore.
 /// Falls back to mockQA in development when Firebase is not configured.
 final qaStreamProvider = StreamProvider<List<QAModel>>((ref) {
+  if (!_isFirebaseReady()) return Stream.value(mockQA);
+
   return FirebaseFirestore.instance
       .collection('qa')
       .orderBy('timestamp', descending: true)
@@ -41,14 +57,19 @@ final qaStreamProvider = StreamProvider<List<QAModel>>((ref) {
 /// Falls back to realistic mock stats if functions are not deployed.
 final placementStatsProvider =
     FutureProvider<Map<String, dynamic>>((ref) async {
+  if (!_isFirebaseReady()) return _mockPlacementStats();
+
   try {
     final result = await FirebaseFunctions.instance
         .httpsCallable('getPlacementStats')
         .call();
     return result.data as Map<String, dynamic>;
   } catch (e) {
-    // Graceful fallback — realistic Aditya College data
-    return {
+    return _mockPlacementStats();
+  }
+});
+
+Map<String, dynamic> _mockPlacementStats() => {
       'totalAlumni': 450,
       'companiesRepresented': 120,
       'avgPackage': 12.5,
@@ -68,19 +89,18 @@ final placementStatsProvider =
         '2021': 8.7,
       },
     };
-  }
-});
 
 // ─── Placement Analytics from Firestore ──────────────────────────────────────
 final placementDataProvider =
     FutureProvider<List<Map<String, dynamic>>>((ref) async {
+  if (!_isFirebaseReady()) return [];
+
   try {
     final snapshot = await FirebaseFirestore.instance
         .collection('placement_analytics')
         .get();
     return snapshot.docs.map((doc) => doc.data()).toList();
   } catch (e) {
-    // Fallback to empty list
     return [];
   }
 });
@@ -88,7 +108,9 @@ final placementDataProvider =
 // ─── Mentorship Requests ─────────────────────────────────────────────────────
 /// Real-time mentorship requests for the current student.
 final mentorshipRequestsProvider =
-    StreamProvider.family<QuerySnapshot, String>((ref, studentId) {
+    StreamProvider.family<QuerySnapshot?, String>((ref, studentId) {
+  if (!_isFirebaseReady()) return Stream.value(null);
+
   return FirebaseFirestore.instance
       .collection('mentorship_requests')
       .where('studentId', isEqualTo: studentId)
@@ -100,6 +122,8 @@ final mentorshipRequestsProvider =
 /// Real-time events stream.
 /// Falls back to mockEvents when Firestore is not available.
 final eventsStreamProvider = StreamProvider<List<EventModel>>((ref) {
+  if (!_isFirebaseReady()) return Stream.value(mockEvents);
+
   return FirebaseFirestore.instance
       .collection('events')
       .orderBy('eventDate', descending: false)
@@ -128,6 +152,8 @@ final eventsStreamProvider = StreamProvider<List<EventModel>>((ref) {
 
 final notificationsProvider =
     StreamProvider.family<List<Map<String, dynamic>>, String>((ref, userId) {
+  if (!_isFirebaseReady()) return Stream.value([]);
+
   return FirebaseFirestore.instance
       .collection('notifications')
       .where('userId', isEqualTo: userId)
@@ -143,6 +169,8 @@ final notificationsProvider =
 
 final unreadNotificationsCountProvider =
     StreamProvider.family<int, String>((ref, userId) {
+  if (!_isFirebaseReady()) return Stream.value(0);
+
   return FirebaseFirestore.instance
       .collection('notifications')
       .where('userId', isEqualTo: userId)

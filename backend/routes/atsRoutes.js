@@ -13,6 +13,7 @@ const upload = multer({
 });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+// Note: If you get a 404, ensure "Generative Language API" is enabled in your Google Cloud Console
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 const cleanJsonFence = (text) =>
@@ -58,7 +59,25 @@ Return ONLY a valid JSON object with this exact structure:
 }
 `;
 
-    const result = await model.generateContent(prompt);
+    // Smart Fallback: Try multiple models until one works
+    const modelNames = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-pro', 'gemini-2.0-flash', 'gemini-2.5-flash'];
+    let result;
+    let lastError;
+
+    for (const modelName of modelNames) {
+      try {
+        console.log(`Trying model: ${modelName}...`);
+        const tempModel = genAI.getGenerativeModel({ model: modelName });
+        result = await tempModel.generateContent(prompt);
+        if (result) break; // Success!
+      } catch (e) {
+        lastError = e;
+        console.warn(`${modelName} failed, trying next...`);
+      }
+    }
+
+    if (!result) throw lastError; // None of the models worked
+
     const response = await result.response;
     const raw = response.text();
     const cleaned = cleanJsonFence(raw);
@@ -67,9 +86,17 @@ Return ONLY a valid JSON object with this exact structure:
     return res.status(200).json(analysis);
   } catch (error) {
     console.error('ATS Error:', error);
+    let errorMessage = error.message;
+    if (error.status === 404) {
+      errorMessage = 'Gemini Model not found. Check model name or API availability.';
+    } else if (error.status === 429) {
+      errorMessage = 'AI Speed Limit Reached. Please wait 60 seconds and try again.';
+    } else if (error.message.includes('fetch failed')) {
+      errorMessage = 'Network error: Backend could not reach Google AI servers.';
+    }
     return res.status(500).json({
       message: 'Server error while analyzing resume',
-      error: error.message,
+      error: errorMessage,
     });
   }
 });

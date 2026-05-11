@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -6,24 +7,40 @@ import 'app.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // Capture Flutter framework errors
+  FlutterError.onError = (details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter Error: ${details.exception}');
+  };
 
-  // Initialize Firebase — required before any Firebase service call
+  // Capture platform/async errors
+  PlatformDispatcher.instance.onError = (error, stack) {
+    debugPrint('Platform Error: $error');
+    return false; 
+  };
+
+  WidgetsFlutterBinding.ensureInitialized();
+  debugPrint('--- GraduWay App Starting ---');
+
+  // Initialize Firebase with timeout to prevent hanging
   try {
+    debugPrint('Initializing Firebase (2s timeout)...');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
-    );
+    ).timeout(const Duration(seconds: 2));
+    debugPrint('Firebase initialized successfully.');
   } catch (e) {
-    // Firebase initialization can fail gracefully when running in local/dev mode
-    // The app will fall back to the Node.js/MongoDB backend
-    debugPrint('Firebase init skipped (dev mode): $e');
+    debugPrint('Firebase initialization skipped (expected in dev): $e');
   }
 
+  debugPrint('Running app...');
   runApp(
-    DevicePreview(
-      enabled: true,
-      tools: const [...DevicePreview.defaultTools],
-      builder: (context) => const ProviderScope(child: GraduWayApp()),
+    ProviderScope(
+      child: DevicePreview(
+        enabled: !kReleaseMode,
+        tools: const [...DevicePreview.defaultTools],
+        builder: (context) => const GraduWayApp(),
+      ),
     ),
   );
 }
