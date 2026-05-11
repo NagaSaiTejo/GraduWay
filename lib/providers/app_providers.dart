@@ -7,6 +7,7 @@ import '../data/models/models.dart';
 import '../data/models/student_model.dart';
 import '../data/mock/alumni_data.dart';
 import '../data/mock/placement_data.dart';
+import '../core/api_config.dart';
 import 'firestore_providers.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -188,7 +189,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/roadmap/select'),
+        Uri.parse(ApiConfig.roadmapSelect),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'roadmapName': roadmapName}),
       );
@@ -213,7 +214,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final email = state.student?.email ?? state.loginEmail;
       if (email.isEmpty) return;
       final response = await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/roadmap/exit'),
+        Uri.parse(ApiConfig.roadmapExit),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email}),
       );

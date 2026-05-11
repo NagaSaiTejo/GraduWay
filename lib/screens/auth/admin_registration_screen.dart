@@ -7,12 +7,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
+import '../../core/api_config.dart';
 
 class AdminRegistrationScreen extends StatefulWidget {
   const AdminRegistrationScreen({super.key});
 
   @override
-  State<AdminRegistrationScreen> createState() => _AdminRegistrationScreenState();
+  State<AdminRegistrationScreen> createState() =>
+      _AdminRegistrationScreenState();
 }
 
 class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
@@ -42,7 +44,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
     if (picked == null) return;
     final bytes = await picked.readAsBytes();
     if (bytes.length > _maxImageBytes) {
-      _showError('Profile image must be under 2 MB. Please choose a smaller image.');
+      _showError(
+          'Profile image must be under 2 MB. Please choose a smaller image.');
       return;
     }
     setState(() => _profileImage = picked);
@@ -59,7 +62,7 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/admin');
+      final uri = Uri.parse(ApiConfig.registerAdmin);
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['name'] = _nameController.text.trim();
@@ -71,10 +74,13 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
       if (_profileImage != null) {
         final bytes = await _profileImage!.readAsBytes();
         final ext = _profileImage!.name.split('.').last.toLowerCase();
-        final mimeType = ext == 'png' ? 'image/png'
-            : ext == 'gif' ? 'image/gif'
-            : ext == 'webp' ? 'image/webp'
-            : 'image/jpeg';
+        final mimeType = ext == 'png'
+            ? 'image/png'
+            : ext == 'gif'
+                ? 'image/gif'
+                : ext == 'webp'
+                    ? 'image/webp'
+                    : 'image/jpeg';
         request.files.add(http.MultipartFile.fromBytes(
           'profileImage',
           bytes,
@@ -91,7 +97,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful! Please login.')),
+          const SnackBar(
+              content: Text('Registration successful! Please login.')),
         );
         context.pop();
       } else {
@@ -100,7 +107,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showError('Could not connect to server. Please ensure backend is running.');
+      _showError(
+          'Could not connect to server. Please ensure backend is running.');
     }
   }
 
@@ -129,16 +137,17 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Join as an Admin',
-                    style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.admin))
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.admin))
                     .animate()
                     .fadeIn()
                     .slideY(),
                 const SizedBox(height: 8),
-                const Text('Manage users, verify alumni, and oversee the platform.',
-                    style: TextStyle(color: AppColors.textSecondary))
+                const Text(
+                        'Manage users, verify alumni, and oversee the platform.',
+                        style: TextStyle(color: AppColors.textSecondary))
                     .animate()
                     .fadeIn(delay: 100.ms),
                 const SizedBox(height: 28),
@@ -156,7 +165,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
                   label: 'Secret Admin Code',
                   icon: Icons.vpn_key_outlined,
                   obscureText: true,
-                  validator: (v) => v!.isEmpty ? 'Required for admin registration' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Required for admin registration' : null,
                 ).animate().fadeIn(delay: 200.ms),
                 const SizedBox(height: 16),
 
@@ -164,7 +174,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
                   controller: _nameController,
                   label: 'Full Name',
                   icon: Icons.person_outline,
-                  validator: (v) => v!.isEmpty ? 'Please enter your name' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Please enter your name' : null,
                 ).animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 16),
 
@@ -174,7 +185,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Please enter your email';
+                    if (v == null || v.isEmpty)
+                      return 'Please enter your email';
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
@@ -186,7 +198,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
                   label: 'Password',
                   icon: Icons.lock_outline,
                   obscureText: true,
-                  validator: (v) => v != null && v.length < 6 ? 'Min 6 characters' : null,
+                  validator: (v) =>
+                      v != null && v.length < 6 ? 'Min 6 characters' : null,
                 ).animate().fadeIn(delay: 350.ms),
                 const SizedBox(height: 40),
 
@@ -270,7 +283,8 @@ class _ProfileImagePicker extends StatelessWidget {
                       : FileImage(File(image!.path))) as ImageProvider
                   : null,
               child: image == null
-                  ? Icon(Icons.person, size: 52, color: accentColor.withValues(alpha: 0.5))
+                  ? Icon(Icons.person,
+                      size: 52, color: accentColor.withValues(alpha: 0.5))
                   : null,
             ),
             Positioned(
@@ -283,7 +297,8 @@ class _ProfileImagePicker extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                child:
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 16),
               ),
             ),
           ],

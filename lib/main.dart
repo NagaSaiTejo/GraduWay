@@ -16,7 +16,7 @@ void main() async {
   // Capture platform/async errors
   PlatformDispatcher.instance.onError = (error, stack) {
     debugPrint('Platform Error: $error');
-    return false; 
+    return false;
   };
 
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,7 +37,7 @@ void main() async {
   runApp(
     ProviderScope(
       child: DevicePreview(
-        enabled: !kReleaseMode,
+        enabled: kIsWeb && kDebugMode,
         tools: const [...DevicePreview.defaultTools],
         builder: (context) => const GraduWayApp(),
       ),

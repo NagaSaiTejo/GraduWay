@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
+import '../../core/api_config.dart';
 
 class AlumniRegistrationScreen extends StatefulWidget {
   const AlumniRegistrationScreen({super.key});
@@ -47,7 +48,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
     if (picked == null) return;
     final bytes = await picked.readAsBytes();
     if (bytes.length > _maxImageBytes) {
-      _showError('Profile image must be under 2 MB. Please choose a smaller image.');
+      _showError(
+          'Profile image must be under 2 MB. Please choose a smaller image.');
       return;
     }
     setState(() => _profileImage = picked);
@@ -64,7 +66,7 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/alumni');
+      final uri = Uri.parse(ApiConfig.registerAlumni);
       final request = http.MultipartRequest('POST', uri);
 
       request.fields['name'] = _nameController.text.trim();
@@ -78,10 +80,13 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
       if (_profileImage != null) {
         final bytes = await _profileImage!.readAsBytes();
         final ext = _profileImage!.name.split('.').last.toLowerCase();
-        final mimeType = ext == 'png' ? 'image/png'
-            : ext == 'gif' ? 'image/gif'
-            : ext == 'webp' ? 'image/webp'
-            : 'image/jpeg';
+        final mimeType = ext == 'png'
+            ? 'image/png'
+            : ext == 'gif'
+                ? 'image/gif'
+                : ext == 'webp'
+                    ? 'image/webp'
+                    : 'image/jpeg';
         request.files.add(http.MultipartFile.fromBytes(
           'profileImage',
           bytes,
@@ -98,7 +103,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful! Please login.')),
+          const SnackBar(
+              content: Text('Registration successful! Please login.')),
         );
         context.pop();
       } else {
@@ -107,7 +113,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showError('Could not connect to server. Please ensure backend is running.');
+      _showError(
+          'Could not connect to server. Please ensure backend is running.');
     }
   }
 
@@ -136,17 +143,17 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Join as an Alumni',
-                    style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.alumni))
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.alumni))
                     .animate()
                     .fadeIn()
                     .slideY(),
                 const SizedBox(height: 8),
                 const Text(
-                    'Give back to your college community and guide the next generation.',
-                    style: TextStyle(color: AppColors.textSecondary))
+                        'Give back to your college community and guide the next generation.',
+                        style: TextStyle(color: AppColors.textSecondary))
                     .animate()
                     .fadeIn(delay: 100.ms),
                 const SizedBox(height: 28),
@@ -163,7 +170,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   controller: _nameController,
                   label: 'Full Name',
                   icon: Icons.person_outline,
-                  validator: (v) => v!.isEmpty ? 'Please enter your name' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Please enter your name' : null,
                 ).animate().fadeIn(delay: 200.ms),
                 const SizedBox(height: 16),
 
@@ -173,7 +181,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Please enter your email';
+                    if (v == null || v.isEmpty)
+                      return 'Please enter your email';
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
@@ -185,7 +194,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   label: 'Password',
                   icon: Icons.lock_outline,
                   obscureText: true,
-                  validator: (v) => v != null && v.length < 6 ? 'Min 6 characters' : null,
+                  validator: (v) =>
+                      v != null && v.length < 6 ? 'Min 6 characters' : null,
                 ).animate().fadeIn(delay: 300.ms),
                 const SizedBox(height: 16),
 
@@ -202,7 +212,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   controller: _companyController,
                   label: 'Current Company',
                   icon: Icons.business_outlined,
-                  validator: (v) => v!.isEmpty ? 'Please enter your company' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Please enter your company' : null,
                 ).animate().fadeIn(delay: 400.ms),
                 const SizedBox(height: 16),
 
@@ -210,7 +221,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                   controller: _roleController,
                   label: 'Job Title / Role',
                   icon: Icons.work_outline,
-                  validator: (v) => v!.isEmpty ? 'Please enter your role' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Please enter your role' : null,
                 ).animate().fadeIn(delay: 450.ms),
                 const SizedBox(height: 40),
 
@@ -294,7 +306,8 @@ class _ProfileImagePicker extends StatelessWidget {
                       : FileImage(File(image!.path))) as ImageProvider
                   : null,
               child: image == null
-                  ? Icon(Icons.person, size: 52, color: accentColor.withValues(alpha: 0.5))
+                  ? Icon(Icons.person,
+                      size: 52, color: accentColor.withValues(alpha: 0.5))
                   : null,
             ),
             Positioned(
@@ -307,7 +320,8 @@ class _ProfileImagePicker extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                child:
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 16),
               ),
             ),
           ],

@@ -252,6 +252,7 @@ The `CollegeConfig` class in `lib/core/multi_college_config.dart` defines per-co
 - College-specific data: all placement data, alumni stories, and roadmaps are Aditya College specific
 - Direct messaging between students and alumni via REST API
 - AI-powered ATS resume scanner using Gemini AI
+- ATS scope clarification: resume-JD compatibility scoring is in scope; AI job recommendation suggestions remain out of scope
 - Events system with RSVP for webinars, workshops, career talks, mock interviews
 - Role-based registration with profile image upload and resume PDF upload
 - Anonymous confession system for honest alumni placement stories
@@ -267,7 +268,7 @@ The `CollegeConfig` class in `lib/core/multi_college_config.dart` defines per-co
 - Bulk email campaigns or mass notification system — Phase 3
 - Integration with college ERP system (attendance, marks, timetable) — Phase 3
 - Multi-college onboarding UI and admin portal — Phase 3 (architecture already designed)
-- AI-powered job recommendations engine — Phase 2 (service layer foundation in `lib/services/ai_service.dart`)
+- AI-powered job recommendations engine (which jobs to apply to) — Phase 2 (service layer foundation in `lib/services/ai_service.dart`)
 - Resume builder with AI-generated content suggestions — Phase 2
 - Mock interview preparation module with recording — Phase 2
 

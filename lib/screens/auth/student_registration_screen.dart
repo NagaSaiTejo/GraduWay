@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import '../../theme/app_colors.dart';
 import '../../utils/platform_pdf_picker.dart';
+import '../../core/api_config.dart';
 
 class StudentRegistrationScreen extends StatefulWidget {
   const StudentRegistrationScreen({super.key});
@@ -19,8 +20,7 @@ class StudentRegistrationScreen extends StatefulWidget {
       _StudentRegistrationScreenState();
 }
 
-class _StudentRegistrationScreenState
-    extends State<StudentRegistrationScreen> {
+class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
@@ -58,7 +58,8 @@ class _StudentRegistrationScreenState
 
     final bytes = await picked.readAsBytes();
     if (bytes.length > _maxImageBytes) {
-      _showError('Profile image must be under 2 MB. Please choose a smaller image.');
+      _showError(
+          'Profile image must be under 2 MB. Please choose a smaller image.');
       return;
     }
     setState(() => _profileImage = picked);
@@ -72,10 +73,10 @@ class _StudentRegistrationScreenState
         final result = await pickPdfFilePlatform(_maxResumeBytes);
         if (result == null) return;
         setState(() => _resumeFile = PlatformFile(
-          name: result['name'] as String,
-          size: (result['bytes'] as List).length,
-          bytes: result['bytes'] as Uint8List,
-        ));
+              name: result['name'] as String,
+              size: (result['bytes'] as List).length,
+              bytes: result['bytes'] as Uint8List,
+            ));
       } catch (e) {
         if (e == 'size_exceeded') {
           _showError('Resume must be under 5 MB. Please choose a smaller PDF.');
@@ -99,10 +100,10 @@ class _StudentRegistrationScreenState
           return;
         }
         setState(() => _resumeFile = PlatformFile(
-          name: file.name,
-          size: bytes.length,
-          bytes: bytes,
-        ));
+              name: file.name,
+              size: bytes.length,
+              bytes: bytes,
+            ));
       } catch (e) {
         _showError('Could not open file picker. Please try again.');
       }
@@ -110,8 +111,8 @@ class _StudentRegistrationScreenState
   }
 
   void _showError(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg), backgroundColor: Colors.redAccent));
+    ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(msg), backgroundColor: Colors.redAccent));
   }
 
   // ─── Register ────────────────────────────────────────────────────────────
@@ -120,7 +121,7 @@ class _StudentRegistrationScreenState
     setState(() => _isLoading = true);
 
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/register/student');
+      final uri = Uri.parse(ApiConfig.registerStudent);
       final request = http.MultipartRequest('POST', uri);
 
       // Text fields
@@ -135,10 +136,13 @@ class _StudentRegistrationScreenState
       if (_profileImage != null) {
         final bytes = await _profileImage!.readAsBytes();
         final ext = _profileImage!.name.split('.').last.toLowerCase();
-        final mimeType = ext == 'png' ? 'image/png'
-            : ext == 'gif' ? 'image/gif'
-            : ext == 'webp' ? 'image/webp'
-            : 'image/jpeg'; // default for jpg/jpeg
+        final mimeType = ext == 'png'
+            ? 'image/png'
+            : ext == 'gif'
+                ? 'image/gif'
+                : ext == 'webp'
+                    ? 'image/webp'
+                    : 'image/jpeg'; // default for jpg/jpeg
         request.files.add(http.MultipartFile.fromBytes(
           'profileImage',
           bytes,
@@ -164,17 +168,21 @@ class _StudentRegistrationScreenState
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registration successful! Please login.')),
+          const SnackBar(
+              content: Text('Registration successful! Please login.')),
         );
         context.pop();
       } else {
         final data = response.body;
-        _showError(data.contains('message') ? _parseMessage(data) : 'Registration failed.');
+        _showError(data.contains('message')
+            ? _parseMessage(data)
+            : 'Registration failed.');
       }
     } catch (e) {
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showError('Could not connect to server. Please ensure backend is running.');
+      _showError(
+          'Could not connect to server. Please ensure backend is running.');
     }
   }
 
@@ -203,17 +211,17 @@ class _StudentRegistrationScreenState
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text('Join as a Student',
-                    style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary))
+                        style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary))
                     .animate()
                     .fadeIn()
                     .slideY(),
                 const SizedBox(height: 8),
                 const Text(
-                    'Create your account to connect with alumni and access resources.',
-                    style: TextStyle(color: AppColors.textSecondary))
+                        'Create your account to connect with alumni and access resources.',
+                        style: TextStyle(color: AppColors.textSecondary))
                     .animate()
                     .fadeIn(delay: 100.ms),
                 const SizedBox(height: 28),
@@ -231,7 +239,8 @@ class _StudentRegistrationScreenState
                   controller: _nameController,
                   label: 'Full Name',
                   icon: Icons.person_outline,
-                  validator: (v) => v!.isEmpty ? 'Please enter your name' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Please enter your name' : null,
                 ).animate().fadeIn(delay: 200.ms),
                 const SizedBox(height: 16),
 
@@ -239,7 +248,8 @@ class _StudentRegistrationScreenState
                   controller: _rollNumberController,
                   label: 'Roll Number',
                   icon: Icons.badge_outlined,
-                  validator: (v) => v!.isEmpty ? 'Please enter your roll number' : null,
+                  validator: (v) =>
+                      v!.isEmpty ? 'Please enter your roll number' : null,
                 ).animate().fadeIn(delay: 250.ms),
                 const SizedBox(height: 16),
 
@@ -249,7 +259,8 @@ class _StudentRegistrationScreenState
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Please enter your email';
+                    if (v == null || v.isEmpty)
+                      return 'Please enter your email';
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
@@ -270,9 +281,11 @@ class _StudentRegistrationScreenState
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       value: _selectedBranch,
-                      decoration: _dropdownDecoration('Branch', Icons.account_tree_outlined),
+                      decoration: _dropdownDecoration(
+                          'Branch', Icons.account_tree_outlined),
                       items: ['CSE', 'ECE', 'MECH', 'CIVIL', 'IT', 'EEE']
-                          .map((b) => DropdownMenuItem(value: b, child: Text(b)))
+                          .map(
+                              (b) => DropdownMenuItem(value: b, child: Text(b)))
                           .toList(),
                       onChanged: (v) => setState(() => _selectedBranch = v!),
                     ).animate().fadeIn(delay: 400.ms),
@@ -281,10 +294,11 @@ class _StudentRegistrationScreenState
                   Expanded(
                     child: DropdownButtonFormField<int>(
                       value: _selectedYear,
-                      decoration: _dropdownDecoration('Year', Icons.school_outlined),
+                      decoration:
+                          _dropdownDecoration('Year', Icons.school_outlined),
                       items: [1, 2, 3, 4]
-                          .map((y) =>
-                              DropdownMenuItem(value: y, child: Text('Year $y')))
+                          .map((y) => DropdownMenuItem(
+                              value: y, child: Text('Year $y')))
                           .toList(),
                       onChanged: (v) => setState(() => _selectedYear = v!),
                     ).animate().fadeIn(delay: 450.ms),
@@ -393,7 +407,8 @@ class _ProfileImagePicker extends StatelessWidget {
                       : FileImage(File(image!.path))) as ImageProvider
                   : null,
               child: image == null
-                  ? Icon(Icons.person, size: 52, color: accentColor.withValues(alpha: 0.5))
+                  ? Icon(Icons.person,
+                      size: 52, color: accentColor.withValues(alpha: 0.5))
                   : null,
             ),
             Positioned(
@@ -406,7 +421,8 @@ class _ProfileImagePicker extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 2),
                 ),
-                child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                child:
+                    const Icon(Icons.camera_alt, color: Colors.white, size: 16),
               ),
             ),
           ],
@@ -453,8 +469,7 @@ class _FilePicker extends StatelessWidget {
               child: Text(
                 fileName ?? label,
                 style: TextStyle(
-                  color:
-                      fileName != null ? accentColor : Colors.grey.shade600,
+                  color: fileName != null ? accentColor : Colors.grey.shade600,
                   fontSize: 14,
                 ),
                 overflow: TextOverflow.ellipsis,

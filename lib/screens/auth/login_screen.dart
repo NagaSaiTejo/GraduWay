@@ -9,6 +9,7 @@ import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../core/api_config.dart';
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
@@ -44,24 +45,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
-          Builder(
-            builder: (context) {
-              return GestureDetector(
-                onTap: () {
-                  if (_overlayEntry == null) {
-                    _overlayEntry = _createOverlayEntry(context);
-                    Overlay.of(context).insert(_overlayEntry!);
-                  } else {
-                    _removeOverlay();
-                  }
-                },
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Icon(Icons.info_outline_rounded, color: AppColors.textSecondary),
-                ),
-              );
-            }
-          ).animate().fadeIn(delay: 500.ms),
+          Builder(builder: (context) {
+            return GestureDetector(
+              onTap: () {
+                if (_overlayEntry == null) {
+                  _overlayEntry = _createOverlayEntry(context);
+                  Overlay.of(context).insert(_overlayEntry!);
+                } else {
+                  _removeOverlay();
+                }
+              },
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Icon(Icons.info_outline_rounded,
+                    color: AppColors.textSecondary),
+              ),
+            );
+          }).animate().fadeIn(delay: 500.ms),
           const SizedBox(width: 8),
         ],
       ),
@@ -88,14 +88,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     )
                   ],
                 ),
-                child: const Icon(Icons.school_rounded, color: Colors.white, size: 28),
+                child: const Icon(Icons.school_rounded,
+                    color: Colors.white, size: 28),
               ).animate().fadeIn().scale(curve: Curves.elasticOut),
 
               const SizedBox(height: 32),
 
               const Text(
                 'Welcome to GraduWay',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary),
               ).animate().fadeIn(delay: 100.ms).slideX(begin: -0.1),
 
               const SizedBox(height: 8),
@@ -121,7 +125,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         hintText: 'e.g. name@stud.com',
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty) return 'Email is required';
+                        if (value == null || value.trim().isEmpty)
+                          return 'Email is required';
                         if (!value.contains('@')) return 'Enter a valid email';
                         return null;
                       },
@@ -138,13 +143,18 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         labelText: 'Password',
                         prefixIcon: const Icon(Icons.lock_outline_rounded),
                         suffixIcon: IconButton(
-                          icon: Icon(_showPassword ? Icons.visibility_off : Icons.visibility),
-                          onPressed: () => setState(() => _showPassword = !_showPassword),
+                          icon: Icon(_showPassword
+                              ? Icons.visibility_off
+                              : Icons.visibility),
+                          onPressed: () =>
+                              setState(() => _showPassword = !_showPassword),
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty) return 'Password is required';
-                        if (value.length < 6) return 'Password must be at least 6 characters';
+                        if (value == null || value.isEmpty)
+                          return 'Password is required';
+                        if (value.length < 6)
+                          return 'Password must be at least 6 characters';
                         return null;
                       },
                       onChanged: (_) => setState(() => _errorMessage = null),
@@ -167,7 +177,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 decoration: BoxDecoration(
                   color: Colors.red.shade50,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.redAccent.withValues(alpha: 0.4)),
+                  border: Border.all(
+                      color: Colors.redAccent.withValues(alpha: 0.4)),
                 ),
                 child: _errorMessage != null
                     ? Row(
@@ -204,7 +215,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ? const SizedBox(
                         width: 20,
                         height: 20,
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                            color: Colors.white, strokeWidth: 2),
                       )
                     : const Text('Sign In'),
               ),
@@ -216,7 +228,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   onPressed: () => _showRegistrationSheet(context),
                   child: const Text(
                     'New here? Create an account',
-                    style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600),
                   ),
                 ),
               ).animate().fadeIn(delay: 600.ms),
@@ -241,16 +255,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // ── Path 1: Try Firebase Auth (production) ─────────────────────────────
     try {
       // Check if Firebase is actually initialized before trying to use it
-      Firebase.app(); 
-      
+      Firebase.app();
+
       final credential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
       final uid = credential.user!.uid;
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
+      final userDoc =
+          await FirebaseFirestore.instance.collection('users').doc(uid).get();
 
       if (!mounted) return;
 
@@ -271,7 +283,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     // ── Path 2: Fall back to Node.js/MongoDB backend (development) ────────
     try {
-      final uri = Uri.parse('http://127.0.0.1:5000/api/auth/login');
+      final uri = Uri.parse(ApiConfig.login);
       final response = await http.post(
         uri,
         headers: {'Content-Type': 'application/json'},
@@ -284,24 +296,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         ref.read(authProvider.notifier).setUser(
-          email: email,
-          roleStr: data['role'] as String,
-          user: data['user'] as Map<String, dynamic>,
-        );
+              email: email,
+              roleStr: data['role'] as String,
+              user: data['user'] as Map<String, dynamic>,
+            );
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
-        setState(() =>
-            _errorMessage = data['message'] as String? ?? 'Login failed. Please try again.');
+        setState(() => _errorMessage =
+            data['message'] as String? ?? 'Login failed. Please try again.');
       }
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _isLoading = false;
-        _errorMessage = 'Could not connect to server.\nMake sure the backend is running.';
+        _errorMessage =
+            'Could not connect to server.\nMake sure the backend is running.';
       });
     }
   }
-
 
   OverlayEntry _createOverlayEntry(BuildContext context) {
     final renderBox = context.findRenderObject() as RenderBox;
@@ -357,10 +369,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ListTile(
                   leading: const CircleAvatar(
                     backgroundColor: Color(0xFFEFF3FF),
-                    child: Icon(Icons.school_outlined, color: AppColors.primary),
+                    child:
+                        Icon(Icons.school_outlined, color: AppColors.primary),
                   ),
-                  title: const Text('Student', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Join as a current student', style: TextStyle(fontSize: 12)),
+                  title: const Text('Student',
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Join as a current student',
+                      style: TextStyle(fontSize: 12)),
                   onTap: () {
                     context.pop();
                     context.push('/register-student');
@@ -369,10 +384,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ListTile(
                   leading: CircleAvatar(
                     backgroundColor: AppColors.alumni.withValues(alpha: 0.1),
-                    child: const Icon(Icons.work_outline, color: AppColors.alumni),
+                    child:
+                        const Icon(Icons.work_outline, color: AppColors.alumni),
                   ),
-                  title: const Text('Alumni', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Join as an alumni', style: TextStyle(fontSize: 12)),
+                  title: const Text('Alumni',
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Join as an alumni',
+                      style: TextStyle(fontSize: 12)),
                   onTap: () {
                     context.pop();
                     context.push('/register-alumni');
@@ -381,10 +399,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ListTile(
                   leading: CircleAvatar(
                     backgroundColor: AppColors.admin.withValues(alpha: 0.1),
-                    child: const Icon(Icons.admin_panel_settings_outlined, color: AppColors.admin),
+                    child: const Icon(Icons.admin_panel_settings_outlined,
+                        color: AppColors.admin),
                   ),
-                  title: const Text('Admin', style: TextStyle(fontWeight: FontWeight.w600)),
-                  subtitle: const Text('Platform administrator', style: TextStyle(fontSize: 12)),
+                  title: const Text('Admin',
+                      style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Platform administrator',
+                      style: TextStyle(fontSize: 12)),
                   onTap: () {
                     context.pop();
                     context.push('/register-admin');
@@ -418,7 +439,8 @@ class _CredentialHintCard extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.info_outline_rounded, size: 16, color: AppColors.primary),
+              Icon(Icons.info_outline_rounded,
+                  size: 16, color: AppColors.primary),
               SizedBox(width: 6),
               Text(
                 'How to Login',

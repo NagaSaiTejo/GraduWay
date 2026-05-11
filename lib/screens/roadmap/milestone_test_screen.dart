@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../core/api_config.dart';
 
 class MilestoneTestScreen extends ConsumerStatefulWidget {
   final String roadmapName;
@@ -17,7 +18,8 @@ class MilestoneTestScreen extends ConsumerStatefulWidget {
   });
 
   @override
-  ConsumerState<MilestoneTestScreen> createState() => _MilestoneTestScreenState();
+  ConsumerState<MilestoneTestScreen> createState() =>
+      _MilestoneTestScreenState();
 }
 
 class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
@@ -39,18 +41,25 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
   List<Map<String, dynamic>> _generateQuestions(String roadmap, int milestone) {
     final List<Map<String, dynamic>> questionBank = [
       {
-        'question': 'What is the primary language used to develop Flutter applications?',
+        'question':
+            'What is the primary language used to develop Flutter applications?',
         'options': ['Java', 'Kotlin', 'Dart', 'Swift'],
         'correctAnswer': 'Dart',
       },
       {
-        'question': 'Which widget is used to create a material design app in Flutter?',
+        'question':
+            'Which widget is used to create a material design app in Flutter?',
         'options': ['CupertinoApp', 'MaterialApp', 'WidgetsApp', 'Scaffold'],
         'correctAnswer': 'MaterialApp',
       },
       {
         'question': 'What does state refer to in Flutter?',
-        'options': ['The app lifecycle', 'Data that can change over time', 'The layout constraints', 'Network requests'],
+        'options': [
+          'The app lifecycle',
+          'Data that can change over time',
+          'The layout constraints',
+          'Network requests'
+        ],
         'correctAnswer': 'Data that can change over time',
       },
       {
@@ -60,7 +69,12 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
       },
       {
         'question': 'What is the function of the pubspec.yaml file?',
-        'options': ['Managing UI layouts', 'Defining routing', 'Managing dependencies', 'Compiling code'],
+        'options': [
+          'Managing UI layouts',
+          'Defining routing',
+          'Managing dependencies',
+          'Compiling code'
+        ],
         'correctAnswer': 'Managing dependencies',
       },
       {
@@ -70,7 +84,12 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
       },
       {
         'question': 'What does S3 stand for in AWS?',
-        'options': ['Simple Storage Service', 'Scalable Storage System', 'Serverless Storage Solution', 'Secure System Service'],
+        'options': [
+          'Simple Storage Service',
+          'Scalable Storage System',
+          'Serverless Storage Solution',
+          'Secure System Service'
+        ],
         'correctAnswer': 'Simple Storage Service',
       },
       {
@@ -80,12 +99,22 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
       },
       {
         'question': 'In ServiceNow, what is an Incident?',
-        'options': ['A planned change', 'An unplanned interruption to an IT service', 'A request for a new service', 'A database record'],
+        'options': [
+          'A planned change',
+          'An unplanned interruption to an IT service',
+          'A request for a new service',
+          'A database record'
+        ],
         'correctAnswer': 'An unplanned interruption to an IT service',
       },
       {
         'question': 'What is the primary role of a Load Balancer?',
-        'options': ['Store data', 'Distribute incoming network traffic', 'Compile code', 'Manage user authentication'],
+        'options': [
+          'Store data',
+          'Distribute incoming network traffic',
+          'Compile code',
+          'Manage user authentication'
+        ],
         'correctAnswer': 'Distribute incoming network traffic',
       },
       {
@@ -100,7 +129,12 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
       },
       {
         'question': 'What is REST an acronym for?',
-        'options': ['Representational State Transfer', 'Remote State Transmission', 'Reliable Server Technology', 'Relational State Transfer'],
+        'options': [
+          'Representational State Transfer',
+          'Remote State Transmission',
+          'Reliable Server Technology',
+          'Relational State Transfer'
+        ],
         'correctAnswer': 'Representational State Transfer',
       },
       {
@@ -110,14 +144,19 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
       },
       {
         'question': 'What does CI/CD stand for?',
-        'options': ['Continuous Integration / Continuous Deployment', 'Code Integration / Code Deployment', 'Constant Improvement / Constant Delivery', 'Centralized Integration / Centralized Deployment'],
+        'options': [
+          'Continuous Integration / Continuous Deployment',
+          'Code Integration / Code Deployment',
+          'Constant Improvement / Constant Delivery',
+          'Centralized Integration / Centralized Deployment'
+        ],
         'correctAnswer': 'Continuous Integration / Continuous Deployment',
       }
     ];
 
     questionBank.shuffle();
     final selectedQuestions = questionBank.take(10).toList();
-    
+
     // Shuffle options for each question
     for (var q in selectedQuestions) {
       final options = List<String>.from(q['options'] as List);
@@ -154,10 +193,10 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
     if (passed) {
       final authState = ref.read(authProvider);
       final email = authState.student?.email ?? authState.loginEmail;
-      
+
       try {
         final response = await http.post(
-          Uri.parse('http://127.0.0.1:5000/api/roadmap/complete-milestone'),
+          Uri.parse(ApiConfig.roadmapCompleteMilestone),
           headers: {'Content-Type': 'application/json'},
           body: jsonEncode({
             'email': email,
@@ -170,10 +209,11 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
           final data = jsonDecode(response.body);
           final progressMap = data['roadmapProgress'] as Map<String, dynamic>;
           ref.read(authProvider.notifier).updateRoadmapState(
-            activeRoadmap: data['activeRoadmap'],
-            roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
-            careerScore: data['careerScore'],
-          );
+                activeRoadmap: data['activeRoadmap'],
+                roadmapProgress:
+                    progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
+                careerScore: data['careerScore'],
+              );
         }
       } catch (e) {
         debugPrint('Error completing milestone: $e');
@@ -196,7 +236,8 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('Milestone ${widget.milestoneIndex + 1} Test', style: const TextStyle(color: AppColors.textPrimary)),
+        title: Text('Milestone ${widget.milestoneIndex + 1} Test',
+            style: const TextStyle(color: AppColors.textPrimary)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -206,16 +247,20 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Question ${_currentQuestionIndex + 1} of 10', 
-              style: const TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.bold)),
+            Text('Question ${_currentQuestionIndex + 1} of 10',
+                style: const TextStyle(
+                    color: AppColors.textMuted, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             LinearProgressIndicator(
               value: (_currentQuestionIndex + 1) / 10,
               backgroundColor: AppColors.border,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor:
+                  const AlwaysStoppedAnimation<Color>(AppColors.primary),
             ),
             const SizedBox(height: 32),
-            Text(currentQ['question'], style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(currentQ['question'],
+                style:
+                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 32),
             ...currentQ['options'].map<Widget>((option) {
               final isSelected = _selectedAnswer == option;
@@ -226,21 +271,35 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: isSelected ? AppColors.primary.withValues(alpha: 0.1) : AppColors.bgCard,
+                      color: isSelected
+                          ? AppColors.primary.withValues(alpha: 0.1)
+                          : AppColors.bgCard,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+                      border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.border),
                     ),
                     child: Row(
                       children: [
                         Icon(
-                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          color: isSelected ? AppColors.primary : AppColors.textMuted,
+                          isSelected
+                              ? Icons.radio_button_checked
+                              : Icons.radio_button_unchecked,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.textMuted,
                         ),
                         const SizedBox(width: 12),
-                        Text(option, style: TextStyle(
-                          color: isSelected ? AppColors.primary : AppColors.textPrimary,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        )),
+                        Text(option,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textPrimary,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.normal,
+                            )),
                       ],
                     ),
                   ),
@@ -256,9 +315,14 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: Text(_currentQuestionIndex == 9 ? 'Submit Test' : 'Next Question', style: const TextStyle(fontWeight: FontWeight.bold)),
+                child: Text(
+                    _currentQuestionIndex == 9
+                        ? 'Submit Test'
+                        : 'Next Question',
+                    style: const TextStyle(fontWeight: FontWeight.bold)),
               ),
             ),
           ],
@@ -281,13 +345,22 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
               if (_isSubmitting)
                 const CircularProgressIndicator()
               else ...[
-                Icon(passed ? Icons.check_circle : Icons.cancel, color: passed ? AppColors.success : AppColors.error, size: 100),
+                Icon(passed ? Icons.check_circle : Icons.cancel,
+                    color: passed ? AppColors.success : AppColors.error,
+                    size: 100),
                 const SizedBox(height: 24),
-                Text(passed ? 'Milestone Passed!' : 'Test Failed', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+                Text(passed ? 'Milestone Passed!' : 'Test Failed',
+                    style: const TextStyle(
+                        fontSize: 28, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
-                Text('You scored $_score out of 10.', style: const TextStyle(fontSize: 18, color: AppColors.textSecondary)),
+                Text('You scored $_score out of 10.',
+                    style: const TextStyle(
+                        fontSize: 18, color: AppColors.textSecondary)),
                 const SizedBox(height: 16),
-                Text(passed ? 'Your progress has been updated.' : 'You need at least 7/10 to pass. Review the materials and try again.',
+                Text(
+                  passed
+                      ? 'Your progress has been updated.'
+                      : 'You need at least 7/10 to pass. Review the materials and try again.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: AppColors.textMuted),
                 ),
@@ -298,11 +371,14 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
                   child: ElevatedButton(
                     onPressed: () => context.pop(),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: passed ? AppColors.success : AppColors.primary,
+                      backgroundColor:
+                          passed ? AppColors.success : AppColors.primary,
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text('Back to Roadmap', style: TextStyle(fontWeight: FontWeight.bold)),
+                    child: const Text('Back to Roadmap',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

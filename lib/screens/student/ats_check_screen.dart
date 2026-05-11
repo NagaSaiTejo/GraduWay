@@ -9,6 +9,12 @@ import '../../core/api_config.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/custom_app_bar.dart';
 
+/// ATS Resume Scanner - In Scope Feature
+///
+/// This is a resume-JD compatibility checker, NOT an AI job recommendations engine.
+/// AI job recommendations (suggesting which jobs to apply to) remain out of scope.
+/// This feature analyzes a resume the student already has against a JD they provide -
+/// it is a placement preparation tool, fundamentally different from job recommendations.
 class AtsCheckScreen extends StatefulWidget {
   const AtsCheckScreen({super.key});
 

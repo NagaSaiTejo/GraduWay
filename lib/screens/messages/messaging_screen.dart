@@ -4,12 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../core/api_config.dart';
 
 class MessagingListScreen extends ConsumerStatefulWidget {
   const MessagingListScreen({super.key});
 
   @override
-  ConsumerState<MessagingListScreen> createState() => _MessagingListScreenState();
+  ConsumerState<MessagingListScreen> createState() =>
+      _MessagingListScreenState();
 }
 
 class _MessagingListScreenState extends ConsumerState<MessagingListScreen> {
@@ -25,7 +27,7 @@ class _MessagingListScreenState extends ConsumerState<MessagingListScreen> {
   Future<void> _fetchConnections() async {
     final email = ref.read(authProvider).loginEmail;
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/messages/connections/$email'));
+      final response = await http.get(Uri.parse(ApiConfig.connections(email)));
       if (response.statusCode == 200) {
         setState(() {
           _connections = jsonDecode(response.body);
@@ -43,7 +45,8 @@ class _MessagingListScreenState extends ConsumerState<MessagingListScreen> {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        title: const Text('Messages', style: TextStyle(color: AppColors.textPrimary)),
+        title: const Text('Messages',
+            style: TextStyle(color: AppColors.textPrimary)),
         backgroundColor: Colors.white,
         elevation: 0,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -51,23 +54,38 @@ class _MessagingListScreenState extends ConsumerState<MessagingListScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _connections.isEmpty
-              ? const Center(child: Text('No messages yet. Connect with alumni to start chatting!', style: TextStyle(color: AppColors.textMuted)))
+              ? const Center(
+                  child: Text(
+                      'No messages yet. Connect with alumni to start chatting!',
+                      style: TextStyle(color: AppColors.textMuted)))
               : ListView.builder(
                   itemCount: _connections.length,
                   itemBuilder: (context, index) {
                     final conn = _connections[index];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                        backgroundImage: conn['profileImageUrl'] != null ? NetworkImage(conn['profileImageUrl']) : null,
-                        child: conn['profileImageUrl'] == null ? Text(conn['name'][0]) : null,
+                        backgroundColor:
+                            AppColors.primary.withValues(alpha: 0.1),
+                        backgroundImage: conn['profileImageUrl'] != null
+                            ? NetworkImage(conn['profileImageUrl'])
+                            : null,
+                        child: conn['profileImageUrl'] == null
+                            ? Text(conn['name'][0])
+                            : null,
                       ),
-                      title: Text(conn['name'], style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(conn['role'] == 'alumni' ? 'Alumni' : 'Student', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
+                      title: Text(conn['name'],
+                          style: const TextStyle(fontWeight: FontWeight.bold)),
+                      subtitle: Text(
+                          conn['role'] == 'alumni' ? 'Alumni' : 'Student',
+                          style: const TextStyle(
+                              color: AppColors.textSecondary, fontSize: 12)),
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => ChatScreen(receiverEmail: conn['email'], receiverName: conn['name'])),
+                          MaterialPageRoute(
+                              builder: (_) => ChatScreen(
+                                  receiverEmail: conn['email'],
+                                  receiverName: conn['name'])),
                         );
                       },
                     );
@@ -81,7 +99,8 @@ class ChatScreen extends ConsumerStatefulWidget {
   final String receiverEmail;
   final String receiverName;
 
-  const ChatScreen({super.key, required this.receiverEmail, required this.receiverName});
+  const ChatScreen(
+      {super.key, required this.receiverEmail, required this.receiverName});
 
   @override
   ConsumerState<ChatScreen> createState() => _ChatScreenState();
@@ -102,7 +121,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   Future<void> _fetchMessages() async {
     final senderEmail = ref.read(authProvider).loginEmail;
     try {
-      final response = await http.get(Uri.parse('http://127.0.0.1:5000/api/messages/$senderEmail/${widget.receiverEmail}'));
+      final response = await http.get(
+        Uri.parse(ApiConfig.chatHistory(senderEmail, widget.receiverEmail)),
+      );
       if (response.statusCode == 200) {
         setState(() {
           _messages = jsonDecode(response.body);
@@ -110,7 +131,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         });
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
-            _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent);
           }
         });
       }
@@ -124,7 +146,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (content.isEmpty) return;
 
     final senderEmail = ref.read(authProvider).loginEmail;
-    
+
     // Optimistic UI update
     final tempMsg = {
       'senderEmail': senderEmail,
@@ -139,13 +161,14 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent, duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
       }
     });
 
     try {
       await http.post(
-        Uri.parse('http://127.0.0.1:5000/api/messages/send'),
+        Uri.parse(ApiConfig.messagingSend),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'senderEmail': senderEmail,
@@ -165,7 +188,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     return Scaffold(
       backgroundColor: AppColors.bgPage,
       appBar: AppBar(
-        title: Text(widget.receiverName, style: const TextStyle(color: AppColors.textPrimary)),
+        title: Text(widget.receiverName,
+            style: const TextStyle(color: AppColors.textPrimary)),
         backgroundColor: Colors.white,
         elevation: 1,
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -173,7 +197,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       body: Column(
         children: [
           Expanded(
-            child: _isLoading 
+            child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : ListView.builder(
                     controller: _scrollController,
@@ -183,18 +207,25 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       final msg = _messages[index];
                       final isMe = msg['senderEmail'] == currentUserEmail;
                       return Align(
-                        alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                        alignment:
+                            isMe ? Alignment.centerRight : Alignment.centerLeft,
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 8),
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
                             color: isMe ? AppColors.primary : Colors.white,
                             borderRadius: BorderRadius.circular(20),
-                            border: isMe ? null : Border.all(color: AppColors.border),
+                            border: isMe
+                                ? null
+                                : Border.all(color: AppColors.border),
                           ),
                           child: Text(
                             msg['content'],
-                            style: TextStyle(color: isMe ? Colors.white : AppColors.textPrimary),
+                            style: TextStyle(
+                                color: isMe
+                                    ? Colors.white
+                                    : AppColors.textPrimary),
                           ),
                         ),
                       );
@@ -217,7 +248,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       ),
                       filled: true,
                       fillColor: AppColors.bgPage,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 10),
                     ),
                     onSubmitted: (_) => _sendMessage(),
                   ),

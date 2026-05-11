@@ -20,7 +20,8 @@ class BadgesScreen extends ConsumerWidget {
       final prevNotifs = prev?.pendingNotifications ?? [];
       for (final notif in next.pendingNotifications) {
         if (!prevNotifs.any((n) => n.badgeId == notif.badgeId)) {
-          _showBadgeNotification(context, ref, notif.title, notif.emoji, notif.badgeId);
+          _showBadgeNotification(
+              context, ref, notif.title, notif.emoji, notif.badgeId);
         }
       }
     });
@@ -29,7 +30,8 @@ class BadgesScreen extends ConsumerWidget {
     final String hintText;
     if (careerScore == 0) {
       motivationText = '🌱 Just Getting Started!';
-      hintText = 'Ask a question or view an alumni profile to earn your first badge and points.';
+      hintText =
+          'Ask a question or view an alumni profile to earn your first badge and points.';
     } else if (careerScore < 25) {
       motivationText = '🚀 Building Momentum!';
       hintText = 'Keep engaging — attend events, ask more questions!';
@@ -44,177 +46,50 @@ class BadgesScreen extends ConsumerWidget {
       hintText = 'Excellent! You\'re among the top engaged students.';
     }
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
-        child: SafeArea(
-          child: CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text('Your Progress 🏆', style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-                                const SizedBox(height: 4),
-                                const Text('Career readiness score & badge collection', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                              ],
-                            ).animate().fadeIn(duration: 400.ms),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 28),
-
-                      // Career score hero
-                      Container(
-                        padding: const EdgeInsets.all(28),
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(24),
-                          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 30, offset: const Offset(0, 12))],
-                        ),
-                        child: Column(
-                          children: [
-                            CircularPercentIndicator(
-                              radius: 70,
-                              lineWidth: 10,
-                              percent: (careerScore / 100).clamp(0.0, 1.0),
-                              center: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text('$careerScore', style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white)),
-                                  const Text('/100', style: TextStyle(fontSize: 12, color: Colors.white70)),
-                                ],
-                              ),
-                              progressColor: Colors.white,
-                              backgroundColor: Colors.white24,
-                              circularStrokeCap: CircularStrokeCap.round,
-                              animation: true,
-                              animationDuration: 1500,
-                            ),
-                            const SizedBox(height: 16),
-                            const Text('Career Ready Score', style: TextStyle(fontSize: 14, color: Colors.white70, letterSpacing: 0.5)),
-                            const SizedBox(height: 6),
-                            Text(motivationText, style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.w800)),
-                            const SizedBox(height: 4),
-                            Text(hintText, style: const TextStyle(fontSize: 11, color: Colors.white70), textAlign: TextAlign.center),
-                          ],
-                        ),
-                      ).animate().fadeIn(delay: 150.ms, duration: 600.ms).scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), delay: 150.ms),
-
-                      const SizedBox(height: 28),
-
-                      // Progress breakdown — real data
-                      Row(
-                        children: [
-                          _ProgressStat(label: 'Questions Asked', value: '${progress.questionsAsked}', max: '10', progress: (progress.questionsAsked / 10).clamp(0.0, 1.0), color: AppColors.primary),
-                          const SizedBox(width: 12),
-                          _ProgressStat(label: 'Events Attended', value: '${progress.eventsAttended}', max: '5', progress: (progress.eventsAttended / 5).clamp(0.0, 1.0), color: AppColors.secondary),
-                          const SizedBox(width: 12),
-                          _ProgressStat(label: 'Alumni Viewed', value: '${progress.alumniProfilesViewed}', max: '5', progress: (progress.alumniProfilesViewed / 5).clamp(0.0, 1.0), color: AppColors.accent),
-                        ],
-                      ).animate().fadeIn(delay: 300.ms),
-
-                      const SizedBox(height: 28),
-
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: const Text('Your Badges', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                      ).animate().fadeIn(delay: 350.ms),
-                      const SizedBox(height: 4),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          earnedIds.isEmpty
-                              ? 'No badges yet — start engaging to unlock!'
-                              : '${earnedIds.length}/${mockBadges.length} earned',
-                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                        ),
-                      ).animate().fadeIn(delay: 400.ms),
-                      const SizedBox(height: 16),
-
-                      GridView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 1.1,
-                        ),
-                        itemCount: mockBadges.length,
-                        itemBuilder: (context, i) {
-                          final badge = mockBadges[i];
-                          final isEarned = earnedIds.contains(badge.id);
-                          return Container(
-                            decoration: BoxDecoration(
-                              gradient: isEarned ? AppColors.primaryGradient : null,
-                              color: isEarned ? null : AppColors.bgCard,
-                              borderRadius: BorderRadius.circular(18),
-                              border: Border.all(color: isEarned ? Colors.transparent : AppColors.border),
-                              boxShadow: isEarned
-                                  ? [BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 12)]
-                                  : [],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    badge.icon,
-                                    style: TextStyle(fontSize: 26, color: isEarned ? null : null),
-                                  ),
-                                  const SizedBox(height: 5),
-                                  Text(
-                                    badge.title,
-                                    style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: isEarned ? Colors.white : AppColors.textMuted),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    badge.description,
-                                    style: TextStyle(fontSize: 9, color: isEarned ? Colors.white70 : AppColors.textMuted),
-                                    textAlign: TextAlign.center,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  if (!isEarned) ...[
-                                    const SizedBox(height: 3),
-                                    const Icon(Icons.lock_rounded, size: 11, color: AppColors.textMuted),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          )
-                              .animate(delay: Duration(milliseconds: 450 + i * 60))
-                              .fadeIn(duration: 350.ms)
-                              .scale(begin: const Offset(0.8, 0.8), end: const Offset(1, 1), delay: Duration(milliseconds: 450 + i * 60), curve: Curves.elasticOut);
-                        },
-                      ),
-
-                      const SizedBox(height: 80),
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        body: Container(
+          decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Container(
+                  color: AppColors.bgCard,
+                  child: const TabBar(
+                    labelColor: AppColors.primary,
+                    unselectedLabelColor: AppColors.textMuted,
+                    indicatorColor: AppColors.primary,
+                    tabs: [
+                      Tab(text: 'My Progress'),
+                      Tab(text: 'Leaderboard'),
                     ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _BadgesTab(
+                        progress: progress,
+                        careerScore: careerScore,
+                        earnedIds: earnedIds,
+                        motivationText: motivationText,
+                        hintText: hintText,
+                      ),
+                      const _LeaderboardTab(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  void _showBadgeNotification(BuildContext context, WidgetRef ref, String title, String emoji, String badgeId) {
+  void _showBadgeNotification(BuildContext context, WidgetRef ref, String title,
+      String emoji, String badgeId) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
@@ -226,8 +101,14 @@ class BadgesScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Badge Unlocked! 🎉', style: TextStyle(fontWeight: FontWeight.w700, color: Colors.white, fontSize: 13)),
-                  Text(title, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                  const Text('Badge Unlocked! 🎉',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          fontSize: 13)),
+                  Text(title,
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12)),
                 ],
               ),
             ),
@@ -240,8 +121,450 @@ class BadgesScreen extends ConsumerWidget {
       ),
     );
     Future.delayed(const Duration(milliseconds: 500), () {
-      if (context.mounted) ref.read(studentProgressProvider.notifier).clearNotification(badgeId);
+      if (context.mounted)
+        ref.read(studentProgressProvider.notifier).clearNotification(badgeId);
     });
+  }
+}
+
+class _BadgesTab extends StatelessWidget {
+  final StudentProgressState progress;
+  final int careerScore;
+  final List<String> earnedIds;
+  final String motivationText;
+  final String hintText;
+
+  const _BadgesTab({
+    required this.progress,
+    required this.careerScore,
+    required this.earnedIds,
+    required this.motivationText,
+    required this.hintText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 80),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(28),
+            decoration: BoxDecoration(
+              gradient: AppColors.primaryGradient,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.4),
+                  blurRadius: 30,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                CircularPercentIndicator(
+                  radius: 70,
+                  lineWidth: 10,
+                  percent: (careerScore / 100).clamp(0.0, 1.0),
+                  center: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '$careerScore',
+                        style: const TextStyle(
+                          fontSize: 36,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Text('/100',
+                          style:
+                              TextStyle(fontSize: 12, color: Colors.white70)),
+                    ],
+                  ),
+                  progressColor: Colors.white,
+                  backgroundColor: Colors.white24,
+                  circularStrokeCap: CircularStrokeCap.round,
+                  animation: true,
+                  animationDuration: 1500,
+                ),
+                const SizedBox(height: 16),
+                const Text('Career Ready Score',
+                    style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.white70,
+                        letterSpacing: 0.5)),
+                const SizedBox(height: 6),
+                Text(
+                  motivationText,
+                  style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  hintText,
+                  style: const TextStyle(fontSize: 11, color: Colors.white70),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ).animate().fadeIn(delay: 150.ms),
+          const SizedBox(height: 28),
+          Row(
+            children: [
+              _ProgressStat(
+                label: 'Questions Asked',
+                value: '${progress.questionsAsked}',
+                max: '10',
+                progress: (progress.questionsAsked / 10).clamp(0.0, 1.0),
+                color: AppColors.primary,
+              ),
+              const SizedBox(width: 12),
+              _ProgressStat(
+                label: 'Events Attended',
+                value: '${progress.eventsAttended}',
+                max: '5',
+                progress: (progress.eventsAttended / 5).clamp(0.0, 1.0),
+                color: AppColors.secondary,
+              ),
+              const SizedBox(width: 12),
+              _ProgressStat(
+                label: 'Alumni Viewed',
+                value: '${progress.alumniProfilesViewed}',
+                max: '5',
+                progress: (progress.alumniProfilesViewed / 5).clamp(0.0, 1.0),
+                color: AppColors.accent,
+              ),
+            ],
+          ).animate().fadeIn(delay: 300.ms),
+          const SizedBox(height: 28),
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Your Badges',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textPrimary,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              earnedIds.isEmpty
+                  ? 'No badges yet - start engaging to unlock!'
+                  : '${earnedIds.length}/${mockBadges.length} earned',
+              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+            ),
+          ),
+          const SizedBox(height: 16),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.1,
+            ),
+            itemCount: mockBadges.length,
+            itemBuilder: (context, i) {
+              final badge = mockBadges[i];
+              final isEarned = earnedIds.contains(badge.id);
+              return Container(
+                decoration: BoxDecoration(
+                  gradient: isEarned ? AppColors.primaryGradient : null,
+                  color: isEarned ? null : AppColors.bgCard,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(
+                      color: isEarned ? Colors.transparent : AppColors.border),
+                  boxShadow: isEarned
+                      ? [
+                          BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.3),
+                              blurRadius: 12)
+                        ]
+                      : [],
+                ),
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(badge.icon, style: const TextStyle(fontSize: 26)),
+                      const SizedBox(height: 5),
+                      Text(
+                        badge.title,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: isEarned ? Colors.white : AppColors.textMuted,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        badge.description,
+                        style: TextStyle(
+                            fontSize: 9,
+                            color: isEarned
+                                ? Colors.white70
+                                : AppColors.textMuted),
+                        textAlign: TextAlign.center,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      if (!isEarned) ...[
+                        const SizedBox(height: 3),
+                        const Icon(Icons.lock_rounded,
+                            size: 11, color: AppColors.textMuted),
+                      ],
+                    ],
+                  ),
+                ),
+              )
+                  .animate(delay: Duration(milliseconds: 450 + i * 60))
+                  .fadeIn(duration: 350.ms);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LeaderboardTab extends StatelessWidget {
+  const _LeaderboardTab();
+
+  static const _leaders = [
+    {
+      'rank': 1,
+      'name': 'Arjun Reddy',
+      'branch': 'CSE',
+      'score': 87,
+      'badges': 7,
+      'emoji': '🥇'
+    },
+    {
+      'rank': 2,
+      'name': 'Meena Kumari',
+      'branch': 'ECE',
+      'score': 74,
+      'badges': 6,
+      'emoji': '🥈'
+    },
+    {
+      'rank': 3,
+      'name': 'Vikram Rao',
+      'branch': 'CSE',
+      'score': 68,
+      'badges': 5,
+      'emoji': '🥉'
+    },
+    {
+      'rank': 4,
+      'name': 'Suresh Babu',
+      'branch': 'MECH',
+      'score': 61,
+      'badges': 4,
+      'emoji': '4️⃣'
+    },
+    {
+      'rank': 5,
+      'name': 'Lakshmi Prasad',
+      'branch': 'IT',
+      'score': 55,
+      'badges': 4,
+      'emoji': '5️⃣'
+    },
+    {
+      'rank': 6,
+      'name': 'Rahul Sharma',
+      'branch': 'EEE',
+      'score': 48,
+      'badges': 3,
+      'emoji': '6️⃣'
+    },
+    {
+      'rank': 7,
+      'name': 'Priya Nair',
+      'branch': 'CSE',
+      'score': 42,
+      'badges': 3,
+      'emoji': '7️⃣'
+    },
+    {
+      'rank': 8,
+      'name': 'Kiran Das',
+      'branch': 'ECE',
+      'score': 35,
+      'badges': 2,
+      'emoji': '8️⃣'
+    },
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+              border:
+                  Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                Text('🏆', style: TextStyle(fontSize: 24)),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Career Ready Leaderboard',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800, fontSize: 15)),
+                      Text(
+                          'Rankings based on questions asked, events attended, and badges earned',
+                          style: TextStyle(
+                              fontSize: 11, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ).animate().fadeIn(),
+          const SizedBox(height: 20),
+          ..._leaders.asMap().entries.map((entry) {
+            final i = entry.key;
+            final leader = entry.value;
+            final isTopThree = (leader['rank'] as int) <= 3;
+            return Container(
+              margin: const EdgeInsets.only(bottom: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                gradient: isTopThree ? AppColors.primaryGradient : null,
+                color: isTopThree ? null : AppColors.bgCard,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                    color: isTopThree ? Colors.transparent : AppColors.border),
+                boxShadow: isTopThree
+                    ? [
+                        BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 10)
+                      ]
+                    : [],
+              ),
+              child: Row(
+                children: [
+                  Text(leader['emoji'] as String,
+                      style: const TextStyle(fontSize: 20)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          leader['name'] as String,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: isTopThree
+                                ? Colors.white
+                                : AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          '${leader['branch']} • ${leader['badges']} badges',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isTopThree
+                                ? Colors.white70
+                                : AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isTopThree
+                          ? Colors.white.withValues(alpha: 0.2)
+                          : AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      '${leader['score']}pts',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 12,
+                        color: isTopThree ? Colors.white : AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+                .animate(delay: Duration(milliseconds: i * 80))
+                .fadeIn()
+                .slideX(begin: 0.1);
+          }),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: AppColors.bgCard,
+              borderRadius: BorderRadius.circular(14),
+              border:
+                  Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+            ),
+            child: const Row(
+              children: [
+                Text('👤', style: TextStyle(fontSize: 20)),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('You',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 14,
+                              color: AppColors.primary)),
+                      Text('Keep engaging to climb the leaderboard!',
+                          style: TextStyle(
+                              fontSize: 11, color: AppColors.textMuted)),
+                    ],
+                  ),
+                ),
+                Text('-',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textMuted)),
+              ],
+            ),
+          ),
+          const SizedBox(height: 80),
+        ],
+      ),
+    );
   }
 }
 
@@ -249,7 +572,12 @@ class _ProgressStat extends StatelessWidget {
   final String label, value, max;
   final double progress;
   final Color color;
-  const _ProgressStat({required this.label, required this.value, required this.max, required this.progress, required this.color});
+  const _ProgressStat(
+      {required this.label,
+      required this.value,
+      required this.max,
+      required this.progress,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -263,13 +591,21 @@ class _ProgressStat extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text('$value/$max', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: color)),
+            Text('$value/$max',
+                style: TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w800, color: color)),
             const SizedBox(height: 4),
-            Text(label, style: const TextStyle(fontSize: 9, color: AppColors.textMuted), textAlign: TextAlign.center),
+            Text(label,
+                style: const TextStyle(fontSize: 9, color: AppColors.textMuted),
+                textAlign: TextAlign.center),
             const SizedBox(height: 6),
             ClipRRect(
               borderRadius: BorderRadius.circular(2),
-              child: LinearProgressIndicator(value: progress, backgroundColor: color.withValues(alpha: 0.2), valueColor: AlwaysStoppedAnimation(color), minHeight: 3),
+              child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: color.withValues(alpha: 0.2),
+                  valueColor: AlwaysStoppedAnimation(color),
+                  minHeight: 3),
             ),
           ],
         ),
