@@ -26,6 +26,7 @@ import '../screens/alumni_dashboard/student_questions_screen.dart';
 import '../screens/admin/admin_overview_screen.dart';
 import '../screens/admin/admin_users_screen.dart';
 import '../screens/messages/messaging_screen.dart';
+import '../screens/student/ats_check_screen.dart';
 import '../providers/app_providers.dart';
 
 // Routes that do NOT require login
@@ -175,8 +176,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           builder: (_, __) => const SkillPackageScreen()),
       GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
       GoRoute(
-          path: '/messages',
-          builder: (_, __) => const MessagingListScreen()),
+          path: '/messages', builder: (_, __) => const MessagingListScreen()),
+      GoRoute(path: '/ats-check', builder: (_, __) => const AtsCheckScreen()),
     ],
   );
 

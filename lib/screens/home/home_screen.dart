@@ -16,7 +16,9 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
     final student = auth.student;
-    final displayName = auth.loginName.isNotEmpty ? auth.loginName : (student?.name ?? 'Student');
+    final displayName = auth.loginName.isNotEmpty
+        ? auth.loginName
+        : (student?.name ?? 'Student');
 
     return Scaffold(
       appBar: CustomAppBar(
@@ -30,7 +32,8 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             icon: CircleAvatar(
               radius: 14,
-              backgroundImage: NetworkImage(student?.photoUrl ?? 'https://i.pravatar.cc/150'),
+              backgroundImage: NetworkImage(
+                  student?.photoUrl ?? 'https://i.pravatar.cc/150'),
             ),
             onPressed: () => context.push('/profile'),
           ),
@@ -49,12 +52,14 @@ class HomeScreen extends ConsumerWidget {
                 children: [
                   Text(
                     '${_getGreeting()}, ${displayName.split(' ').first}! 👋',
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w800),
                   ).animate().fadeIn().slideX(begin: -0.1),
                   const SizedBox(height: 4),
                   Text(
                     '${student?.branch ?? "CSE"} • Year ${student?.year ?? 3}',
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 13),
                   ).animate().fadeIn(delay: 100.ms),
                 ],
               ),
@@ -69,7 +74,10 @@ class HomeScreen extends ConsumerWidget {
                   gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
-                    BoxShadow(color: AppColors.primary.withValues(alpha: 0.3), blurRadius: 20, offset: const Offset(0, 10))
+                    BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10))
                   ],
                 ),
                 child: Row(
@@ -80,7 +88,10 @@ class HomeScreen extends ConsumerWidget {
                       percent: (student?.careerScore ?? 42) / 100,
                       center: Text(
                         '${student?.careerScore ?? 42}%',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 16),
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16),
                       ),
                       progressColor: Colors.white,
                       backgroundColor: Colors.white24,
@@ -91,13 +102,20 @@ class HomeScreen extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Career Ready Score', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                          const Text('Career Ready Score',
+                              style: TextStyle(
+                                  color: Colors.white70, fontSize: 12)),
                           const SizedBox(height: 4),
-                          const Text('Great progress! 🚀', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800)),
+                          const Text('Great progress! 🚀',
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800)),
                           const SizedBox(height: 8),
                           const Text(
                             'Complete 2 more sessions to reach 50%',
-                            style: TextStyle(color: Colors.white70, fontSize: 11),
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 11),
                           ),
                         ],
                       ),
@@ -112,7 +130,8 @@ class HomeScreen extends ConsumerWidget {
             // Quick Access
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Quick Access', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              child: Text('Quick Access',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -147,8 +166,22 @@ class HomeScreen extends ConsumerWidget {
                       context.go('/roadmap');
                     },
                   ),
-                  _QuickLink(icon: Icons.currency_rupee_rounded, label: 'Packages', color: AppColors.error, onTap: () => context.push('/skill-package')),
-                  _QuickLink(icon: Icons.history_edu_rounded, label: 'Stories', color: AppColors.textSecondary, onTap: () => context.push('/placement')),
+                  _QuickLink(
+                      icon: Icons.currency_rupee_rounded,
+                      label: 'Packages',
+                      color: AppColors.error,
+                      onTap: () => context.push('/skill-package')),
+                  _QuickLink(
+                    icon: Icons.document_scanner_rounded,
+                    label: 'Resume Scan',
+                    color: Colors.indigo,
+                    onTap: () => context.push('/ats-check'),
+                  ),
+                  _QuickLink(
+                      icon: Icons.history_edu_rounded,
+                      label: 'Stories',
+                      color: AppColors.textSecondary,
+                      onTap: () => context.push('/placement')),
                 ],
               ),
             ).animate().fadeIn(delay: 300.ms),
@@ -161,7 +194,9 @@ class HomeScreen extends ConsumerWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Top Alumni', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  const Text('Top Alumni',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                   TextButton(
                     onPressed: () {
                       ref.read(studentNavIndexProvider.notifier).state = 1;
@@ -194,20 +229,35 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       child: Column(
                         children: [
-                          CircleAvatar(radius: 28, backgroundImage: NetworkImage(alu.photoUrl)),
+                          CircleAvatar(
+                              radius: 28,
+                              backgroundImage: NetworkImage(alu.photoUrl)),
                           const SizedBox(height: 12),
-                          Text(alu.name.split(' ').first, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
-                          Text(alu.company, style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                          Text(alu.name.split(' ').first,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 13)),
+                          Text(alu.company,
+                              style: const TextStyle(
+                                  color: AppColors.textMuted, fontSize: 10)),
                           const Spacer(),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                            child: Text('₹${alu.package}L', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Text('₹${alu.package}L',
+                                style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w800,
+                                    color: AppColors.primary)),
                           ),
                         ],
                       ),
                     ),
-                  ).animate().fadeIn(delay: Duration(milliseconds: 400 + (i * 100)));
+                  )
+                      .animate()
+                      .fadeIn(delay: Duration(milliseconds: 400 + (i * 100)));
                 },
               ),
             ),
@@ -217,23 +267,37 @@ class HomeScreen extends ConsumerWidget {
             // Trending Q&A
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Text('Trending Q&A', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              child: Text('Trending Q&A',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 16),
-            ...mockQA.take(2).map((q) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-              child: Card(
-                child: ListTile(
-                  title: Text(q.question, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                  subtitle: Text('${q.answers.length} answers • ${q.upvotes} upvotes', style: const TextStyle(fontSize: 11)),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {
-                    ref.read(studentNavIndexProvider.notifier).state = 2;
-                    context.go('/qa');
-                  },
-                ),
-              ),
-            )).toList().animate().fadeIn(delay: 600.ms),
+            ...mockQA
+                .take(2)
+                .map((q) => Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 6),
+                      child: Card(
+                        child: ListTile(
+                          title: Text(q.question,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                  fontSize: 14, fontWeight: FontWeight.w600)),
+                          subtitle: Text(
+                              '${q.answers.length} answers • ${q.upvotes} upvotes',
+                              style: const TextStyle(fontSize: 11)),
+                          trailing: const Icon(Icons.chevron_right_rounded),
+                          onTap: () {
+                            ref.read(studentNavIndexProvider.notifier).state =
+                                2;
+                            context.go('/qa');
+                          },
+                        ),
+                      ),
+                    ))
+                .toList()
+                .animate()
+                .fadeIn(delay: 600.ms),
 
             const SizedBox(height: 100),
           ],
@@ -251,9 +315,24 @@ class HomeScreen extends ConsumerWidget {
 
   void _showNotifications(BuildContext context) {
     final notifs = [
-      _NotifData(icon: Icons.chat_bubble_rounded, color: AppColors.primary, title: 'Ravi Kumar answered your question', sub: 'Insights on FAANG prep & LeetCode strategy!', time: '2h ago'),
-      _NotifData(icon: Icons.event_rounded, color: AppColors.secondary, title: 'Webinar tomorrow at 6 PM', sub: 'System Design with Priya Lakshmi', time: '5h ago'),
-      _NotifData(icon: Icons.emoji_events_rounded, color: AppColors.accent, title: 'New Badge Earned! 🏆', sub: 'You earned "First Question Asked"', time: 'Yesterday'),
+      _NotifData(
+          icon: Icons.chat_bubble_rounded,
+          color: AppColors.primary,
+          title: 'Ravi Kumar answered your question',
+          sub: 'Insights on FAANG prep & LeetCode strategy!',
+          time: '2h ago'),
+      _NotifData(
+          icon: Icons.event_rounded,
+          color: AppColors.secondary,
+          title: 'Webinar tomorrow at 6 PM',
+          sub: 'System Design with Priya Lakshmi',
+          time: '5h ago'),
+      _NotifData(
+          icon: Icons.emoji_events_rounded,
+          color: AppColors.accent,
+          title: 'New Badge Earned! 🏆',
+          sub: 'You earned "First Question Asked"',
+          time: 'Yesterday'),
     ];
 
     showModalBottomSheet(
@@ -271,28 +350,47 @@ class HomeScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
+              child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                      color: AppColors.border,
+                      borderRadius: BorderRadius.circular(2))),
             ),
             Row(
               children: [
-                const Text('Notifications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                const Text('Notifications',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                 const Spacer(),
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Mark all read')),
+                TextButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    child: const Text('Mark all read')),
               ],
             ),
             const SizedBox(height: 8),
             ...notifs.map((n) => ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
-              leading: Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(color: n.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
-                child: Icon(n.icon, color: n.color, size: 22),
-              ),
-              title: Text(n.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-              subtitle: Text(n.sub, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-              trailing: Text(n.time, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
-            )),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 0, vertical: 4),
+                  leading: Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                        color: n.color.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(12)),
+                    child: Icon(n.icon, color: n.color, size: 22),
+                  ),
+                  title: Text(n.title,
+                      style: const TextStyle(
+                          fontSize: 13, fontWeight: FontWeight.w600)),
+                  subtitle: Text(n.sub,
+                      style: const TextStyle(
+                          fontSize: 11, color: AppColors.textMuted)),
+                  trailing: Text(n.time,
+                      style: const TextStyle(
+                          fontSize: 10, color: AppColors.textMuted)),
+                )),
           ],
         ),
       ),
@@ -304,9 +402,13 @@ class _NotifData {
   final IconData icon;
   final Color color;
   final String title, sub, time;
-  const _NotifData({required this.icon, required this.color, required this.title, required this.sub, required this.time});
+  const _NotifData(
+      {required this.icon,
+      required this.color,
+      required this.title,
+      required this.sub,
+      required this.time});
 }
-
 
 class _QuickLink extends StatelessWidget {
   final IconData icon;
@@ -314,7 +416,11 @@ class _QuickLink extends StatelessWidget {
   final Color color;
   final VoidCallback onTap;
 
-  const _QuickLink({required this.icon, required this.label, required this.color, required this.onTap});
+  const _QuickLink(
+      {required this.icon,
+      required this.label,
+      required this.color,
+      required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +441,12 @@ class _QuickLink extends StatelessWidget {
               child: Icon(icon, color: color, size: 24),
             ),
             const SizedBox(height: 8),
-            Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.textSecondary), textAlign: TextAlign.center),
+            Text(label,
+                style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textSecondary),
+                textAlign: TextAlign.center),
           ],
         ),
       ),

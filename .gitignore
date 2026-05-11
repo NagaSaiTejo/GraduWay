@@ -44,13 +44,17 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# ─── Backend / Node.js ───────────────────────────────────────────────────────
-# Environment variables — NEVER commit these (contains DB password, secret keys)
-backend/.env
-backend/.env.local
-backend/.env.production
-backend/.env.*
-backend/node_modules
+# ─── Security / Environment Variables ───────────────────────────────────────
+# NEVER commit real .env files (they contain DB passwords, secret keys)
+.env
+.env.local
+.env.production
+.env.*
+**/.env
+**/.env.local
+**/.env.production
+**/.env.*
+backend/node_modules/
 
 # Node modules — reinstall with `npm install`
 backend/node_modules/
