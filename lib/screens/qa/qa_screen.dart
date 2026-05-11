@@ -3,6 +3,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/firestore_providers.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../data/models/models.dart';
@@ -30,13 +31,29 @@ class _QAScreenState extends ConsumerState<QAScreen> {
 
   @override
   Widget build(BuildContext context) {
+    ref.listen<AsyncValue<List<QAModel>>>(qaStreamProvider, (_, next) {
+      next.whenData((firestoreQA) {
+        if (firestoreQA.isEmpty) return;
+
+        final existing = ref.read(qaProvider);
+        final firestoreIds = firestoreQA.map((q) => q.id).toSet();
+        final merged = [
+          ...firestoreQA,
+          ...existing.where((q) => !firestoreIds.contains(q.id)),
+        ];
+
+        ref.read(qaProvider.notifier).state = merged;
+      });
+    });
+
     final questions = ref.watch(qaProvider);
     final filtered = _searchQuery.isEmpty
         ? questions
         : questions
             .where((q) =>
                 q.question.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                q.tags.any((t) => t.toLowerCase().contains(_searchQuery.toLowerCase())))
+                q.tags.any((t) =>
+                    t.toLowerCase().contains(_searchQuery.toLowerCase())))
             .toList();
 
     return Scaffold(
@@ -44,7 +61,8 @@ class _QAScreenState extends ConsumerState<QAScreen> {
         title: 'Q&A Community',
         actions: [
           IconButton(
-            icon: Icon(_showSearch ? Icons.search_off_rounded : Icons.search_rounded),
+            icon: Icon(
+                _showSearch ? Icons.search_off_rounded : Icons.search_rounded),
             onPressed: () {
               setState(() {
                 _showSearch = !_showSearch;
@@ -63,7 +81,9 @@ class _QAScreenState extends ConsumerState<QAScreen> {
           // Live search bar
           AnimatedCrossFade(
             duration: const Duration(milliseconds: 250),
-            crossFadeState: _showSearch ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+            crossFadeState: _showSearch
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
             firstChild: const SizedBox.shrink(),
             secondChild: Container(
               color: AppColors.bgCard,
@@ -74,7 +94,8 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                 onChanged: (v) => setState(() => _searchQuery = v),
                 decoration: InputDecoration(
                   hintText: 'Search questions or tags...',
-                  prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20),
+                  prefixIcon: const Icon(Icons.search_rounded,
+                      color: AppColors.textMuted, size: 20),
                   suffixIcon: _searchQuery.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear_rounded, size: 18),
@@ -86,7 +107,9 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                       : null,
                   fillColor: AppColors.bgPage,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                   contentPadding: const EdgeInsets.symmetric(vertical: 10),
                 ),
               ),
@@ -103,8 +126,11 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                         const Text('🔍', style: TextStyle(fontSize: 48)),
                         const SizedBox(height: 12),
                         Text(
-                          _searchQuery.isEmpty ? 'No questions yet' : 'No results for "$_searchQuery"',
-                          style: const TextStyle(color: AppColors.textMuted, fontSize: 15),
+                          _searchQuery.isEmpty
+                              ? 'No questions yet'
+                              : 'No results for "$_searchQuery"',
+                          style: const TextStyle(
+                              color: AppColors.textMuted, fontSize: 15),
                         ),
                       ],
                     ).animate().fadeIn(),
@@ -138,7 +164,8 @@ class _QAScreenState extends ConsumerState<QAScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+        padding: EdgeInsets.fromLTRB(
+            20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -149,38 +176,55 @@ class _QAScreenState extends ConsumerState<QAScreen> {
           children: [
             Row(
               children: [
-                const Text('Ask Alumni', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+                const Text('Ask Alumni',
+                    style:
+                        TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                 const Spacer(),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context)),
               ],
             ),
             const SizedBox(height: 4),
-            const Text('Your question will be visible to all verified alumni.', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+            const Text('Your question will be visible to all verified alumni.',
+                style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
             const SizedBox(height: 20),
             TextField(
               controller: _questionController,
               maxLines: 4,
               decoration: InputDecoration(
-                hintText: 'What would you like to know about placements, skills, or career path?',
+                hintText:
+                    'What would you like to know about placements, skills, or career path?',
                 fillColor: AppColors.bgPage,
                 filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 20),
-            const Text('Tags', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+            const Text('Tags',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
-              children: ['Placements', 'Skills', 'Interview', 'Companies', 'Resumes'].map((tag) {
+              children: [
+                'Placements',
+                'Skills',
+                'Interview',
+                'Companies',
+                'Resumes'
+              ].map((tag) {
                 final isSelected = _selectedTags.contains(tag);
                 return FilterChip(
                   label: Text(tag),
                   selected: isSelected,
                   onSelected: (val) {
                     setState(() {
-                      if (val) _selectedTags.add(tag);
-                      else _selectedTags.remove(tag);
+                      if (val)
+                        _selectedTags.add(tag);
+                      else
+                        _selectedTags.remove(tag);
                     });
                   },
                 );
@@ -198,7 +242,9 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                   askedById: student.rollNumber,
                   timestamp: DateTime.now(),
                   upvotes: 0,
-                  tags: _selectedTags.isEmpty ? ['General'] : List.from(_selectedTags),
+                  tags: _selectedTags.isEmpty
+                      ? ['General']
+                      : List.from(_selectedTags),
                   answers: [],
                   isAnswered: false,
                 );
@@ -207,7 +253,9 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                 _selectedTags.clear();
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Question posted! Alumni will notify you once answered.')),
+                  const SnackBar(
+                      content: Text(
+                          'Question posted! Alumni will notify you once answered.')),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -241,27 +289,50 @@ class _QuestionCard extends StatelessWidget {
                 CircleAvatar(
                   radius: 12,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  child: Text(question.askedBy[0], style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                  child: Text(question.askedBy[0],
+                      style: const TextStyle(
+                          fontSize: 10,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold)),
                 ),
                 const SizedBox(width: 8),
-                Text(question.askedBy, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+                Text(question.askedBy,
+                    style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textSecondary)),
                 const Spacer(),
-                Text(DateFormat('MMM d').format(question.timestamp), style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                Text(DateFormat('MMM d').format(question.timestamp),
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.textMuted)),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               question.question,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary, height: 1.4),
+              style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                  height: 1.4),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
-              children: question.tags.map((t) => Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(color: AppColors.bgPage, borderRadius: BorderRadius.circular(8)),
-                child: Text('#$t', style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w600)),
-              )).toList(),
+              children: question.tags
+                  .map((t) => Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                            color: AppColors.bgPage,
+                            borderRadius: BorderRadius.circular(8)),
+                        child: Text('#$t',
+                            style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600)),
+                      ))
+                  .toList(),
             ),
             if (question.answers.isNotEmpty) ...[
               const SizedBox(height: 16),
@@ -270,7 +341,10 @@ class _QuestionCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  CircleAvatar(radius: 14, backgroundImage: NetworkImage(question.answers.first.alumniPhotoUrl)),
+                  CircleAvatar(
+                      radius: 14,
+                      backgroundImage:
+                          NetworkImage(question.answers.first.alumniPhotoUrl)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -278,14 +352,20 @@ class _QuestionCard extends StatelessWidget {
                       children: [
                         Text(
                           '${question.answers.first.alumniName} • ${question.answers.first.alumniCompany}',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.alumni),
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.alumni),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           question.answers.first.answer,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                          style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                              height: 1.4),
                         ),
                       ],
                     ),
@@ -295,15 +375,24 @@ class _QuestionCard extends StatelessWidget {
               if (question.answers.length > 1)
                 Padding(
                   padding: const EdgeInsets.only(top: 8, left: 40),
-                  child: Text('+ ${question.answers.length - 1} more answers', style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                  child: Text('+ ${question.answers.length - 1} more answers',
+                      style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600)),
                 ),
             ] else ...[
               const SizedBox(height: 16),
               const Row(
                 children: [
-                  Icon(Icons.hourglass_empty_rounded, size: 14, color: AppColors.textMuted),
+                  Icon(Icons.hourglass_empty_rounded,
+                      size: 14, color: AppColors.textMuted),
                   SizedBox(width: 6),
-                  Text('Waiting for alumni response...', style: TextStyle(fontSize: 11, color: AppColors.textMuted, fontStyle: FontStyle.italic)),
+                  Text('Waiting for alumni response...',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.textMuted,
+                          fontStyle: FontStyle.italic)),
                 ],
               ),
             ],

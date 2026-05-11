@@ -3,8 +3,8 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
-import '../data/mock/alumni_data.dart';
 import '../data/mock/placement_data.dart';
+import '../data/mock/alumni_data.dart';
 
 // ─── Alumni from Firestore ────────────────────────────────────────────────────
 /// Real-time alumni stream from Firestore.
@@ -106,7 +106,21 @@ final eventsStreamProvider = StreamProvider<List<EventModel>>((ref) {
       .snapshots()
       .map((snapshot) {
     if (snapshot.docs.isEmpty) return mockEvents; // dev fallback
-    return snapshot.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
+    return snapshot.docs.map((doc) {
+      final data = doc.data();
+      return EventModel(
+        id: doc.id,
+        title: data['title'] as String? ?? '',
+        description: data['description'] as String? ?? '',
+        hostAlumniName: data['hostAlumniName'] as String? ?? '',
+        hostCompany: data['hostCompany'] as String? ?? '',
+        eventDate:
+            (data['eventDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+        type: data['type'] as String? ?? 'webinar',
+        registeredCount: (data['registeredCount'] as num?)?.toInt() ?? 0,
+        isRsvped: data['isRsvped'] as bool? ?? false,
+      );
+    }).toList();
   }).handleError((_) => mockEvents);
 });
 

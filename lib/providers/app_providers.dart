@@ -7,6 +7,7 @@ import '../data/models/models.dart';
 import '../data/models/student_model.dart';
 import '../data/mock/alumni_data.dart';
 import '../data/mock/placement_data.dart';
+import 'firestore_providers.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Auth State
@@ -66,8 +67,6 @@ class AuthState {
   }
 }
 
-
-
 class AuthNotifier extends StateNotifier<AuthState> {
   AuthNotifier() : super(const AuthState());
 
@@ -87,8 +86,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
     if (roleStr == 'student') {
       role = UserRole.student;
-      final progressMap = user['roadmapProgress'] as Map<String, dynamic>? ?? {};
-      final parsedProgress = progressMap.map((k, v) => MapEntry(k, (v as num).toInt()));
+      final progressMap =
+          user['roadmapProgress'] as Map<String, dynamic>? ?? {};
+      final parsedProgress =
+          progressMap.map((k, v) => MapEntry(k, (v as num).toInt()));
 
       studentModel = StudentModel(
         id: user['id'] as String,
@@ -153,7 +154,10 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   /// Update the student's roadmap state after an API call
-  void updateRoadmapState({required String? activeRoadmap, required Map<String, int> roadmapProgress, int? careerScore}) {
+  void updateRoadmapState(
+      {required String? activeRoadmap,
+      required Map<String, int> roadmapProgress,
+      int? careerScore}) {
     if (state.student != null) {
       final updatedStudent = StudentModel(
         id: state.student!.id,
@@ -193,7 +197,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final progressMap = data['roadmapProgress'] as Map<String, dynamic>;
         updateRoadmapState(
           activeRoadmap: data['activeRoadmap'],
-          roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
+          roadmapProgress:
+              progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
         );
       } else {
         debugPrint('Failed to select roadmap: ${response.body}');
@@ -217,7 +222,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         final progressMap = data['roadmapProgress'] as Map<String, dynamic>;
         updateRoadmapState(
           activeRoadmap: null,
-          roadmapProgress: progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
+          roadmapProgress:
+              progressMap.map((k, v) => MapEntry(k, (v as num).toInt())),
         );
       } else {
         debugPrint('Failed to exit roadmap: ${response.body}');
@@ -321,11 +327,13 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
     final newCount = state.questionsAsked + 1;
     var newState = state.copyWith(questionsAsked: newCount);
     // Award badge: first question
-    if (newCount == 1)
+    if (newCount == 1) {
       newState = _awardBadge(newState, 'b002', 'Curious Mind', '❓');
+    }
     // Award badge: 5 questions
-    if (newCount == 5)
+    if (newCount == 5) {
       newState = _awardBadge(newState, 'b008', 'Community Hero', '💬');
+    }
     state = newState;
   }
 
@@ -467,10 +475,20 @@ final trendingQAProvider = Provider<List<QAModel>>((ref) {
 final alumniSearchProvider = StateProvider<String>((ref) => '');
 final selectedBranchProvider = StateProvider<String>((ref) => 'All');
 
+final alumniListProvider = Provider<List<AlumniModel>>((ref) {
+  final firestoreAlumni = ref.watch(alumniStreamProvider);
+  return firestoreAlumni.when(
+    data: (list) => list.isNotEmpty ? list : mockAlumni,
+    loading: () => mockAlumni,
+    error: (_, __) => mockAlumni,
+  );
+});
+
 final searchedAlumniProvider = Provider<List<AlumniModel>>((ref) {
   final query = ref.watch(alumniSearchProvider).toLowerCase();
   final branch = ref.watch(selectedBranchProvider);
-  return mockAlumni.where((a) {
+  final alumni = ref.watch(alumniListProvider);
+  return alumni.where((a) {
     final matchesBranch = branch == 'All' || a.branch == branch;
     final matchesQuery = query.isEmpty ||
         a.name.toLowerCase().contains(query) ||

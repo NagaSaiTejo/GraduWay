@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:device_preview/device_preview.dart';
+import 'core/multi_college_config.dart';
 import 'routing/app_router.dart';
 import 'theme/app_theme.dart';
 
@@ -11,7 +12,7 @@ class GraduWayApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     return MaterialApp.router(
-      title: 'GraduWay — Aditya College',
+      title: 'GraduWay — ${activeCollege.collegeName}',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       themeMode: ThemeMode.light,

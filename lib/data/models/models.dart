@@ -63,8 +63,7 @@ class QAModel {
       question: data['question'] as String? ?? '',
       askedBy: data['askedBy'] as String? ?? 'Anonymous',
       askedById: data['askedById'] as String? ?? '',
-      timestamp:
-          (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      timestamp: (data['timestamp'] as Timestamp?)?.toDate() ?? DateTime.now(),
       upvotes: (data['upvotes'] as num?)?.toInt() ?? 0,
       tags: List<String>.from(data['tags'] as List? ?? []),
       answers: [], // loaded separately from sub-collection
@@ -168,6 +167,21 @@ class EventModel {
     required this.registeredCount,
     required this.isRsvped,
   });
+
+  factory EventModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
+    return EventModel(
+      id: doc.id,
+      title: data['title'] as String? ?? '',
+      description: data['description'] as String? ?? '',
+      hostAlumniName: data['hostAlumniName'] as String? ?? '',
+      hostCompany: data['hostCompany'] as String? ?? '',
+      eventDate: (data['eventDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+      type: data['type'] as String? ?? 'webinar',
+      registeredCount: (data['registeredCount'] as num?)?.toInt() ?? 0,
+      isRsvped: data['isRsvped'] as bool? ?? false,
+    );
+  }
 }
 
 // ─── Badge ────────────────────────────────────────────────────────────────────
