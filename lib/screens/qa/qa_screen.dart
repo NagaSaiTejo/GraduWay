@@ -42,7 +42,7 @@ class _QAScreenState extends ConsumerState<QAScreen> {
           ...existing.where((q) => !firestoreIds.contains(q.id)),
         ];
 
-        ref.read(qaProvider.notifier).state = merged;
+        ref.read(qaProvider.notifier).replaceAll(merged);
       });
     });
 
@@ -221,10 +221,11 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                   selected: isSelected,
                   onSelected: (val) {
                     setState(() {
-                      if (val)
+                      if (val) {
                         _selectedTags.add(tag);
-                      else
+                      } else {
                         _selectedTags.remove(tag);
+                      }
                     });
                   },
                 );

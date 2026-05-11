@@ -341,8 +341,9 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
   void attendEvent() {
     final newCount = state.eventsAttended + 1;
     var newState = state.copyWith(eventsAttended: newCount);
-    if (newCount == 1)
+    if (newCount == 1) {
       newState = _awardBadge(newState, 'b004', 'Event Goer', '🎓');
+    }
     state = newState;
   }
 
@@ -354,10 +355,12 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
       alumniProfilesViewed: newIds.length,
       viewedAlumniIds: newIds,
     );
-    if (newIds.length == 1)
+    if (newIds.length == 1) {
       newState = _awardBadge(newState, 'b001', 'First Connect', '🤝');
-    if (newIds.length == 5)
+    }
+    if (newIds.length == 5) {
       newState = _awardBadge(newState, 'b007', 'Network Builder', '🌐');
+    }
     state = newState;
   }
 
@@ -430,6 +433,10 @@ final careerScoreProvider =
 
 class QANotifier extends StateNotifier<List<QAModel>> {
   QANotifier() : super(mockQA);
+
+  void replaceAll(List<QAModel> questions) {
+    state = questions;
+  }
 
   void addQuestion(QAModel question) {
     state = [question, ...state];
