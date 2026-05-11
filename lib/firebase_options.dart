@@ -4,6 +4,20 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
+/// SECURITY NOTE: All Firebase API keys are injected at build time via --dart-define.
+///
+/// The placeholder values below are intentional. In production:
+/// 1. Never hardcode API keys in source code
+/// 2. Inject via: flutter run --dart-define=FIREBASE_WEB_API_KEY=AIza...
+/// 3. The app gracefully falls back to Node.js/MongoDB backend if Firebase is not configured
+/// 4. For release builds: flutter build apk --dart-define=FIREBASE_WEB_API_KEY=your_key
+///
+/// Setup Instructions:
+/// 1. Create Firebase project: https://console.firebase.google.com
+/// 2. Run: flutterfire configure --project=your-firebase-project-id
+/// 3. Copy credentials from Firebase Console → Project Settings
+/// See README.md → Setup → Firebase Configuration for full details.
+
 /// Default [FirebaseOptions] for use with your Firebase apps.
 ///
 /// Example:

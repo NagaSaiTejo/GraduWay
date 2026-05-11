@@ -134,8 +134,12 @@ router.post('/register/admin', (req, res) => {
     try {
       const { name, email, password, adminCode } = req.body;
 
-      const SECRET_ADMIN_CODE = 'GRADUWAY_SECURE_KEY';
-      if (adminCode !== SECRET_ADMIN_CODE) {
+      // SECURITY: Admin code is stored in environment variable, never hardcoded
+      const ADMIN_REGISTRATION_CODE = process.env.ADMIN_REGISTRATION_CODE;
+      if (!ADMIN_REGISTRATION_CODE) {
+        return res.status(500).json({ message: 'Server configuration error: ADMIN_REGISTRATION_CODE not set.' });
+      }
+      if (adminCode !== ADMIN_REGISTRATION_CODE) {
         return res.status(403).json({ message: 'Invalid Admin Verification Code.' });
       }
 
