@@ -283,14 +283,15 @@ class _QAScreenState extends ConsumerState<QAScreen> {
 
                 _questionController.clear();
                 _selectedTags.clear();
-                if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text(
-                            'Question posted! Alumni will notify you once answered.')),
-                  );
-                }
+                
+                if (!context.mounted) return;
+                
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                      content: Text(
+                          'Question posted! Alumni will notify you once answered.')),
+                );
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

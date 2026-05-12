@@ -5,7 +5,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../data/models/alumni_model.dart';
 import '../data/models/models.dart';
 import '../data/models/student_model.dart';
-import '../data/mock/alumni_data.dart';
 import '../data/mock/placement_data.dart';
 import '../core/api_config.dart';
 import 'firestore_providers.dart';

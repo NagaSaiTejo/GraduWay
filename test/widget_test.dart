@@ -757,11 +757,9 @@ void main() {
   group('Widget Tests — Event Card Rendering', () {
     testWidgets('Event card shows RSVP status correctly', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
-            body: Container(
-              child: const Text('RSVP\'d — See you there!'),
-            ),
+            body: Text('RSVP\'d — See you there!'),
           ),
         ),
       );

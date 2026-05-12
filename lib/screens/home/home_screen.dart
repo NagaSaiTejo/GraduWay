@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
-import '../../providers/firestore_providers.dart';
 import '../../data/mock/alumni_data.dart';
 import '../../data/mock/placement_data.dart';
 import '../../widgets/custom_app_bar.dart';
