@@ -11,7 +11,7 @@ class ApiConfig {
   /// Override at build time: --dart-define=API_BASE_URL=https://your-server.com
   static const String _baseHost = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://127.0.0.1:5000',
+    defaultValue: 'https://graduway-1.onrender.com',
   );
 
   static const String baseUrl = '$_baseHost/api';
