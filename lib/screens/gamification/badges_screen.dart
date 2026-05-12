@@ -5,6 +5,8 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../data/mock/placement_data.dart';
+import '../../services/firebase_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class BadgesScreen extends ConsumerWidget {
   const BadgesScreen({super.key});
@@ -76,7 +78,7 @@ class BadgesScreen extends ConsumerWidget {
                         motivationText: motivationText,
                         hintText: hintText,
                       ),
-                      const _LeaderboardTab(),
+                      _LeaderboardTab(),
                     ],
                   ),
                 ),
@@ -343,10 +345,15 @@ class _BadgesTab extends StatelessWidget {
   }
 }
 
-class _LeaderboardTab extends StatelessWidget {
+class _LeaderboardTab extends StatefulWidget {
   const _LeaderboardTab();
 
-  static const _leaders = [
+  @override
+  State<_LeaderboardTab> createState() => _LeaderboardTabState();
+}
+
+class _LeaderboardTabState extends State<_LeaderboardTab> {
+  static const List<Map<String, dynamic>> _mockLeaders = [
     {
       'rank': 1,
       'name': 'Arjun Reddy',
@@ -412,159 +419,214 @@ class _LeaderboardTab extends StatelessWidget {
       'emoji': '8️⃣'
     },
   ];
+  Future<List<Map<String, dynamic>>> _fetchLeaders() async {
+    try {
+      final snap = await FirebaseService.db
+          .collection('students')
+          .where('isBanned', isEqualTo: false)
+          .orderBy('careerScore', descending: true)
+          .limit(8)
+          .get();
+      final docs = snap.docs;
+      if (docs.isEmpty) return [];
+      return docs.asMap().entries.map((e) {
+        final d = e.value.data() as Map<String, dynamic>? ?? {};
+        final score = d['careerScore'] ?? 0;
+        final badges = (d['earnedBadges'] is List)
+            ? (d['earnedBadges'] as List).length
+            : 0;
+        return {
+          'rank': e.key + 1,
+          'name': d['name'] ?? 'Student',
+          'branch': d['branch'] ?? '-',
+          'score': score,
+          'badges': badges,
+          'emoji': e.key == 0
+              ? '🥇'
+              : e.key == 1
+                  ? '🥈'
+                  : e.key == 2
+                      ? '🥉'
+                      : '${e.key + 1}️⃣'
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Leaderboard fetch failed: $e');
+      return [];
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      FirebaseAnalytics.instance.logEvent(name: 'leaderboard_view');
+    } catch (_) {}
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-              border:
-                  Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
-            ),
-            child: const Row(
-              children: [
-                Text('🏆', style: TextStyle(fontSize: 24)),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Career Ready Leaderboard',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w800, fontSize: 15)),
-                      Text(
-                          'Rankings based on questions asked, events attended, and badges earned',
-                          style: TextStyle(
-                              fontSize: 11, color: AppColors.textMuted)),
-                    ],
-                  ),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _fetchLeaders(),
+      builder: (context, snap) {
+        final leaders = snap.data ?? [];
+        final useMock = leaders.isEmpty;
+        final display = useMock ? _mockLeaders : leaders;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.accent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                      color: AppColors.accent.withValues(alpha: 0.3)),
                 ),
-              ],
-            ),
-          ).animate().fadeIn(),
-          const SizedBox(height: 20),
-          ..._leaders.asMap().entries.map((entry) {
-            final i = entry.key;
-            final leader = entry.value;
-            final isTopThree = (leader['rank'] as int) <= 3;
-            return Container(
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                gradient: isTopThree ? AppColors.primaryGradient : null,
-                color: isTopThree ? null : AppColors.bgCard,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                    color: isTopThree ? Colors.transparent : AppColors.border),
-                boxShadow: isTopThree
-                    ? [
-                        BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 10)
-                      ]
-                    : [],
-              ),
-              child: Row(
-                children: [
-                  Text(leader['emoji'] as String,
-                      style: const TextStyle(fontSize: 20)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          leader['name'] as String,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
-                            color: isTopThree
-                                ? Colors.white
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                        Text(
-                          '${leader['branch']} • ${leader['badges']} badges',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isTopThree
-                                ? Colors.white70
-                                : AppColors.textMuted,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isTopThree
-                          ? Colors.white.withValues(alpha: 0.2)
-                          : AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      '${leader['score']}pts',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 12,
-                        color: isTopThree ? Colors.white : AppColors.primary,
+                child: const Row(
+                  children: [
+                    Text('🏆', style: TextStyle(fontSize: 24)),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Career Ready Leaderboard',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w800, fontSize: 15)),
+                          Text(
+                              'Rankings based on questions asked, events attended, and badges earned',
+                              style: TextStyle(
+                                  fontSize: 11, color: AppColors.textMuted)),
+                        ],
                       ),
                     ),
+                  ],
+                ),
+              ).animate().fadeIn(),
+              const SizedBox(height: 20),
+              ...display.asMap().entries.map((entry) {
+                final i = entry.key;
+                final leader = entry.value;
+                final isTopThree = (leader['rank'] as int) <= 3;
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    gradient: isTopThree ? AppColors.primaryGradient : null,
+                    color: isTopThree ? null : AppColors.bgCard,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                        color:
+                            isTopThree ? Colors.transparent : AppColors.border),
+                    boxShadow: isTopThree
+                        ? [
+                            BoxShadow(
+                                color: AppColors.primary.withValues(alpha: 0.3),
+                                blurRadius: 10)
+                          ]
+                        : [],
                   ),
-                ],
-              ),
-            )
-                .animate(delay: Duration(milliseconds: i * 80))
-                .fadeIn()
-                .slideX(begin: 0.1);
-          }),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.bgCard,
-              borderRadius: BorderRadius.circular(14),
-              border:
-                  Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-            ),
-            child: const Row(
-              children: [
-                Text('👤', style: TextStyle(fontSize: 20)),
-                SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text('You',
+                      Text(leader['emoji'] as String,
+                          style: const TextStyle(fontSize: 20)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              leader['name'] as String,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                                color: isTopThree
+                                    ? Colors.white
+                                    : AppColors.textPrimary,
+                              ),
+                            ),
+                            Text(
+                              '${leader['branch']} • ${leader['badges']} badges',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isTopThree
+                                    ? Colors.white70
+                                    : AppColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: isTopThree
+                              ? Colors.white.withValues(alpha: 0.2)
+                              : AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '${leader['score']}pts',
                           style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: AppColors.primary)),
-                      Text('Keep engaging to climb the leaderboard!',
-                          style: TextStyle(
-                              fontSize: 11, color: AppColors.textMuted)),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 12,
+                            color:
+                                isTopThree ? Colors.white : AppColors.primary,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
+                )
+                    .animate(delay: Duration(milliseconds: i * 80))
+                    .fadeIn()
+                    .slideX(begin: 0.1);
+              }).toList(),
+              const SizedBox(height: 20),
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: AppColors.bgCard,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
-                Text('-',
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textMuted)),
-              ],
-            ),
+                child: const Row(
+                  children: [
+                    Text('👤', style: TextStyle(fontSize: 20)),
+                    SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('You',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                  color: AppColors.primary)),
+                          Text('Keep engaging to climb the leaderboard!',
+                              style: TextStyle(
+                                  fontSize: 11, color: AppColors.textMuted)),
+                        ],
+                      ),
+                    ),
+                    Text('-',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textMuted)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 80),
+            ],
           ),
-          const SizedBox(height: 80),
-        ],
-      ),
+        );
+      },
     );
   }
 }

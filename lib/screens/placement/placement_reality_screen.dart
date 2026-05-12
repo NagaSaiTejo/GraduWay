@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../theme/app_colors.dart';
 import '../../data/mock/alumni_data.dart';
+import '../../services/firebase_service.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import '../../widgets/custom_app_bar.dart';
 
 class PlacementRealityScreen extends StatelessWidget {
@@ -120,10 +122,40 @@ class PlacementRealityScreen extends StatelessWidget {
               ),
               SliverPadding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, i) => _StoryCard(story: _stories[i], index: i),
-                    childCount: _stories.length,
+                sliver: SliverToBoxAdapter(
+                  child: FutureBuilder(
+                    future: FirebaseService.getPlacementData(),
+                    builder: (context, snap) {
+                      List<_Story> stories = _stories;
+                      try {
+                        if (snap.hasData &&
+                            (snap.data as dynamic).docs.isNotEmpty) {
+                          final docs = (snap.data as dynamic).docs as List;
+                          stories = docs.map((d) {
+                            final m = (d.data() as Map<String, dynamic>);
+                            return _Story(
+                              name: m['name'] ?? 'Anonymous',
+                              company: m['company'] ?? '-',
+                              photoUrl:
+                                  m['photoUrl'] ?? 'https://i.pravatar.cc/150',
+                              title: m['title'] ?? '-',
+                              content: m['content'] ?? '',
+                              package: m['package'] ?? '-',
+                              isAnon: m['isAnon'] ?? false,
+                            );
+                          }).toList();
+                        }
+                      } catch (_) {}
+
+                      return Column(
+                        children: stories
+                            .asMap()
+                            .entries
+                            .map(
+                                (e) => _StoryCard(story: e.value, index: e.key))
+                            .toList(),
+                      );
+                    },
                   ),
                 ),
               ),
@@ -164,7 +196,17 @@ class _StoryCardState extends State<_StoryCard> {
   Widget build(BuildContext context) {
     final s = widget.story;
     return GestureDetector(
-      onTap: () => setState(() => _expanded = !_expanded),
+      onTap: () {
+        setState(() => _expanded = !_expanded);
+        try {
+          FirebaseAnalytics.instance
+              .logEvent(name: 'placement_story_view', parameters: {
+            'index': widget.index,
+            'title': widget.story.title,
+            'isAnon': widget.story.isAnon ? 1 : 0,
+          });
+        } catch (_) {}
+      },
       child: Container(
         margin: const EdgeInsets.only(bottom: 14),
         decoration: BoxDecoration(

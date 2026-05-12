@@ -101,12 +101,14 @@ router.post('/register/student', (req, res) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const profileImageUrl = req.files?.profileImage?.[0]
-        ? fileUrl(req, `uploads/profiles/${req.files.profileImage[0].filename}`)
-        : null;
-      const resumeUrl = req.files?.resume?.[0]
-        ? fileUrl(req, `uploads/resumes/${req.files.resume[0].filename}`)
-        : null;
+      const profileImageUrl = req.uploadedToFirebase?.profileImageUrl
+        || (req.files?.profileImage?.[0]
+          ? fileUrl(req, `uploads/profiles/${req.files.profileImage[0].filename}`)
+          : null);
+      const resumeUrl = req.uploadedToFirebase?.resumeUrl
+        || (req.files?.resume?.[0]
+          ? fileUrl(req, `uploads/resumes/${req.files.resume[0].filename}`)
+          : null);
 
       const newStudent = new Student({
         name, email, password: hashedPassword, rollNumber, branch,
@@ -154,9 +156,10 @@ router.post('/register/alumni', (req, res) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const profileImageUrl = req.file
-        ? fileUrl(req, `uploads/profiles/${req.file.filename}`)
-        : null;
+      const profileImageUrl = req.uploadedToFirebase?.profileImageUrl
+        || (req.file
+          ? fileUrl(req, `uploads/profiles/${req.file.filename}`)
+          : null);
 
       const newAlumni = new Alumni({
         name, email, password: hashedPassword,
@@ -211,9 +214,10 @@ router.post('/register/admin', (req, res) => {
       }
 
       const hashedPassword = await bcrypt.hash(password, 10);
-      const profileImageUrl = req.file
-        ? fileUrl(req, `uploads/profiles/${req.file.filename}`)
-        : null;
+      const profileImageUrl = req.uploadedToFirebase?.profileImageUrl
+        || (req.file
+          ? fileUrl(req, `uploads/profiles/${req.file.filename}`)
+          : null);
 
       const newAdmin = new Admin({ name, email, password: hashedPassword, profileImageUrl });
 
