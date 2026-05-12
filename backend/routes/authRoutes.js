@@ -4,6 +4,8 @@ const Student = require('../models/Student');
 const Alumni = require('../models/Alumni');
 const Admin = require('../models/Admin');
 const { uploadStudentFiles, uploadProfileImage } = require('../middleware/upload');
+const jwt = require('jsonwebtoken');
+const { verifyToken, JWT_SECRET } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -284,9 +286,20 @@ router.post('/login', async (req, res) => {
       roadmapProgressObj = {};
     }
 
+    // Issue JWT (non-breaking: still returns user payload as before)
+    const secret = process.env.JWT_SECRET || JWT_SECRET || 'dev_jwt_secret_change_in_prod';
+    let token = null;
+    try {
+      token = jwt.sign({ id: user._id?.toString(), email: user.email, role }, secret, { expiresIn: '7d' });
+    } catch (e) {
+      // token creation failure should not block normal login response
+      console.error('JWT sign error', e?.message || e);
+    }
+
     res.status(200).json({
       message: 'Login successful',
       role,
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -336,8 +349,11 @@ router.get('/admin/users', async (req, res) => {
   }
 });
 
-router.patch('/admin/users/:role/:id/ban', async (req, res) => {
+router.patch('/admin/users/:role/:id/ban', verifyToken, async (req, res) => {
   try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin privileges required.' });
+    }
     const role = normalizeRole(req.params.role);
     const Model = adminModelMap[role];
     if (!Model) {
@@ -369,8 +385,11 @@ router.patch('/admin/users/:role/:id/ban', async (req, res) => {
   }
 });
 
-router.delete('/admin/users/:role/:id', async (req, res) => {
+router.delete('/admin/users/:role/:id', verifyToken, async (req, res) => {
   try {
+    if (!req.user || req.user.role !== 'admin') {
+      return res.status(403).json({ message: 'Admin privileges required.' });
+    }
     const role = normalizeRole(req.params.role);
     const Model = adminModelMap[role];
     if (!Model) {

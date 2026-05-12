@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:intl/intl.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/firestore_providers.dart';
@@ -250,6 +251,13 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                   isAnswered: false,
                 );
                 ref.read(qaProvider.notifier).addQuestion(newQ);
+                try {
+                  FirebaseAnalytics.instance
+                      .logEvent(name: 'question_posted', parameters: {
+                    'tags': newQ.tags.join(','),
+                    'length': newQ.question.length,
+                  });
+                } catch (_) {}
                 _questionController.clear();
                 _selectedTags.clear();
                 Navigator.pop(context);

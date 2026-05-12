@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
 import '../../data/models/alumni_model.dart';
@@ -31,6 +32,14 @@ class AlumniProfileScreen extends ConsumerWidget {
             alumni = match.first;
           }
         }
+
+        try {
+          FirebaseAnalytics.instance
+              .logEvent(name: 'alumni_profile_view', parameters: {
+            'alumniId': alumni.id,
+            'isVerified': alumni.isVerified ? 1 : 0,
+          });
+        } catch (_) {}
 
         return Scaffold(
           body: Container(

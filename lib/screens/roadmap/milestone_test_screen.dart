@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:http/http.dart' as http;
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
@@ -219,6 +220,16 @@ class _MilestoneTestScreenState extends ConsumerState<MilestoneTestScreen> {
         debugPrint('Error completing milestone: $e');
       }
     }
+
+    try {
+      FirebaseAnalytics.instance
+          .logEvent(name: 'milestone_test_completed', parameters: {
+        'roadmap': widget.roadmapName,
+        'milestoneIndex': widget.milestoneIndex,
+        'score': _score,
+        'passed': passed ? 1 : 0,
+      });
+    } catch (_) {}
 
     setState(() {
       _isSubmitting = false;

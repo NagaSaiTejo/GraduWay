@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -290,6 +291,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           roleStr: data['role'] as String,
           user: {'id': uid, ...data},
         );
+        try {
+          final domain = email.contains('@') ? email.split('@').last : '';
+          await FirebaseAnalytics.instance.logEvent(
+              name: 'login',
+              parameters: {'method': 'firebase', 'email_domain': domain});
+        } catch (_) {}
         setState(() => _isLoading = false);
         return; // Firebase login succeeded — exit early
       }
@@ -317,6 +324,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               roleStr: data['role'] as String,
               user: data['user'] as Map<String, dynamic>,
             );
+        try {
+          final domain = email.contains('@') ? email.split('@').last : '';
+          await FirebaseAnalytics.instance.logEvent(name: 'login', parameters: {
+            'method': 'backend',
+            'email_domain': domain,
+            'role': data['role']
+          });
+        } catch (_) {}
       } else {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         setState(() => _errorMessage =
