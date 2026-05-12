@@ -14,9 +14,16 @@ class AdminShell extends ConsumerWidget {
     final currentIndex = ref.watch(adminNavIndexProvider);
 
     final tabs = [
-      _NavTab(icon: Icons.analytics_rounded, label: 'Overview', path: '/admin-home'),
-      _NavTab(icon: Icons.manage_accounts_rounded, label: 'Users', path: '/admin-users'),
-      _NavTab(icon: Icons.person_rounded, label: 'Profile', path: '/admin-profile'),
+      const _NavTab(
+          icon: Icons.analytics_rounded,
+          label: 'Overview',
+          path: '/admin-home'),
+      const _NavTab(
+          icon: Icons.manage_accounts_rounded,
+          label: 'Users',
+          path: '/admin-users'),
+      const _NavTab(
+          icon: Icons.person_rounded, label: 'Profile', path: '/admin-profile'),
     ];
 
     return Scaffold(
@@ -24,7 +31,8 @@ class AdminShell extends ConsumerWidget {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.bgCard,
-          border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
+          border:
+              const Border(top: BorderSide(color: AppColors.border, width: 1)),
           boxShadow: [
             BoxShadow(
               color: AppColors.admin.withValues(alpha: 0.05),
@@ -55,15 +63,21 @@ class AdminShell extends ConsumerWidget {
                           Icon(
                             tabs[i].icon,
                             size: isSelected ? 24 : 22,
-                            color: isSelected ? AppColors.admin : AppColors.textMuted,
+                            color: isSelected
+                                ? AppColors.admin
+                                : AppColors.textMuted,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tabs[i].label,
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.admin : AppColors.textMuted,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.admin
+                                  : AppColors.textMuted,
                             ),
                           ),
                         ],

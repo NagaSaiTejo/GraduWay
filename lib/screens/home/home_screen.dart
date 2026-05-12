@@ -98,21 +98,21 @@ class HomeScreen extends ConsumerWidget {
                       circularStrokeCap: CircularStrokeCap.round,
                     ),
                     const SizedBox(width: 20),
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('Career Ready Score',
+                          Text('Career Ready Score',
                               style: TextStyle(
                                   color: Colors.white70, fontSize: 12)),
-                          const SizedBox(height: 4),
-                          const Text('Great progress! 🚀',
+                          SizedBox(height: 4),
+                          Text('Great progress! 🚀',
                               style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.w800)),
-                          const SizedBox(height: 8),
-                          const Text(
+                          SizedBox(height: 8),
+                          Text(
                             'Complete 2 more sessions to reach 50%',
                             style:
                                 TextStyle(color: Colors.white70, fontSize: 11),
@@ -315,19 +315,19 @@ class HomeScreen extends ConsumerWidget {
 
   void _showNotifications(BuildContext context) {
     final notifs = [
-      _NotifData(
+      const _NotifData(
           icon: Icons.chat_bubble_rounded,
           color: AppColors.primary,
           title: 'Ravi Kumar answered your question',
           sub: 'Insights on FAANG prep & LeetCode strategy!',
           time: '2h ago'),
-      _NotifData(
+      const _NotifData(
           icon: Icons.event_rounded,
           color: AppColors.secondary,
           title: 'Webinar tomorrow at 6 PM',
           sub: 'System Design with Priya Lakshmi',
           time: '5h ago'),
-      _NotifData(
+      const _NotifData(
           icon: Icons.emoji_events_rounded,
           color: AppColors.accent,
           title: 'New Badge Earned! 🏆',

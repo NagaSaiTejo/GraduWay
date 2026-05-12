@@ -21,9 +21,15 @@ class ProfileScreen extends ConsumerWidget {
     // Always use the email and name from what the user typed at login
     final name = authState.loginName.isNotEmpty
         ? authState.loginName
-        : (isStudent ? (progress.displayName.isNotEmpty ? progress.displayName : 'User') : 'User');
-    final email = authState.loginEmail.isNotEmpty ? authState.loginEmail : 'user@email.com';
-    final photoUrl = isStudent ? authState.student?.photoUrl : (isAlumni ? authState.alumni?.photoUrl : null);
+        : (isStudent
+            ? (progress.displayName.isNotEmpty ? progress.displayName : 'User')
+            : 'User');
+    final email = authState.loginEmail.isNotEmpty
+        ? authState.loginEmail
+        : 'user@email.com';
+    final photoUrl = isStudent
+        ? authState.student?.photoUrl
+        : (isAlumni ? authState.alumni?.photoUrl : null);
     final localPhotoPath = isStudent ? progress.localPhotoPath : null;
 
     return Scaffold(
@@ -45,29 +51,38 @@ class ProfileScreen extends ConsumerWidget {
                 children: [
                   // Avatar with camera overlay
                   GestureDetector(
-                    onTap: isStudent ? () => _showPhotoOptions(context, ref) : null,
+                    onTap: isStudent
+                        ? () => _showPhotoOptions(context, ref)
+                        : null,
                     child: Stack(
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                          backgroundColor:
+                              AppColors.primary.withValues(alpha: 0.1),
                           backgroundImage: localPhotoPath != null
                               ? FileImage(File(localPhotoPath)) as ImageProvider
-                              : (photoUrl != null ? NetworkImage(photoUrl) : null),
+                              : (photoUrl != null
+                                  ? NetworkImage(photoUrl)
+                                  : null),
                           child: (localPhotoPath == null && photoUrl == null)
-                              ? const Icon(Icons.person_rounded, size: 50, color: AppColors.primary)
+                              ? const Icon(Icons.person_rounded,
+                                  size: 50, color: AppColors.primary)
                               : null,
                         ).animate().scale(curve: Curves.elasticOut),
                         if (isStudent)
                           Positioned(
-                            right: 0, bottom: 0,
+                            right: 0,
+                            bottom: 0,
                             child: Container(
-                              width: 28, height: 28,
+                              width: 28,
+                              height: 28,
                               decoration: const BoxDecoration(
                                 color: AppColors.primary,
                                 shape: BoxShape.circle,
                               ),
-                              child: const Icon(Icons.camera_alt_rounded, color: Colors.white, size: 14),
+                              child: const Icon(Icons.camera_alt_rounded,
+                                  color: Colors.white, size: 14),
                             ),
                           ),
                       ],
@@ -76,12 +91,14 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: 16),
                   Text(
                     name,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     email,
-                    style: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+                    style: const TextStyle(
+                        color: AppColors.textMuted, fontSize: 14),
                   ),
                   const SizedBox(height: 12),
                   _RoleBadge(role: authState.role),
@@ -96,7 +113,8 @@ class ProfileScreen extends ConsumerWidget {
                   _ProfileSettingTile(
                     icon: Icons.person_outline_rounded,
                     title: 'Edit Profile',
-                    onTap: () => _showEditProfileSheet(context, ref, name, authState.bio),
+                    onTap: () => _showEditProfileSheet(
+                        context, ref, name, authState.bio),
                   ),
                   _ProfileSettingTile(
                     icon: Icons.notifications_none_rounded,
@@ -145,52 +163,78 @@ class ProfileScreen extends ConsumerWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4, margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
-            const Text('Profile Photo', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2))),
+            const Text('Profile Photo',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 20),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.camera_alt_rounded, color: AppColors.primary),
+                decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.camera_alt_rounded,
+                    color: AppColors.primary),
               ),
-              title: const Text('Take Photo', style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text('Take Photo',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
               onTap: () async {
                 Navigator.pop(ctx);
                 final picker = ImagePicker();
-                final file = await picker.pickImage(source: ImageSource.camera, imageQuality: 80);
+                final file = await picker.pickImage(
+                    source: ImageSource.camera, imageQuality: 80);
                 if (file != null) {
-                  ref.read(studentProgressProvider.notifier).updateProfilePhoto(file.path);
+                  ref
+                      .read(studentProgressProvider.notifier)
+                      .updateProfilePhoto(file.path);
                 }
               },
             ),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.secondary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
-                child: const Icon(Icons.photo_library_rounded, color: AppColors.secondary),
+                decoration: BoxDecoration(
+                    color: AppColors.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10)),
+                child: const Icon(Icons.photo_library_rounded,
+                    color: AppColors.secondary),
               ),
-              title: const Text('Choose from Gallery', style: TextStyle(fontWeight: FontWeight.w600)),
+              title: const Text('Choose from Gallery',
+                  style: TextStyle(fontWeight: FontWeight.w600)),
               onTap: () async {
                 Navigator.pop(ctx);
                 final picker = ImagePicker();
-                final file = await picker.pickImage(source: ImageSource.gallery, imageQuality: 80);
+                final file = await picker.pickImage(
+                    source: ImageSource.gallery, imageQuality: 80);
                 if (file != null) {
-                  ref.read(studentProgressProvider.notifier).updateProfilePhoto(file.path);
+                  ref
+                      .read(studentProgressProvider.notifier)
+                      .updateProfilePhoto(file.path);
                 }
               },
             ),
             ListTile(
               leading: Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: AppColors.error.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(10)),
+                decoration: BoxDecoration(
+                    color: AppColors.error.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10)),
                 child: const Icon(Icons.delete_rounded, color: AppColors.error),
               ),
-              title: const Text('Remove Photo', style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.error)),
+              title: const Text('Remove Photo',
+                  style: TextStyle(
+                      fontWeight: FontWeight.w600, color: AppColors.error)),
               onTap: () {
                 Navigator.pop(ctx);
-                ref.read(studentProgressProvider.notifier).updateProfilePhoto(null);
+                ref
+                    .read(studentProgressProvider.notifier)
+                    .updateProfilePhoto(null);
               },
             ),
           ],
@@ -199,15 +243,20 @@ class ProfileScreen extends ConsumerWidget {
     );
   }
 
-  void _showEditProfileSheet(BuildContext context, WidgetRef ref, String? currentName, String currentBio) {
+  void _showEditProfileSheet(BuildContext context, WidgetRef ref,
+      String? currentName, String currentBio) {
     final nameCtrl = TextEditingController(text: currentName ?? '');
-    final bioCtrl = TextEditingController(text: currentBio.isNotEmpty ? currentBio : 'Passionate about tech and learning 🚀');
+    final bioCtrl = TextEditingController(
+        text: currentBio.isNotEmpty
+            ? currentBio
+            : 'Passionate about tech and learning 🚀');
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx).viewInsets.bottom),
+        padding:
+            EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
@@ -220,9 +269,13 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Text('Edit Profile', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  const Text('Edit Profile',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                   const Spacer(),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -233,7 +286,9 @@ class ProfileScreen extends ConsumerWidget {
                   prefixIcon: const Icon(Icons.person_outline_rounded),
                   fillColor: AppColors.bgPage,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 16),
@@ -245,7 +300,9 @@ class ProfileScreen extends ConsumerWidget {
                   prefixIcon: const Icon(Icons.edit_note_rounded),
                   fillColor: AppColors.bgPage,
                   filled: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 24),
@@ -256,11 +313,13 @@ class ProfileScreen extends ConsumerWidget {
                   if (newName.isNotEmpty) {
                     // Persist the updated name and bio for all roles
                     ref.read(authProvider.notifier).updateUserProfile(
-                      name: newName,
-                      bio: newBio,
-                    );
+                          name: newName,
+                          bio: newBio,
+                        );
                     // Also update studentProgressProvider for backward compat
-                    ref.read(studentProgressProvider.notifier).updateProfile(newName, newBio);
+                    ref
+                        .read(studentProgressProvider.notifier)
+                        .updateProfile(newName, newBio);
                   }
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -273,9 +332,12 @@ class ProfileScreen extends ConsumerWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Save Changes', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                child: const Text('Save Changes',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -286,10 +348,30 @@ class ProfileScreen extends ConsumerWidget {
 
   void _showNotificationsSheet(BuildContext context) {
     final notifs = [
-      _NotifItem(icon: Icons.chat_bubble_rounded, color: AppColors.primary, title: 'Ravi Kumar answered your question', sub: 'Check out insights on FAANG prep!', time: '2h ago'),
-      _NotifItem(icon: Icons.event_rounded, color: AppColors.secondary, title: 'Webinar tomorrow at 6 PM', sub: 'System Design with Priya Lakshmi — WebDev track', time: '5h ago'),
-      _NotifItem(icon: Icons.emoji_events_rounded, color: AppColors.accent, title: 'New Badge Earned! 🏆', sub: 'You earned "First Question Asked"', time: 'Yesterday'),
-      _NotifItem(icon: Icons.people_rounded, color: AppColors.alumni, title: 'Alumni Ajay started following your progress', sub: 'He\'s available for mentorship!', time: '2 days ago'),
+      const _NotifItem(
+          icon: Icons.chat_bubble_rounded,
+          color: AppColors.primary,
+          title: 'Ravi Kumar answered your question',
+          sub: 'Check out insights on FAANG prep!',
+          time: '2h ago'),
+      const _NotifItem(
+          icon: Icons.event_rounded,
+          color: AppColors.secondary,
+          title: 'Webinar tomorrow at 6 PM',
+          sub: 'System Design with Priya Lakshmi — WebDev track',
+          time: '5h ago'),
+      const _NotifItem(
+          icon: Icons.emoji_events_rounded,
+          color: AppColors.accent,
+          title: 'New Badge Earned! 🏆',
+          sub: 'You earned "First Question Asked"',
+          time: 'Yesterday'),
+      const _NotifItem(
+          icon: Icons.people_rounded,
+          color: AppColors.alumni,
+          title: 'Alumni Ajay started following your progress',
+          sub: 'He\'s available for mentorship!',
+          time: '2 days ago'),
     ];
 
     showModalBottomSheet(
@@ -309,14 +391,19 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Container(
                 margin: const EdgeInsets.only(top: 12),
-                width: 40, height: 4,
-                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Notifications', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  child: Text('Notifications',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                 ),
               ),
               Expanded(
@@ -329,13 +416,22 @@ class ProfileScreen extends ConsumerWidget {
                     final n = notifs[i];
                     return ListTile(
                       leading: Container(
-                        width: 42, height: 42,
-                        decoration: BoxDecoration(color: n.color.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(12)),
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                            color: n.color.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12)),
                         child: Icon(n.icon, color: n.color, size: 22),
                       ),
-                      title: Text(n.title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                      subtitle: Text(n.sub, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                      trailing: Text(n.time, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                      title: Text(n.title,
+                          style: const TextStyle(
+                              fontSize: 13, fontWeight: FontWeight.w600)),
+                      subtitle: Text(n.sub,
+                          style: const TextStyle(
+                              fontSize: 11, color: AppColors.textMuted)),
+                      trailing: Text(n.time,
+                          style: const TextStyle(
+                              fontSize: 10, color: AppColors.textMuted)),
                     );
                   },
                 ),
@@ -356,7 +452,8 @@ class ProfileScreen extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx).viewInsets.bottom),
+        padding:
+            EdgeInsets.fromLTRB(0, 0, 0, MediaQuery.of(ctx).viewInsets.bottom),
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: const BoxDecoration(
@@ -369,9 +466,13 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Row(
                 children: [
-                  const Text('Change Password', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  const Text('Change Password',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                   const Spacer(),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
+                  IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.pop(ctx)),
                 ],
               ),
               const SizedBox(height: 20),
@@ -379,21 +480,27 @@ class ProfileScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               _PasswordField(controller: newCtrl, label: 'New Password'),
               const SizedBox(height: 14),
-              _PasswordField(controller: confirmCtrl, label: 'Confirm New Password'),
+              _PasswordField(
+                  controller: confirmCtrl, label: 'Confirm New Password'),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(ctx);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('🔐 Password changed successfully!'), backgroundColor: AppColors.success),
+                    const SnackBar(
+                        content: Text('🔐 Password changed successfully!'),
+                        backgroundColor: AppColors.success),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   minimumSize: const Size(double.infinity, 52),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text('Change Password', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                child: const Text('Change Password',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
               ),
             ],
           ),
@@ -404,11 +511,26 @@ class ProfileScreen extends ConsumerWidget {
 
   void _showHelpSheet(BuildContext context) {
     final faqs = [
-      ['How do I ask a question?', 'Go to the Q&A tab and tap the "Ask Question" button at the bottom right. Fill in your question and select relevant tags.'],
-      ['How are alumni verified?', 'Alumni submit their offer letter and employee ID. Our admin team manually verifies each profile within 48 hours.'],
-      ['Can I book a 1-on-1 session?', 'Select any alumni profile and tap "Ask a Question". Alumni who accept mentorship will schedule a call through the platform.'],
-      ['How is my Career Score calculated?', 'It factors in Q&A participation, events attended, mentorship sessions, and roadmap progress.'],
-      ['How do I report incorrect info?', 'Tap the "..." menu on any profile or post and select "Report". Our team reviews all reports within 24 hours.'],
+      [
+        'How do I ask a question?',
+        'Go to the Q&A tab and tap the "Ask Question" button at the bottom right. Fill in your question and select relevant tags.'
+      ],
+      [
+        'How are alumni verified?',
+        'Alumni submit their offer letter and employee ID. Our admin team manually verifies each profile within 48 hours.'
+      ],
+      [
+        'Can I book a 1-on-1 session?',
+        'Select any alumni profile and tap "Ask a Question". Alumni who accept mentorship will schedule a call through the platform.'
+      ],
+      [
+        'How is my Career Score calculated?',
+        'It factors in Q&A participation, events attended, mentorship sessions, and roadmap progress.'
+      ],
+      [
+        'How do I report incorrect info?',
+        'Tap the "..." menu on any profile or post and select "Report". Our team reviews all reports within 24 hours.'
+      ],
     ];
 
     showModalBottomSheet(
@@ -428,28 +550,40 @@ class ProfileScreen extends ConsumerWidget {
             children: [
               Container(
                 margin: const EdgeInsets.only(top: 12),
-                width: 40, height: 4,
-                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2)),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2)),
               ),
               const Padding(
                 padding: EdgeInsets.fromLTRB(24, 16, 24, 8),
                 child: Align(
                   alignment: Alignment.centerLeft,
-                  child: Text('Help & FAQ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  child: Text('Help & FAQ',
+                      style:
+                          TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                 ),
               ),
               Expanded(
                 child: ListView.builder(
                   controller: ctrl,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   itemCount: faqs.length,
                   itemBuilder: (_, i) => Card(
                     margin: const EdgeInsets.only(bottom: 10),
                     child: ExpansionTile(
-                      title: Text(faqs[i][0], style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      title: Text(faqs[i][0],
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.w600)),
                       childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
                       children: [
-                        Text(faqs[i][1], style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.5)),
+                        Text(faqs[i][1],
+                            style: const TextStyle(
+                                fontSize: 13,
+                                color: AppColors.textSecondary,
+                                height: 1.5)),
                       ],
                     ),
                   ),
@@ -467,7 +601,12 @@ class _NotifItem {
   final IconData icon;
   final Color color;
   final String title, sub, time;
-  const _NotifItem({required this.icon, required this.color, required this.title, required this.sub, required this.time});
+  const _NotifItem(
+      {required this.icon,
+      required this.color,
+      required this.title,
+      required this.sub,
+      required this.time});
 }
 
 class _PasswordField extends StatefulWidget {
@@ -490,12 +629,16 @@ class _PasswordFieldState extends State<_PasswordField> {
         labelText: widget.label,
         prefixIcon: const Icon(Icons.lock_outline_rounded),
         suffixIcon: IconButton(
-          icon: Icon(_obscure ? Icons.visibility_off_outlined : Icons.visibility_outlined),
+          icon: Icon(_obscure
+              ? Icons.visibility_off_outlined
+              : Icons.visibility_outlined),
           onPressed: () => setState(() => _obscure = !_obscure),
         ),
         fillColor: AppColors.bgPage,
         filled: true,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
       ),
     );
   }
@@ -521,7 +664,11 @@ class _RoleBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(color: color, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+        style: TextStyle(
+            color: color,
+            fontSize: 10,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.5),
       ),
     );
   }
@@ -554,7 +701,8 @@ class _ProfileSettingTile extends StatelessWidget {
             color: color ?? AppColors.textPrimary,
           ),
         ),
-        trailing: Icon(Icons.chevron_right_rounded, color: color?.withValues(alpha: 0.5) ?? AppColors.textMuted),
+        trailing: Icon(Icons.chevron_right_rounded,
+            color: color?.withValues(alpha: 0.5) ?? AppColors.textMuted),
       ),
     );
   }

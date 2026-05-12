@@ -14,9 +14,18 @@ class AlumniShell extends ConsumerWidget {
     final currentIndex = ref.watch(alumniNavIndexProvider);
 
     final tabs = [
-      _NavTab(icon: Icons.dashboard_rounded, label: 'Dashboard', path: '/alumni-home'),
-      _NavTab(icon: Icons.question_answer_rounded, label: 'Questions', path: '/alumni-questions'),
-      _NavTab(icon: Icons.person_rounded, label: 'Profile', path: '/alumni-profile'),
+      const _NavTab(
+          icon: Icons.dashboard_rounded,
+          label: 'Dashboard',
+          path: '/alumni-home'),
+      const _NavTab(
+          icon: Icons.question_answer_rounded,
+          label: 'Questions',
+          path: '/alumni-questions'),
+      const _NavTab(
+          icon: Icons.person_rounded,
+          label: 'Profile',
+          path: '/alumni-profile'),
     ];
 
     return Scaffold(
@@ -24,7 +33,8 @@ class AlumniShell extends ConsumerWidget {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.bgCard,
-          border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
+          border:
+              const Border(top: BorderSide(color: AppColors.border, width: 1)),
           boxShadow: [
             BoxShadow(
               color: AppColors.alumni.withValues(alpha: 0.05),
@@ -55,15 +65,21 @@ class AlumniShell extends ConsumerWidget {
                           Icon(
                             tabs[i].icon,
                             size: isSelected ? 24 : 22,
-                            color: isSelected ? AppColors.alumni : AppColors.textMuted,
+                            color: isSelected
+                                ? AppColors.alumni
+                                : AppColors.textMuted,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tabs[i].label,
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.alumni : AppColors.textMuted,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.alumni
+                                  : AppColors.textMuted,
                             ),
                           ),
                         ],

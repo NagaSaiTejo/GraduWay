@@ -121,8 +121,9 @@ class BadgesScreen extends ConsumerWidget {
       ),
     );
     Future.delayed(const Duration(milliseconds: 500), () {
-      if (context.mounted)
+      if (context.mounted) {
         ref.read(studentProgressProvider.notifier).clearNotification(badgeId);
+      }
     });
   }
 }

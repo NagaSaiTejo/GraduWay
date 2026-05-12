@@ -96,11 +96,11 @@ class PlacementRealityScreen extends StatelessWidget {
                           border: Border.all(
                               color: AppColors.accent.withValues(alpha: 0.3)),
                         ),
-                        child: Row(
+                        child: const Row(
                           children: [
-                            const Text('⚠️', style: TextStyle(fontSize: 20)),
-                            const SizedBox(width: 10),
-                            const Expanded(
+                            Text('⚠️', style: TextStyle(fontSize: 20)),
+                            SizedBox(width: 10),
+                            Expanded(
                               child: Text(
                                 'These are real experiences from Aditya College alumni. Some are anonymous to protect privacy.',
                                 style: TextStyle(

@@ -18,7 +18,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     super.initState();
     Future.delayed(const Duration(milliseconds: 3200), () {
       if (!mounted) return;
-      
+
       final hasSeenOnboarding = ref.read(hasSeenOnboardingProvider);
       if (hasSeenOnboarding) {
         context.go('/login');
@@ -80,17 +80,23 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                         ),
                       ],
                     ),
-                    child: const Icon(Icons.school_rounded, color: Colors.white, size: 56),
+                    child: const Icon(Icons.school_rounded,
+                        color: Colors.white, size: 56),
                   )
                       .animate()
-                      .scale(begin: const Offset(0, 0), end: const Offset(1, 1), duration: 600.ms, curve: Curves.elasticOut)
+                      .scale(
+                          begin: const Offset(0, 0),
+                          end: const Offset(1, 1),
+                          duration: 600.ms,
+                          curve: Curves.elasticOut)
                       .fadeIn(duration: 400.ms),
 
                   const SizedBox(height: 24),
 
                   // App name
                   ShaderMask(
-                    shaderCallback: (bounds) => AppColors.primaryGradient.createShader(bounds),
+                    shaderCallback: (bounds) =>
+                        AppColors.primaryGradient.createShader(bounds),
                     child: const Text(
                       'GraduWay',
                       style: TextStyle(
@@ -100,14 +106,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                         letterSpacing: -1,
                       ),
                     ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 400.ms, duration: 600.ms)
-                      .slideY(begin: 0.3, end: 0, delay: 400.ms, duration: 600.ms, curve: Curves.easeOut),
+                  ).animate().fadeIn(delay: 400.ms, duration: 600.ms).slideY(
+                      begin: 0.3,
+                      end: 0,
+                      delay: 400.ms,
+                      duration: 600.ms,
+                      curve: Curves.easeOut),
 
                   const SizedBox(height: 8),
 
-                  Text(
+                  const Text(
                     'Aditya Engineering College',
                     style: TextStyle(
                       fontSize: 14,
@@ -115,27 +123,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       letterSpacing: 1.5,
                       fontWeight: FontWeight.w500,
                     ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 700.ms, duration: 600.ms)
-                      .slideY(begin: 0.3, end: 0, delay: 700.ms, duration: 500.ms),
+                  ).animate().fadeIn(delay: 700.ms, duration: 600.ms).slideY(
+                      begin: 0.3, end: 0, delay: 700.ms, duration: 500.ms),
 
                   const SizedBox(height: 8),
 
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.accent.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.accent.withValues(alpha: 0.3)),
+                      border: Border.all(
+                          color: AppColors.accent.withValues(alpha: 0.3)),
                     ),
                     child: const Text(
                       'Alumni • Students • Growth',
-                      style: TextStyle(fontSize: 11, color: AppColors.accent, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.accent,
+                          fontWeight: FontWeight.w600),
                     ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 900.ms, duration: 600.ms),
+                  ).animate().fadeIn(delay: 900.ms, duration: 600.ms),
                 ],
               ),
             ),
@@ -155,11 +164,11 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       gradient: AppColors.primaryGradient,
                       borderRadius: BorderRadius.circular(2),
                     ),
-                  )
-                      .animate(onPlay: (c) => c.repeat())
-                      .shimmer(duration: 1.5.seconds, color: AppColors.primaryLight.withValues(alpha: 0.6)),
+                  ).animate(onPlay: (c) => c.repeat()).shimmer(
+                      duration: 1.5.seconds,
+                      color: AppColors.primaryLight.withValues(alpha: 0.6)),
                   const SizedBox(height: 16),
-                  Text(
+                  const Text(
                     'Connecting generations.\nBuilding futures.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -168,9 +177,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
                       height: 1.6,
                       letterSpacing: 0.5,
                     ),
-                  )
-                      .animate()
-                      .fadeIn(delay: 1.2.seconds, duration: 800.ms),
+                  ).animate().fadeIn(delay: 1.2.seconds, duration: 800.ms),
                 ],
               ),
             ),

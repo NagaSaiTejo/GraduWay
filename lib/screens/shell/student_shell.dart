@@ -14,16 +14,20 @@ class StudentShell extends ConsumerWidget {
     final currentIndex = ref.watch(studentNavIndexProvider);
 
     final tabs = [
-      _NavTab(icon: Icons.home_rounded, label: 'Home', path: '/home'),
-      _NavTab(icon: Icons.people_alt_rounded, label: 'Alumni', path: '/alumni'),
-      _NavTab(icon: Icons.quiz_rounded, label: 'Ask', path: '/qa'),
-      _NavTab(icon: Icons.map_rounded, label: 'Roadmap', path: '/roadmap'),
-      _NavTab(icon: Icons.emoji_events_rounded, label: 'Badges', path: '/badges'),
+      const _NavTab(icon: Icons.home_rounded, label: 'Home', path: '/home'),
+      const _NavTab(
+          icon: Icons.people_alt_rounded, label: 'Alumni', path: '/alumni'),
+      const _NavTab(icon: Icons.quiz_rounded, label: 'Ask', path: '/qa'),
+      const _NavTab(
+          icon: Icons.map_rounded, label: 'Roadmap', path: '/roadmap'),
+      const _NavTab(
+          icon: Icons.emoji_events_rounded, label: 'Badges', path: '/badges'),
     ];
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: 0, // Hidden by default, screens will provide their own or we add one here
+        toolbarHeight:
+            0, // Hidden by default, screens will provide their own or we add one here
         elevation: 0,
         backgroundColor: Colors.transparent,
       ),
@@ -31,7 +35,8 @@ class StudentShell extends ConsumerWidget {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.bgCard,
-          border: const Border(top: BorderSide(color: AppColors.border, width: 1)),
+          border:
+              const Border(top: BorderSide(color: AppColors.border, width: 1)),
           boxShadow: [
             BoxShadow(
               color: AppColors.primary.withValues(alpha: 0.05),
@@ -62,15 +67,21 @@ class StudentShell extends ConsumerWidget {
                           Icon(
                             tabs[i].icon,
                             size: isSelected ? 24 : 22,
-                            color: isSelected ? AppColors.primary : AppColors.textMuted,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textMuted,
                           ),
                           const SizedBox(height: 2),
                           Text(
                             tabs[i].label,
                             style: TextStyle(
                               fontSize: 10,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? AppColors.primary : AppColors.textMuted,
+                              fontWeight: isSelected
+                                  ? FontWeight.w700
+                                  : FontWeight.w500,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.textMuted,
                             ),
                           ),
                         ],

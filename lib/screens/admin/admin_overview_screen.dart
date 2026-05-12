@@ -374,7 +374,7 @@ class _StatCard extends StatelessWidget {
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 8),
           Text(value,
-              style: TextStyle(
+              style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary)),

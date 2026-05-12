@@ -46,24 +46,36 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Our Alumni 👩‍💼',
-                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: AppColors.textPrimary))
-                        .animate().fadeIn(duration: 400.ms),
+                            style: TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.textPrimary))
+                        .animate()
+                        .fadeIn(duration: 400.ms),
                     const SizedBox(height: 4),
                     Text('${alumni.length} verified professionals from Aditya College',
-                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary))
-                        .animate().fadeIn(delay: 100.ms),
+                            style: const TextStyle(
+                                fontSize: 13, color: AppColors.textSecondary))
+                        .animate()
+                        .fadeIn(delay: 100.ms),
                     const SizedBox(height: 16),
                     // Search bar
                     TextField(
-                      onChanged: (v) => ref.read(alumniSearchProvider.notifier).state = v,
-                      style: const TextStyle(color: AppColors.textPrimary, fontSize: 14),
+                      onChanged: (v) =>
+                          ref.read(alumniSearchProvider.notifier).state = v,
+                      style: const TextStyle(
+                          color: AppColors.textPrimary, fontSize: 14),
                       decoration: InputDecoration(
                         hintText: 'Search by name, company, skill...',
-                        prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted, size: 20),
+                        prefixIcon: const Icon(Icons.search_rounded,
+                            color: AppColors.textMuted, size: 20),
                         suffixIcon: query.isNotEmpty
                             ? IconButton(
-                                icon: const Icon(Icons.clear_rounded, color: AppColors.textMuted, size: 18),
-                                onPressed: () => ref.read(alumniSearchProvider.notifier).state = '',
+                                icon: const Icon(Icons.clear_rounded,
+                                    color: AppColors.textMuted, size: 18),
+                                onPressed: () => ref
+                                    .read(alumniSearchProvider.notifier)
+                                    .state = '',
                               )
                             : null,
                       ),
@@ -80,21 +92,30 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
                           final b = _branches[i];
                           final sel = selectedBranch == b;
                           return GestureDetector(
-                            onTap: () => ref.read(selectedBranchProvider.notifier).state = b,
+                            onTap: () => ref
+                                .read(selectedBranchProvider.notifier)
+                                .state = b,
                             child: AnimatedContainer(
                               duration: 200.ms,
-                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
                               decoration: BoxDecoration(
-                                gradient: sel ? AppColors.primaryGradient : null,
+                                gradient:
+                                    sel ? AppColors.primaryGradient : null,
                                 color: sel ? null : AppColors.bgCard,
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: sel ? Colors.transparent : AppColors.border),
+                                border: Border.all(
+                                    color: sel
+                                        ? Colors.transparent
+                                        : AppColors.border),
                               ),
                               child: Text(b,
                                   style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: sel ? Colors.white : AppColors.textSecondary)),
+                                      color: sel
+                                          ? Colors.white
+                                          : AppColors.textSecondary)),
                             ),
                           );
                         },
@@ -111,22 +132,26 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
                 child: _isLoading
                     ? _buildShimmer()
                     : alumni.isEmpty
-                        ? Center(
+                        ? const Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
-                              children: const [
+                              children: [
                                 Text('🔍', style: TextStyle(fontSize: 48)),
                                 SizedBox(height: 12),
                                 Text('No alumni found',
-                                    style: TextStyle(color: AppColors.textSecondary, fontSize: 16)),
+                                    style: TextStyle(
+                                        color: AppColors.textSecondary,
+                                        fontSize: 16)),
                               ],
                             ),
                           )
                         : ListView.separated(
                             padding: const EdgeInsets.fromLTRB(20, 0, 20, 80),
                             itemCount: alumni.length,
-                            separatorBuilder: (_, __) => const SizedBox(height: 12),
-                            itemBuilder: (context, i) => _AlumniCard(alumni: alumni[i], index: i)
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, i) => _AlumniCard(
+                                    alumni: alumni[i], index: i)
                                 .animate(delay: Duration(milliseconds: i * 60))
                                 .fadeIn(duration: 350.ms)
                                 .slideX(begin: 0.15, end: 0, duration: 350.ms),
@@ -148,7 +173,9 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
         itemCount: 6,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
         itemBuilder: (_, __) => Container(
-            height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16))),
+            height: 100,
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(16))),
       ),
     );
   }
@@ -188,17 +215,22 @@ class _AlumniCard extends StatelessWidget {
             // ── Avatar ───────────────────────────────────────────────────────
             Stack(
               children: [
-                CircleAvatar(radius: 26, backgroundImage: NetworkImage(alumni.photoUrl)),
+                CircleAvatar(
+                    radius: 26, backgroundImage: NetworkImage(alumni.photoUrl)),
                 if (alumni.isVerified)
                   Positioned(
-                    right: 0, bottom: 0,
+                    right: 0,
+                    bottom: 0,
                     child: Container(
-                      width: 16, height: 16,
+                      width: 16,
+                      height: 16,
                       decoration: BoxDecoration(
                           color: AppColors.success,
                           shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.bgCard, width: 2)),
-                      child: const Icon(Icons.check, size: 9, color: Colors.white),
+                          border:
+                              Border.all(color: AppColors.bgCard, width: 2)),
+                      child:
+                          const Icon(Icons.check, size: 9, color: Colors.white),
                     ),
                   ),
               ],
@@ -217,31 +249,40 @@ class _AlumniCard extends StatelessWidget {
                         child: Text(
                           alumni.name,
                           style: const TextStyle(
-                              fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary),
                           overflow: TextOverflow.ellipsis,
                           maxLines: 1,
                         ),
                       ),
                       const SizedBox(width: 5),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 5, vertical: 2),
                         decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(6)),
+                            color: color.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(6)),
                         child: Text(alumni.branch,
-                            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: color)),
+                            style: TextStyle(
+                                fontSize: 9,
+                                fontWeight: FontWeight.w700,
+                                color: color)),
                       ),
                     ],
                   ),
                   const SizedBox(height: 3),
                   Text(
                     '${alumni.role} @ ${alumni.company}',
-                    style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.textSecondary),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
                   Text(
                     'Batch ${alumni.batch} • ${alumni.location}',
-                    style: const TextStyle(fontSize: 10, color: AppColors.textMuted),
+                    style: const TextStyle(
+                        fontSize: 10, color: AppColors.textMuted),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -250,15 +291,22 @@ class _AlumniCard extends StatelessWidget {
                   Wrap(
                     spacing: 4,
                     runSpacing: 4,
-                    children: alumni.skills.take(3).map((s) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-                      decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8)),
-                      child: Text(s,
-                          style: const TextStyle(fontSize: 9, color: AppColors.primaryLight),
-                          overflow: TextOverflow.ellipsis),
-                    )).toList(),
+                    children: alumni.skills
+                        .take(3)
+                        .map((s) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 7, vertical: 2),
+                              decoration: BoxDecoration(
+                                  color:
+                                      AppColors.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8)),
+                              child: Text(s,
+                                  style: const TextStyle(
+                                      fontSize: 9,
+                                      color: AppColors.primaryLight),
+                                  overflow: TextOverflow.ellipsis),
+                            ))
+                        .toList(),
                   ),
                 ],
               ),
@@ -272,16 +320,20 @@ class _AlumniCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
                       color: AppColors.success.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: AppColors.success.withValues(alpha: 0.3)),
+                      border: Border.all(
+                          color: AppColors.success.withValues(alpha: 0.3)),
                     ),
                     child: Text(
                       '₹${alumni.package}L',
                       style: const TextStyle(
-                          fontSize: 11, color: AppColors.success, fontWeight: FontWeight.w800),
+                          fontSize: 11,
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w800),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -289,14 +341,19 @@ class _AlumniCard extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(Icons.star_rounded, size: 11, color: AppColors.accent),
+                      const Icon(Icons.star_rounded,
+                          size: 11, color: AppColors.accent),
                       Text(' ${alumni.rating}',
-                          style: const TextStyle(fontSize: 10, color: AppColors.accent, fontWeight: FontWeight.w600)),
+                          style: const TextStyle(
+                              fontSize: 10,
+                              color: AppColors.accent,
+                              fontWeight: FontWeight.w600)),
                     ],
                   ),
                   const SizedBox(height: 3),
                   Text('${alumni.menteeCount} mentees',
-                      style: const TextStyle(fontSize: 9, color: AppColors.textMuted)),
+                      style: const TextStyle(
+                          fontSize: 9, color: AppColors.textMuted)),
                 ],
               ),
             ),

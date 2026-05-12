@@ -11,10 +11,12 @@ class StudentQuestionsScreen extends ConsumerStatefulWidget {
   const StudentQuestionsScreen({super.key});
 
   @override
-  ConsumerState<StudentQuestionsScreen> createState() => _StudentQuestionsScreenState();
+  ConsumerState<StudentQuestionsScreen> createState() =>
+      _StudentQuestionsScreenState();
 }
 
-class _StudentQuestionsScreenState extends ConsumerState<StudentQuestionsScreen> with SingleTickerProviderStateMixin {
+class _StudentQuestionsScreenState extends ConsumerState<StudentQuestionsScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -33,12 +35,14 @@ class _StudentQuestionsScreenState extends ConsumerState<StudentQuestionsScreen>
   Widget build(BuildContext context) {
     final allQuestions = ref.watch(qaProvider);
     final alumni = ref.watch(authProvider).alumni;
-    
+
     final unanswered = allQuestions.where((q) => !q.isAnswered).toList();
-    final myAnswers = allQuestions.where((q) => q.answers.any((a) => a.alumniId == alumni?.id)).toList();
+    final myAnswers = allQuestions
+        .where((q) => q.answers.any((a) => a.alumniId == alumni?.id))
+        .toList();
 
     return Scaffold(
-      appBar: CustomAppBar(
+      appBar: const CustomAppBar(
         title: 'Student Questions',
         showBackButton: false,
       ),
@@ -86,11 +90,15 @@ class _QuestionList extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.auto_awesome_rounded, size: 64, color: AppColors.textMuted.withValues(alpha: 0.3)),
+            Icon(Icons.auto_awesome_rounded,
+                size: 64, color: AppColors.textMuted.withValues(alpha: 0.3)),
             const SizedBox(height: 16),
             Text(
               isUnansweredTab ? 'All caught up!' : 'No answers yet.',
-              style: const TextStyle(color: AppColors.textMuted, fontSize: 16, fontWeight: FontWeight.w600),
+              style: const TextStyle(
+                  color: AppColors.textMuted,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600),
             ),
           ],
         ).animate().fadeIn(),
@@ -103,7 +111,10 @@ class _QuestionList extends StatelessWidget {
       itemBuilder: (context, i) => _AlumniQuestionCard(
         question: questions[i],
         showReply: isUnansweredTab,
-      ).animate().fadeIn(delay: Duration(milliseconds: i * 100)).slideX(begin: 0.1),
+      )
+          .animate()
+          .fadeIn(delay: Duration(milliseconds: i * 100))
+          .slideX(begin: 0.1),
     );
   }
 }
@@ -127,34 +138,46 @@ class _AlumniQuestionCard extends ConsumerWidget {
                 CircleAvatar(
                   radius: 12,
                   backgroundColor: AppColors.secondary.withValues(alpha: 0.1),
-                  child: Text(question.askedBy[0], style: const TextStyle(fontSize: 10, color: AppColors.secondary)),
+                  child: Text(question.askedBy[0],
+                      style: const TextStyle(
+                          fontSize: 10, color: AppColors.secondary)),
                 ),
                 const SizedBox(width: 8),
                 Text(
                   question.askedBy,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary),
                 ),
                 const Spacer(),
                 Text(
                   DateFormat('MMM d').format(question.timestamp),
-                  style: const TextStyle(fontSize: 11, color: AppColors.textMuted),
+                  style:
+                      const TextStyle(fontSize: 11, color: AppColors.textMuted),
                 ),
               ],
             ),
             const SizedBox(height: 12),
             Text(
               question.question,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.4),
+              style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  height: 1.4),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
-              children: question.tags.map((t) => Chip(
-                label: Text(t, style: const TextStyle(fontSize: 10)),
-                backgroundColor: AppColors.bgPage,
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                visualDensity: VisualDensity.compact,
-              )).toList(),
+              children: question.tags
+                  .map((t) => Chip(
+                        label: Text(t, style: const TextStyle(fontSize: 10)),
+                        backgroundColor: AppColors.bgPage,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        visualDensity: VisualDensity.compact,
+                      ))
+                  .toList(),
             ),
             if (showReply) ...[
               const SizedBox(height: 16),
@@ -172,11 +195,19 @@ class _AlumniQuestionCard extends ConsumerWidget {
               ),
             ] else ...[
               const SizedBox(height: 16),
-              const Text('Your Answer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.alumni)),
+              const Text('Your Answer',
+                  style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.alumni)),
               const SizedBox(height: 4),
               Text(
-                question.answers.firstWhere((a) => a.alumniId == ref.read(authProvider).alumni?.id).answer,
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.5),
+                question.answers
+                    .firstWhere(
+                        (a) => a.alumniId == ref.read(authProvider).alumni?.id)
+                    .answer,
+                style: const TextStyle(
+                    fontSize: 13, color: AppColors.textSecondary, height: 1.5),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -194,7 +225,8 @@ class _AlumniQuestionCard extends ConsumerWidget {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
-        padding: EdgeInsets.fromLTRB(20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
+        padding: EdgeInsets.fromLTRB(
+            20, 20, 20, MediaQuery.of(context).viewInsets.bottom + 20),
         decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
@@ -205,15 +237,20 @@ class _AlumniQuestionCard extends ConsumerWidget {
           children: [
             Row(
               children: [
-                const Text('Reply to Question', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                const Text('Reply to Question',
+                    style:
+                        TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
                 const Spacer(),
-                IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
+                IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context)),
               ],
             ),
             const SizedBox(height: 16),
             Text(
               question.question,
-              style: const TextStyle(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+              style: const TextStyle(
+                  color: AppColors.textSecondary, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -223,14 +260,16 @@ class _AlumniQuestionCard extends ConsumerWidget {
                 hintText: 'Share your wisdom...',
                 fillColor: AppColors.bgPage,
                 filled: true,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+                border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    borderSide: BorderSide.none),
               ),
             ),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () {
                 if (controller.text.trim().isEmpty) return;
-                
+
                 final alumni = ref.read(authProvider).alumni!;
                 final newAnswer = QAAnswer(
                   id: 'ans_${DateTime.now().millisecondsSinceEpoch}',
@@ -242,13 +281,14 @@ class _AlumniQuestionCard extends ConsumerWidget {
                   upvotes: 0,
                   answeredAt: DateTime.now(),
                 );
-                
+
                 ref.read(qaProvider.notifier).addAnswer(question.id, newAnswer);
                 Navigator.pop(context);
-                
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Answer posted! Thank you for helping juniors.'),
+                    content:
+                        Text('Answer posted! Thank you for helping juniors.'),
                     backgroundColor: AppColors.success,
                   ),
                 );

@@ -42,12 +42,12 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen>
           Container(
             color: AppColors.bgCard,
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
+            child: const TextField(
               decoration: InputDecoration(
                 hintText: 'Search by name, roll no, or company...',
-                prefixIcon: const Icon(Icons.search_rounded),
+                prefixIcon: Icon(Icons.search_rounded),
                 fillColor: AppColors.bgPage,
-                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                contentPadding: EdgeInsets.symmetric(vertical: 10),
               ),
             ),
           ),
@@ -65,7 +65,7 @@ class _AdminUsersScreenState extends ConsumerState<AdminUsersScreen>
           Expanded(
             child: TabBarView(
               controller: _tabController,
-              children: [
+              children: const [
                 _UserListView(role: 'Student'),
                 _UserListView(role: 'Alumni'),
               ],
@@ -84,7 +84,7 @@ class _UserListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // For demo, using mockAlumni for both with simulated data
-    final items = mockAlumni;
+    const items = mockAlumni;
 
     return ListView.builder(
       padding: const EdgeInsets.all(16),

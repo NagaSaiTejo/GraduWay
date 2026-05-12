@@ -18,25 +18,28 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   int _currentPage = 0;
 
   final List<_OnboardData> _pages = [
-    _OnboardData(
+    const _OnboardData(
       emoji: '🎓',
       title: 'Learn from\nYour Seniors',
-      subtitle: 'Get real guidance from Aditya College alumni who cracked top companies. Not random YouTube advice — actual experiences from your college.',
-      gradient: [const Color(0xFF4F46E5), const Color(0xFF7C3AED)],
+      subtitle:
+          'Get real guidance from Aditya College alumni who cracked top companies. Not random YouTube advice — actual experiences from your college.',
+      gradient: [Color(0xFF4F46E5), Color(0xFF7C3AED)],
       tag: 'ALUMNI GUIDANCE',
     ),
-    _OnboardData(
+    const _OnboardData(
       emoji: '🚀',
       title: 'Build the Right\nSkill Path',
-      subtitle: 'Understand exactly which skills give the best packages from our college. Skill → Package mapping based on real alumni data.',
-      gradient: [const Color(0xFF7C3AED), const Color(0xFFEC4899)],
+      subtitle:
+          'Understand exactly which skills give the best packages from our college. Skill → Package mapping based on real alumni data.',
+      gradient: [Color(0xFF7C3AED), Color(0xFFEC4899)],
       tag: 'CAREER ROADMAP',
     ),
-    _OnboardData(
+    const _OnboardData(
       emoji: '🏆',
       title: 'Get Placed &\nGrow Continuously',
-      subtitle: 'From 1st year to final year, GraduWay evolves with you — placement prep, mentorship, job referrals, and career tracking.',
-      gradient: [const Color(0xFFF59E0B), const Color(0xFFEF4444)],
+      subtitle:
+          'From 1st year to final year, GraduWay evolves with you — placement prep, mentorship, job referrals, and career tracking.',
+      gradient: [Color(0xFFF59E0B), Color(0xFFEF4444)],
       tag: 'LIFELONG GROWTH',
     ),
   ];
@@ -55,7 +58,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -64,7 +68,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                         onPressed: _completeOnboarding,
                         child: const Text(
                           'Skip',
-                          style: TextStyle(color: AppColors.textMuted, fontSize: 14),
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 14),
                         ),
                       ),
                   ],
@@ -75,7 +80,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   controller: _controller,
                   onPageChanged: (i) => setState(() => _currentPage = i),
                   itemCount: _pages.length,
-                  itemBuilder: (context, index) => _OnboardingPage(data: _pages[index], index: index),
+                  itemBuilder: (context, index) =>
+                      _OnboardingPage(data: _pages[index], index: index),
                 ),
               ),
               Padding(
@@ -85,7 +91,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     SmoothPageIndicator(
                       controller: _controller,
                       count: _pages.length,
-                      effect: ExpandingDotsEffect(
+                      effect: const ExpandingDotsEffect(
                         activeDotColor: AppColors.primary,
                         dotColor: AppColors.border,
                         dotHeight: 8,
@@ -109,19 +115,29 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Widget _buildNextButton() {
     return GestureDetector(
-      onTap: () => _controller.nextPage(duration: 400.ms, curve: Curves.easeInOut),
+      onTap: () =>
+          _controller.nextPage(duration: 400.ms, curve: Curves.easeInOut),
       child: Container(
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.primary.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))],
+          boxShadow: [
+            BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8))
+          ],
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Next', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('Next',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600)),
             SizedBox(width: 8),
             Icon(Icons.arrow_forward_rounded, color: Colors.white, size: 20),
           ],
@@ -137,14 +153,24 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         width: double.infinity,
         height: 56,
         decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [Color(0xFFF59E0B), Color(0xFFEF4444)]),
+          gradient: const LinearGradient(
+              colors: [Color(0xFFF59E0B), Color(0xFFEF4444)]),
           borderRadius: BorderRadius.circular(16),
-          boxShadow: [BoxShadow(color: AppColors.accent.withValues(alpha: 0.4), blurRadius: 20, offset: const Offset(0, 8))],
+          boxShadow: [
+            BoxShadow(
+                color: AppColors.accent.withValues(alpha: 0.4),
+                blurRadius: 20,
+                offset: const Offset(0, 8))
+          ],
         ),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Get Started 🚀', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
+            Text('Get Started 🚀',
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600)),
           ],
         ),
       ),
@@ -171,14 +197,23 @@ class _OnboardingPage extends StatelessWidget {
             decoration: BoxDecoration(
               gradient: LinearGradient(colors: data.gradient),
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: data.gradient[0].withValues(alpha: 0.35), blurRadius: 40, spreadRadius: 5)],
+              boxShadow: [
+                BoxShadow(
+                    color: data.gradient[0].withValues(alpha: 0.35),
+                    blurRadius: 40,
+                    spreadRadius: 5)
+              ],
             ),
             child: Center(
               child: Text(data.emoji, style: const TextStyle(fontSize: 70)),
             ),
           )
               .animate(key: ValueKey(index))
-              .scale(begin: const Offset(0.5, 0.5), end: const Offset(1, 1), duration: 600.ms, curve: Curves.elasticOut)
+              .scale(
+                  begin: const Offset(0.5, 0.5),
+                  end: const Offset(1, 1),
+                  duration: 600.ms,
+                  curve: Curves.elasticOut)
               .fadeIn(duration: 400.ms),
 
           const SizedBox(height: 40),
@@ -192,7 +227,11 @@ class _OnboardingPage extends StatelessWidget {
             ),
             child: Text(
               data.tag,
-              style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700, letterSpacing: 1.5),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.5),
             ),
           )
               .animate(key: ValueKey('tag_$index'))
@@ -240,5 +279,10 @@ class _OnboardingPage extends StatelessWidget {
 class _OnboardData {
   final String emoji, title, subtitle, tag;
   final List<Color> gradient;
-  const _OnboardData({required this.emoji, required this.title, required this.subtitle, required this.gradient, required this.tag});
+  const _OnboardData(
+      {required this.emoji,
+      required this.title,
+      required this.subtitle,
+      required this.gradient,
+      required this.tag});
 }

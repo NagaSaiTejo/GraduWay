@@ -259,8 +259,9 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                   icon: Icons.email_outlined,
                   keyboardType: TextInputType.emailAddress,
                   validator: (v) {
-                    if (v == null || v.isEmpty)
+                    if (v == null || v.isEmpty) {
                       return 'Please enter your email';
+                    }
                     if (!v.contains('@')) return 'Enter a valid email';
                     return null;
                   },
@@ -280,7 +281,7 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                 Row(children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: _selectedBranch,
+                      initialValue: _selectedBranch,
                       decoration: _dropdownDecoration(
                           'Branch', Icons.account_tree_outlined),
                       items: ['CSE', 'ECE', 'MECH', 'CIVIL', 'IT', 'EEE']
@@ -293,7 +294,7 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                   const SizedBox(width: 16),
                   Expanded(
                     child: DropdownButtonFormField<int>(
-                      value: _selectedYear,
+                      initialValue: _selectedYear,
                       decoration:
                           _dropdownDecoration('Year', Icons.school_outlined),
                       items: [1, 2, 3, 4]

@@ -125,8 +125,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         hintText: 'e.g. name@stud.com',
                       ),
                       validator: (value) {
-                        if (value == null || value.trim().isEmpty)
+                        if (value == null || value.trim().isEmpty) {
                           return 'Email is required';
+                        }
                         if (!value.contains('@')) return 'Enter a valid email';
                         return null;
                       },
@@ -151,10 +152,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       validator: (value) {
-                        if (value == null || value.isEmpty)
+                        if (value == null || value.isEmpty) {
                           return 'Password is required';
-                        if (value.length < 6)
+                        }
+                        if (value.length < 6) {
                           return 'Password must be at least 6 characters';
+                        }
                         return null;
                       },
                       onChanged: (_) => setState(() => _errorMessage = null),
@@ -325,11 +328,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         top: offset.dy + size.height, // Position right below the app bar
         right: 20,
         width: 280, // Made it a bit smaller/slimmer
-        child: Material(
+        child: const Material(
           color: Colors.transparent,
           child: Opacity(
             opacity: 0.9, // Semi-transparent
-            child: const _CredentialHintCard(),
+            child: _CredentialHintCard(),
           ),
         ),
       ),
@@ -434,10 +437,10 @@ class _CredentialHintCard extends StatelessWidget {
         border: Border.all(color: const Color(0xFFDDE3FF), width: 1.5),
       ),
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
               Icon(Icons.info_outline_rounded,
                   size: 16, color: AppColors.primary),
@@ -453,42 +456,42 @@ class _CredentialHintCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12),
 
           // Student
           _HintRow(
             icon: Icons.school_outlined,
             role: 'Student',
             color: AppColors.primary,
-            lines: const [
+            lines: [
               'Email ending with  @stud.com',
               'e.g.  yourname@stud.com',
               'Password: anything',
             ],
           ),
 
-          const Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
+          Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
 
           // Alumni
           _HintRow(
             icon: Icons.work_outline_rounded,
             role: 'Alumni',
             color: AppColors.alumni,
-            lines: const [
+            lines: [
               'Email ending with  @alum.com',
               'e.g.  yourname@alum.com',
               'Password: anything',
             ],
           ),
 
-          const Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
+          Divider(height: 20, thickness: 1, color: Color(0xFFDDE3FF)),
 
           // Admin
           _HintRow(
             icon: Icons.admin_panel_settings_outlined,
             role: 'Admin',
             color: AppColors.admin,
-            lines: const [
+            lines: [
               'Email ending with  @admin.com',
               'e.g.  yourname@admin.com',
               'Password: anything',
