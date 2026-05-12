@@ -30,6 +30,8 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
   int _selectedYear = 1;
   bool _isLoading = false;
 
+  static const String _studentEmailDomain = 'stud.com';
+
   // File picks
   XFile? _profileImage;
   PlatformFile? _resumeFile;
@@ -243,7 +245,6 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                       v!.isEmpty ? 'Please enter your name' : null,
                 ).animate().fadeIn(delay: 200.ms),
                 const SizedBox(height: 16),
-
                 _buildTextField(
                   controller: _rollNumberController,
                   label: 'Roll Number',
@@ -262,7 +263,15 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                     if (v == null || v.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!v.contains('@')) return 'Enter a valid email';
+                    final email = v.trim().toLowerCase();
+                    final atIndex = email.lastIndexOf('@');
+                    if (atIndex <= 0 || atIndex == email.length - 1) {
+                      return 'Enter a valid email';
+                    }
+                    final domain = email.substring(atIndex + 1);
+                    if (domain != _studentEmailDomain) {
+                      return 'Student email must end with @$_studentEmailDomain';
+                    }
                     return null;
                   },
                 ).animate().fadeIn(delay: 300.ms),

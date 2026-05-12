@@ -7,6 +7,18 @@ const { uploadStudentFiles, uploadProfileImage } = require('../middleware/upload
 
 const router = express.Router();
 
+const allowedEmailDomains = new Set(['stud.com', 'alum.com', 'admin.com']);
+
+const emailDomain = (email) => {
+  if (!email || typeof email !== 'string') return null;
+  const normalized = email.trim().toLowerCase();
+  const atIndex = normalized.lastIndexOf('@');
+  if (atIndex <= 0 || atIndex === normalized.length - 1) return null;
+  return normalized.slice(atIndex + 1);
+};
+
+const hasAllowedEmailDomain = (email) => allowedEmailDomains.has(emailDomain(email));
+
 // Helper to build a full URL for uploaded files
 const fileUrl = (req, filePath) =>
   filePath ? `http://127.0.0.1:5000/${filePath.replace(/\\/g, '/')}` : null;
@@ -35,6 +47,9 @@ router.post('/register/student', (req, res) => {
 
       if (!name || !email || !password || !rollNumber || !branch || !currentYear) {
         return res.status(400).json({ message: 'All required fields must be filled.' });
+      }
+      if (!hasAllowedEmailDomain(email) || emailDomain(email) !== 'stud.com') {
+        return res.status(400).json({ message: 'Student email must end with @stud.com.' });
       }
 
       // Check email uniqueness across ALL collections
@@ -89,6 +104,9 @@ router.post('/register/alumni', (req, res) => {
       if (!name || !email || !password || !passoutYear || !company || !role) {
         return res.status(400).json({ message: 'All required fields must be filled.' });
       }
+      if (!hasAllowedEmailDomain(email) || emailDomain(email) !== 'alum.com') {
+        return res.status(400).json({ message: 'Alumni email must end with @alum.com.' });
+      }
 
       // Check email uniqueness across ALL collections
       const existingRole = await emailExistsAnywhere(email);
@@ -133,6 +151,10 @@ router.post('/register/admin', (req, res) => {
     if (err) return res.status(400).json({ message: err.message });
     try {
       const { name, email, password, adminCode } = req.body;
+
+      if (!hasAllowedEmailDomain(email) || emailDomain(email) !== 'admin.com') {
+        return res.status(400).json({ message: 'Admin email must end with @admin.com.' });
+      }
 
       // SECURITY: Admin code is stored in environment variable, never hardcoded
       const ADMIN_REGISTRATION_CODE = process.env.ADMIN_REGISTRATION_CODE;
@@ -181,6 +203,11 @@ router.post('/login', async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required.' });
+    }
+    if (!hasAllowedEmailDomain(email)) {
+      return res.status(400).json({
+        message: 'Use your registered college email domain (@stud.com, @alum.com, or @admin.com).',
+      });
     }
 
     // Search ALL three collections simultaneously

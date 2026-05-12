@@ -29,6 +29,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String? _errorMessage;
   OverlayEntry? _overlayEntry;
 
+  static const Set<String> _allowedEmailDomains = {
+    'stud.com',
+    'alum.com',
+    'admin.com',
+  };
+
   @override
   void dispose() {
     _removeOverlay();
@@ -128,7 +134,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         if (value == null || value.trim().isEmpty) {
                           return 'Email is required';
                         }
-                        if (!value.contains('@')) return 'Enter a valid email';
+                        final email = value.trim().toLowerCase();
+                        final atIndex = email.lastIndexOf('@');
+                        if (atIndex <= 0 || atIndex == email.length - 1) {
+                          return 'Enter a valid email';
+                        }
+                        final domain = email.substring(atIndex + 1);
+                        if (!_allowedEmailDomains.contains(domain)) {
+                          return 'Use your college email (@stud.com, @alum.com, or @admin.com)';
+                        }
                         return null;
                       },
                       onChanged: (_) => setState(() => _errorMessage = null),
@@ -464,9 +478,9 @@ class _CredentialHintCard extends StatelessWidget {
             role: 'Student',
             color: AppColors.primary,
             lines: [
-              'Email ending with  @stud.com',
+              'Use your college email domain',
               'e.g.  yourname@stud.com',
-              'Password: anything',
+              'Password: your registered password',
             ],
           ),
 
@@ -478,9 +492,9 @@ class _CredentialHintCard extends StatelessWidget {
             role: 'Alumni',
             color: AppColors.alumni,
             lines: [
-              'Email ending with  @alum.com',
+              'Use your college email domain',
               'e.g.  yourname@alum.com',
-              'Password: anything',
+              'Password: your registered password',
             ],
           ),
 
@@ -492,9 +506,9 @@ class _CredentialHintCard extends StatelessWidget {
             role: 'Admin',
             color: AppColors.admin,
             lines: [
-              'Email ending with  @admin.com',
+              'Use your college email domain',
               'e.g.  yourname@admin.com',
-              'Password: anything',
+              'Password: your registered password',
             ],
           ),
         ],

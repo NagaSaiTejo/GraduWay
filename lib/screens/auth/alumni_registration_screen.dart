@@ -29,6 +29,7 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
   bool _isLoading = false;
   XFile? _profileImage;
   static const int _maxImageBytes = 2 * 1024 * 1024; // 2 MB
+  static const String _alumniEmailDomain = 'alum.com';
 
   @override
   void dispose() {
@@ -184,7 +185,15 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                     if (v == null || v.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!v.contains('@')) return 'Enter a valid email';
+                    final email = v.trim().toLowerCase();
+                    final atIndex = email.lastIndexOf('@');
+                    if (atIndex <= 0 || atIndex == email.length - 1) {
+                      return 'Enter a valid email';
+                    }
+                    final domain = email.substring(atIndex + 1);
+                    if (domain != _alumniEmailDomain) {
+                      return 'Alumni email must end with @$_alumniEmailDomain';
+                    }
                     return null;
                   },
                 ).animate().fadeIn(delay: 250.ms),
