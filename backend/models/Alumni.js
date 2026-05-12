@@ -20,6 +20,8 @@ const alumniSchema = new mongoose.Schema({
   
   profileImageUrl: { type: String },
   isVerified: { type: Boolean, default: false },
+  isBanned: { type: Boolean, default: false },
+  bannedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

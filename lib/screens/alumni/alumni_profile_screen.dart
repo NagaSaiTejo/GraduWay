@@ -3,7 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../theme/app_colors.dart';
+import '../../data/models/alumni_model.dart';
 import '../../data/mock/alumni_data.dart';
+import '../../services/firebase_service.dart';
 import 'mentorship_request_button.dart';
 
 class AlumniProfileScreen extends ConsumerWidget {
@@ -12,423 +14,449 @@ class AlumniProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final alumni = mockAlumni.firstWhere((a) => a.id == alumniId,
-        orElse: () => mockAlumni.first);
+    final fallbackAlumni = mockAlumni.firstWhere(
+      (a) => a.id == alumniId,
+      orElse: () => mockAlumni.first,
+    );
 
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.bgGradient),
-        child: CustomScrollView(
-          slivers: [
-            // Hero header
-            SliverAppBar(
-              expandedHeight: 240,
-              pinned: true,
-              backgroundColor: AppColors.bgDark,
-              leading: GestureDetector(
-                onTap: () => context.pop(),
-                child: Container(
-                  margin: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                      color: AppColors.bgCard.withValues(alpha: 0.8),
-                      borderRadius: BorderRadius.circular(10)),
-                  child: const Icon(Icons.arrow_back_rounded,
-                      color: AppColors.textPrimary, size: 20),
-                ),
-              ),
-              flexibleSpace: FlexibleSpaceBar(
-                background: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    // Gradient bg
-                    Container(
+    return StreamBuilder(
+      stream: FirebaseService.getAlumniStream(),
+      builder: (context, snapshot) {
+        AlumniModel alumni = fallbackAlumni;
+        if (snapshot.hasData) {
+          final docs = snapshot.data!.docs;
+          final liveAlumni = docs.map(AlumniModel.fromFirestore).toList();
+          final match = liveAlumni.where((a) => a.id == alumniId);
+          if (match.isNotEmpty) {
+            alumni = match.first;
+          }
+        }
+
+        return Scaffold(
+          body: Container(
+            decoration: const BoxDecoration(gradient: AppColors.bgGradient),
+            child: CustomScrollView(
+              slivers: [
+                // Hero header
+                SliverAppBar(
+                  expandedHeight: 240,
+                  pinned: true,
+                  backgroundColor: AppColors.bgDark,
+                  leading: GestureDetector(
+                    onTap: () => context.pop(),
+                    child: Container(
+                      margin: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primary.withValues(alpha: 0.7),
-                            AppColors.bgDark
-                          ],
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                        ),
-                      ),
+                          color: AppColors.bgCard.withValues(alpha: 0.8),
+                          borderRadius: BorderRadius.circular(10)),
+                      child: const Icon(Icons.arrow_back_rounded,
+                          color: AppColors.textPrimary, size: 20),
                     ),
-                    // Profile content
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          // Avatar
-                          Stack(
-                            children: [
-                              Container(
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                      color: AppColors.primary, width: 3),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: AppColors.primary
-                                            .withValues(alpha: 0.4),
-                                        blurRadius: 20)
-                                  ],
-                                ),
-                                child: CircleAvatar(
-                                    radius: 45,
-                                    backgroundImage:
-                                        NetworkImage(alumni.photoUrl)),
-                              ),
-                              if (alumni.isVerified)
-                                Positioned(
-                                  right: 2,
-                                  bottom: 2,
-                                  child: Container(
-                                    width: 22,
-                                    height: 22,
-                                    decoration: BoxDecoration(
-                                        color: AppColors.success,
-                                        shape: BoxShape.circle,
-                                        border: Border.all(
-                                            color: AppColors.bgDark, width: 2)),
-                                    child: const Icon(Icons.check,
-                                        size: 12, color: Colors.white),
-                                  ),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(width: 16),
-                          // Name info
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Text(alumni.name,
-                                    style: const TextStyle(
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.w800,
-                                        color: AppColors.textPrimary)),
-                                Text('${alumni.role} @ ${alumni.company}',
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: AppColors.textSecondary)),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.location_on_rounded,
-                                        size: 12, color: AppColors.textMuted),
-                                    Text(' ${alumni.location}',
-                                        style: const TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.textMuted)),
-                                    const SizedBox(width: 12),
-                                    const Icon(Icons.star_rounded,
-                                        size: 12, color: AppColors.accent),
-                                    Text(' ${alumni.rating}',
-                                        style: const TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.accent,
-                                            fontWeight: FontWeight.w600)),
-                                  ],
-                                ),
+                  ),
+                  flexibleSpace: FlexibleSpaceBar(
+                    background: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        // Gradient bg
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                AppColors.primary.withValues(alpha: 0.7),
+                                AppColors.bgDark
                               ],
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Info cards row
-                    Row(
-                      children: [
-                        _InfoPill(
-                            label: 'Batch ${alumni.batch}',
-                            icon: Icons.school_rounded,
-                            color: AppColors.primary),
-                        const SizedBox(width: 8),
-                        _InfoPill(
-                            label: alumni.branch,
-                            icon: Icons.computer_rounded,
-                            color: AppColors.secondary),
-                        const SizedBox(width: 8),
-                        _InfoPill(
-                            label: '₹${alumni.package}L',
-                            icon: Icons.currency_rupee_rounded,
-                            color: AppColors.success),
-                      ],
-                    ).animate().fadeIn(duration: 400.ms),
-
-                    const SizedBox(height: 24),
-
-                    // Stats row
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.cardGradient,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _Stat(
-                              value: '${alumni.menteeCount}',
-                              label: 'Mentees',
-                              emoji: '👥'),
-                          Container(
-                              width: 1, height: 36, color: AppColors.border),
-                          _Stat(
-                              value: alumni.rating.toString(),
-                              label: 'Rating',
-                              emoji: '⭐'),
-                          Container(
-                              width: 1, height: 36, color: AppColors.border),
-                          _Stat(
-                              value: '${alumni.yearsOfExp}yr',
-                              label: 'Exp.',
-                              emoji: '💼'),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
-
-                    const SizedBox(height: 24),
-
-                    // Their advice
-                    const _SectionHeader(title: '💡 Advice to You'),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: AppColors.primary.withValues(alpha: 0.2)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
+                        ),
+                        // Profile content
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 80, 20, 20),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              CircleAvatar(
-                                  radius: 16,
-                                  backgroundImage:
-                                      NetworkImage(alumni.photoUrl)),
-                              const SizedBox(width: 8),
-                              Text(alumni.name.split(' ').first,
-                                  style: const TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.primaryLight)),
-                              const Spacer(),
-                              const Icon(Icons.format_quote_rounded,
-                                  color: AppColors.primary, size: 20),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-                          Text(alumni.advice,
-                              style: const TextStyle(
-                                  fontSize: 14,
-                                  color: AppColors.textPrimary,
-                                  height: 1.6)),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
-
-                    const SizedBox(height: 24),
-
-                    // Placement story
-                    const _SectionHeader(title: '📖 Their Journey'),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        gradient: AppColors.cardGradient,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Text(alumni.story,
-                          style: const TextStyle(
-                              fontSize: 14,
-                              color: AppColors.textSecondary,
-                              height: 1.7)),
-                    ).animate().fadeIn(delay: 300.ms),
-
-                    const SizedBox(height: 24),
-
-                    // Skills
-                    const _SectionHeader(
-                        title: '🛠️ Skills That Got Them There'),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: alumni.skills
-                          .map((s) => Container(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 8),
-                                decoration: BoxDecoration(
-                                  gradient: AppColors.primaryGradient,
-                                  borderRadius: BorderRadius.circular(20),
-                                  boxShadow: [
-                                    BoxShadow(
-                                        color: AppColors.primary
-                                            .withValues(alpha: 0.3),
-                                        blurRadius: 8)
+                              // Avatar
+                              Stack(
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: AppColors.primary, width: 3),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: AppColors.primary
+                                                .withValues(alpha: 0.4),
+                                            blurRadius: 20)
+                                      ],
+                                    ),
+                                    child: CircleAvatar(
+                                        radius: 45,
+                                        backgroundImage:
+                                            NetworkImage(alumni.photoUrl)),
+                                  ),
+                                  if (alumni.isVerified)
+                                    Positioned(
+                                      right: 2,
+                                      bottom: 2,
+                                      child: Container(
+                                        width: 22,
+                                        height: 22,
+                                        decoration: BoxDecoration(
+                                            color: AppColors.success,
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                                color: AppColors.bgDark,
+                                                width: 2)),
+                                        child: const Icon(Icons.check,
+                                            size: 12, color: Colors.white),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(width: 16),
+                              // Name info
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(alumni.name,
+                                        style: const TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w800,
+                                            color: AppColors.textPrimary)),
+                                    Text('${alumni.role} @ ${alumni.company}',
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary)),
+                                    Row(
+                                      children: [
+                                        const Icon(Icons.location_on_rounded,
+                                            size: 12,
+                                            color: AppColors.textMuted),
+                                        Text(' ${alumni.location}',
+                                            style: const TextStyle(
+                                                fontSize: 11,
+                                                color: AppColors.textMuted)),
+                                        const SizedBox(width: 12),
+                                        const Icon(Icons.star_rounded,
+                                            size: 12, color: AppColors.accent),
+                                        Text(' ${alumni.rating}',
+                                            style: const TextStyle(
+                                                fontSize: 11,
+                                                color: AppColors.accent,
+                                                fontWeight: FontWeight.w600)),
+                                      ],
+                                    ),
                                   ],
                                 ),
-                                child: Text(s,
-                                    style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600)),
-                              ))
-                          .toList(),
-                    ).animate().fadeIn(delay: 350.ms),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
 
-                    const SizedBox(height: 24),
-
-                    // Interview rounds
-                    const _SectionHeader(title: '🎯 Interview Process'),
-                    const SizedBox(height: 12),
-                    ...alumni.interviewRounds.asMap().entries.map((e) {
-                      final i = e.key;
-                      final round = e.value;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Row(
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 24, 20, 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Info cards row
+                        Row(
                           children: [
-                            Container(
-                              width: 28,
-                              height: 28,
-                              decoration: const BoxDecoration(
-                                  gradient: AppColors.primaryGradient,
-                                  shape: BoxShape.circle),
-                              child: Center(
-                                  child: Text('${i + 1}',
+                            _InfoPill(
+                                label: 'Batch ${alumni.batch}',
+                                icon: Icons.school_rounded,
+                                color: AppColors.primary),
+                            const SizedBox(width: 8),
+                            _InfoPill(
+                                label: alumni.branch,
+                                icon: Icons.computer_rounded,
+                                color: AppColors.secondary),
+                            const SizedBox(width: 8),
+                            _InfoPill(
+                                label: '₹${alumni.package}L',
+                                icon: Icons.currency_rupee_rounded,
+                                color: AppColors.success),
+                          ],
+                        ).animate().fadeIn(duration: 400.ms),
+
+                        const SizedBox(height: 24),
+
+                        // Stats row
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.cardGradient,
+                            borderRadius: BorderRadius.circular(18),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              _Stat(
+                                  value: '${alumni.menteeCount}',
+                                  label: 'Mentees',
+                                  emoji: '👥'),
+                              Container(
+                                  width: 1,
+                                  height: 36,
+                                  color: AppColors.border),
+                              _Stat(
+                                  value: alumni.rating.toString(),
+                                  label: 'Rating',
+                                  emoji: '⭐'),
+                              Container(
+                                  width: 1,
+                                  height: 36,
+                                  color: AppColors.border),
+                              _Stat(
+                                  value: '${alumni.yearsOfExp}yr',
+                                  label: 'Exp.',
+                                  emoji: '💼'),
+                            ],
+                          ),
+                        ).animate().fadeIn(delay: 100.ms, duration: 400.ms),
+
+                        const SizedBox(height: 24),
+
+                        // Their advice
+                        const _SectionHeader(title: '💡 Advice to You'),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color:
+                                    AppColors.primary.withValues(alpha: 0.2)),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  CircleAvatar(
+                                      radius: 16,
+                                      backgroundImage:
+                                          NetworkImage(alumni.photoUrl)),
+                                  const SizedBox(width: 8),
+                                  Text(alumni.name.split(' ').first,
                                       style: const TextStyle(
                                           fontSize: 12,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w700))),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                                child: Text(round,
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: AppColors.textSecondary,
-                                        height: 1.4))),
-                          ],
-                        )
-                            .animate(
-                                delay: Duration(milliseconds: 400 + i * 80))
-                            .fadeIn(duration: 300.ms)
-                            .slideX(begin: 0.2, end: 0),
-                      );
-                    }),
+                                          fontWeight: FontWeight.w600,
+                                          color: AppColors.primaryLight)),
+                                  const Spacer(),
+                                  const Icon(Icons.format_quote_rounded,
+                                      color: AppColors.primary, size: 20),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              Text(alumni.advice,
+                                  style: const TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.textPrimary,
+                                      height: 1.6)),
+                            ],
+                          ),
+                        ).animate().fadeIn(delay: 200.ms, duration: 400.ms),
 
-                    const SizedBox(height: 24),
+                        const SizedBox(height: 24),
 
-                    // Anonymous confession
-                    const _SectionHeader(title: '🤫 What They Really Felt'),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: AppColors.accent.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                            color: AppColors.accent.withValues(alpha: 0.25)),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('🤫', style: TextStyle(fontSize: 28)),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                        // Placement story
+                        const _SectionHeader(title: '📖 Their Journey'),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.cardGradient,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Text(alumni.story,
+                              style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.textSecondary,
+                                  height: 1.7)),
+                        ).animate().fadeIn(delay: 300.ms),
+
+                        const SizedBox(height: 24),
+
+                        // Skills
+                        const _SectionHeader(
+                            title: '🛠️ Skills That Got Them There'),
+                        const SizedBox(height: 12),
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: alumni.skills
+                              .map((s) => Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 14, vertical: 8),
+                                    decoration: BoxDecoration(
+                                      gradient: AppColors.primaryGradient,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                            color: AppColors.primary
+                                                .withValues(alpha: 0.3),
+                                            blurRadius: 8)
+                                      ],
+                                    ),
+                                    child: Text(s,
+                                        style: const TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600)),
+                                  ))
+                              .toList(),
+                        ).animate().fadeIn(delay: 350.ms),
+
+                        const SizedBox(height: 24),
+
+                        // Interview rounds
+                        const _SectionHeader(title: '🎯 Interview Process'),
+                        const SizedBox(height: 12),
+                        ...alumni.interviewRounds.asMap().entries.map((e) {
+                          final i = e.key;
+                          final round = e.value;
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Row(
                               children: [
-                                const Text('Anonymous Confession',
+                                Container(
+                                  width: 28,
+                                  height: 28,
+                                  decoration: const BoxDecoration(
+                                      gradient: AppColors.primaryGradient,
+                                      shape: BoxShape.circle),
+                                  child: Center(
+                                      child: Text('${i + 1}',
+                                          style: const TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w700))),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                    child: Text(round,
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary,
+                                            height: 1.4))),
+                              ],
+                            )
+                                .animate(
+                                    delay: Duration(milliseconds: 400 + i * 80))
+                                .fadeIn(duration: 300.ms)
+                                .slideX(begin: 0.2, end: 0),
+                          );
+                        }),
+
+                        const SizedBox(height: 24),
+
+                        // Anonymous confession
+                        const _SectionHeader(title: '🤫 What They Really Felt'),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                                color:
+                                    AppColors.accent.withValues(alpha: 0.25)),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('🤫', style: TextStyle(fontSize: 28)),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Anonymous Confession',
+                                        style: TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.accent,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 0.5)),
+                                    const SizedBox(height: 6),
+                                    Text(alumni.anonConfession,
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary,
+                                            height: 1.6,
+                                            fontStyle: FontStyle.italic)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ).animate().fadeIn(delay: 500.ms),
+
+                        const SizedBox(height: 32),
+
+                        // Mentorship request — real-time Firestore status
+                        MentorshipRequestButton(alumni: alumni)
+                            .animate()
+                            .fadeIn(delay: 550.ms)
+                            .slideY(begin: 0.2, end: 0),
+
+                        const SizedBox(height: 12),
+
+                        // Ask question button
+                        GestureDetector(
+                          onTap: () => context.go('/qa'),
+                          child: Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryGradient,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.4),
+                                    blurRadius: 20,
+                                    offset: const Offset(0, 8))
+                              ],
+                            ),
+                            child: const Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.chat_bubble_outline_rounded,
+                                    color: Colors.white, size: 20),
+                                SizedBox(width: 8),
+                                Text('Ask a Question',
                                     style: TextStyle(
-                                        fontSize: 11,
-                                        color: AppColors.accent,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.5)),
-                                const SizedBox(height: 6),
-                                Text(alumni.anonConfession,
-                                    style: const TextStyle(
-                                        fontSize: 13,
-                                        color: AppColors.textSecondary,
-                                        height: 1.6,
-                                        fontStyle: FontStyle.italic)),
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700)),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-                    ).animate().fadeIn(delay: 500.ms),
-
-                    const SizedBox(height: 32),
-
-                    // Mentorship request — real-time Firestore status
-                    MentorshipRequestButton(alumni: alumni)
-                        .animate()
-                        .fadeIn(delay: 550.ms)
-                        .slideY(begin: 0.2, end: 0),
-
-                    const SizedBox(height: 12),
-
-                    // Ask question button
-                    GestureDetector(
-                      onTap: () => context.go('/qa'),
-                      child: Container(
-                        width: double.infinity,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.4),
-                                blurRadius: 20,
-                                offset: const Offset(0, 8))
-                          ],
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.chat_bubble_outline_rounded,
-                                color: Colors.white, size: 20),
-                            SizedBox(width: 8),
-                            Text('Ask a Question',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700)),
-                          ],
-                        ),
-                      ),
-                    )
-                        .animate()
-                        .fadeIn(delay: 600.ms)
-                        .slideY(begin: 0.3, end: 0, delay: 600.ms),
-                  ],
+                        )
+                            .animate()
+                            .fadeIn(delay: 600.ms)
+                            .slideY(begin: 0.3, end: 0, delay: 600.ms),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

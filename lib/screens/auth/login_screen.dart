@@ -30,9 +30,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   OverlayEntry? _overlayEntry;
 
   static const Set<String> _allowedEmailDomains = {
-    'stud.com',
-    'alum.com',
-    'admin.com',
+    'acet.ac.in',
+    'aec.edu.in',
+    'acoe.edu.in',
   };
 
   @override

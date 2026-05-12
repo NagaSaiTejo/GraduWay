@@ -7,7 +7,14 @@ const { uploadStudentFiles, uploadProfileImage } = require('../middleware/upload
 
 const router = express.Router();
 
-const allowedEmailDomains = new Set(['stud.com', 'alum.com', 'admin.com']);
+const allowedEmailDomains = new Set([
+  'stud.com',
+  'alum.com',
+  'admin.com',
+  'acet.ac.in',
+  'aec.edu.in',
+  'acoe.edu.in',
+]);
 
 const emailDomain = (email) => {
   if (!email || typeof email !== 'string') return null;
@@ -20,8 +27,35 @@ const emailDomain = (email) => {
 const hasAllowedEmailDomain = (email) => allowedEmailDomains.has(emailDomain(email));
 
 // Helper to build a full URL for uploaded files
-const fileUrl = (req, filePath) =>
-  filePath ? `http://127.0.0.1:5000/${filePath.replace(/\\/g, '/')}` : null;
+const fileUrl = (req, filePath) => {
+  if (!filePath) return null;
+  const normalizedPath = filePath.replace(/\\/g, '/');
+  const configuredBase = process.env.PUBLIC_BASE_URL?.replace(/\/$/, '');
+  const requestBase = `${req.protocol}://${req.get('host')}`;
+  const base = configuredBase || requestBase;
+  return `${base}/${normalizedPath}`;
+};
+
+const adminModelMap = {
+  student: Student,
+  alumni: Alumni,
+  admin: Admin,
+};
+
+const normalizeRole = (role) => (role || '').toString().trim().toLowerCase();
+
+const sanitizeUser = (user, role) => ({
+  id: user._id,
+  name: user.name,
+  email: user.email,
+  role,
+  branch: user.branch ?? null,
+  rollNumber: user.rollNumber ?? null,
+  company: user.company ?? null,
+  adminRole: user.role ?? null,
+  isBanned: !!user.isBanned,
+  createdAt: user.createdAt ?? null,
+});
 
 // Helper: check if an email is already used in ANY collection
 const emailExistsAnywhere = async (email) => {
@@ -275,6 +309,85 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+// ─── Admin Moderation ───────────────────────────────────────────────────────
+router.get('/admin/users', async (req, res) => {
+  try {
+    const requestedRole = normalizeRole(req.query.role);
+    const roles = requestedRole && requestedRole !== 'all'
+      ? [requestedRole]
+      : ['student', 'alumni'];
+
+    const invalidRole = roles.find((r) => !adminModelMap[r]);
+    if (invalidRole) {
+      return res.status(400).json({ message: `Invalid role: ${invalidRole}` });
+    }
+
+    const results = await Promise.all(
+      roles.map(async (role) => {
+        const Model = adminModelMap[role];
+        const docs = await Model.find({}).sort({ createdAt: -1 }).lean();
+        return docs.map((doc) => sanitizeUser(doc, role));
+      }),
+    );
+
+    return res.status(200).json({ users: results.flat() });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+router.patch('/admin/users/:role/:id/ban', async (req, res) => {
+  try {
+    const role = normalizeRole(req.params.role);
+    const Model = adminModelMap[role];
+    if (!Model) {
+      return res.status(400).json({ message: 'Invalid role.' });
+    }
+
+    const isBanned = req.body?.isBanned !== false;
+    const updated = await Model.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: {
+          isBanned,
+          bannedAt: isBanned ? new Date() : null,
+        },
+      },
+      { new: true },
+    ).lean();
+
+    if (!updated) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json({
+      message: isBanned ? 'User banned successfully.' : 'User unbanned successfully.',
+      user: sanitizeUser(updated, role),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+router.delete('/admin/users/:role/:id', async (req, res) => {
+  try {
+    const role = normalizeRole(req.params.role);
+    const Model = adminModelMap[role];
+    if (!Model) {
+      return res.status(400).json({ message: 'Invalid role.' });
+    }
+
+    const deleted = await Model.findByIdAndDelete(req.params.id).lean();
+    if (!deleted) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    return res.status(200).json({ message: 'User removed successfully.' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Server error', error: error.message });
   }
 });
 

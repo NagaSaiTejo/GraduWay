@@ -44,6 +44,14 @@ class RoadmapScreen extends ConsumerWidget {
     final overallPct = totalSteps > 0
         ? ((completedSteps.clamp(0, totalSteps)) / totalSteps)
         : 0.0;
+    final int studentYear = (student?.year ?? 1).clamp(1, 4);
+
+    final Map<int, String> yearGuidance = {
+      1: 'Year 1 focus: basics, communication, and consistent coding habits.',
+      2: 'Year 2 focus: projects + DSA momentum and profile building.',
+      3: 'Year 3 focus: internships, advanced projects, and mock interviews.',
+      4: 'Year 4 focus: placement execution, interviews, and offer conversion.',
+    };
 
     return Scaffold(
       appBar: AppBar(
@@ -151,6 +159,27 @@ class RoadmapScreen extends ConsumerWidget {
                 ),
               ).animate().fadeIn(),
             if (effectiveGoal != null) ...[
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.secondary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: AppColors.secondary.withValues(alpha: 0.25),
+                  ),
+                ),
+                child: Text(
+                  'Year $studentYear Guidance: ${yearGuidance[studentYear]}',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w600,
+                    height: 1.4,
+                  ),
+                ),
+              ).animate().fadeIn(delay: 80.ms),
               if (activeRoadmap != null) ...[
                 Container(
                   padding: const EdgeInsets.all(20),

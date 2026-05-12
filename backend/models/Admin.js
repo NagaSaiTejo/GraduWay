@@ -6,6 +6,8 @@ const adminSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, default: 'Moderator' }, // Super Admin, Moderator
   profileImageUrl: { type: String },
+  isBanned: { type: Boolean, default: false },
+  bannedAt: { type: Date, default: null },
   
   createdAt: { type: Date, default: Date.now }
 });

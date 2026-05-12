@@ -22,6 +22,8 @@ const studentSchema = new mongoose.Schema({
 
   // App usage stats
   careerScore: { type: Number, default: 0 },
+  isBanned: { type: Boolean, default: false },
+  bannedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now }
 });
 

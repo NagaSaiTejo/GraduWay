@@ -3,6 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:graduway/providers/app_providers.dart';
 import 'package:graduway/data/models/models.dart';
+import 'package:graduway/services/ai_service.dart';
+import 'package:graduway/services/webrtc_service.dart';
+import 'package:graduway/services/industry_partnership_service.dart';
+import 'package:graduway/core/multi_college_config.dart';
 
 void main() {
   // ─── AuthNotifier Unit Tests ───────────────────────────────────────────────
@@ -367,6 +371,101 @@ void main() {
       final updated = original.copyWith(upvotes: 10);
       expect(updated.upvotes, 10);
       expect(updated.question, 'Test'); // unchanged
+    });
+  });
+
+  // ─── Future Scope Foundation Tests ───────────────────────────────────────
+  group('Future Scope — WebRTC Foundation', () {
+    test('MentorshipSession defaults are set for Phase 2 calls', () {
+      final session = MentorshipSession(
+        sessionId: 'sess_001',
+        studentId: 'stu_01',
+        alumniId: 'al_01',
+        scheduledAt: DateTime(2026, 1, 1),
+      );
+
+      expect(session.durationMinutes, 30);
+      expect(session.screenSharingEnabled, true);
+    });
+
+    test('WebRTC state moves to offering on initiateSession', () async {
+      WebRTCService.dispose();
+      expect(WebRTCService.state, WebRTCSignalingState.idle);
+
+      await WebRTCService.initiateSession(
+        MentorshipSession(
+          sessionId: 'sess_002',
+          studentId: 'stu_02',
+          alumniId: 'al_02',
+          scheduledAt: DateTime(2026, 1, 1),
+        ),
+      );
+
+      expect(WebRTCService.state, WebRTCSignalingState.offering);
+      WebRTCService.dispose();
+      expect(WebRTCService.state, WebRTCSignalingState.idle);
+    });
+  });
+
+  group('Future Scope — AI Matching Foundation', () {
+    test('Mentorship match score is bounded between 0 and 1', () {
+      final score = AIService.calculateMentorshipMatchScore(
+        studentGoalSkills: ['Flutter', 'Dart', 'Firebase'],
+        alumniSkills: ['Flutter', 'Dart', 'AWS'],
+        studentTargetRole: 'Mobile Engineer',
+        alumniTargetRole: 'Mobile Engineer',
+      );
+
+      expect(score, greaterThanOrEqualTo(0));
+      expect(score, lessThanOrEqualTo(1));
+    });
+
+    test('Mentorship match score is zero for empty skill vectors', () {
+      final score = AIService.calculateMentorshipMatchScore(
+        studentGoalSkills: const [],
+        alumniSkills: ['Flutter'],
+        studentTargetRole: 'Mobile Engineer',
+        alumniTargetRole: 'Mobile Engineer',
+      );
+
+      expect(score, 0);
+    });
+  });
+
+  group('Future Scope — Multi-College & Partnerships', () {
+    test('Active college config builds isolated Firestore paths', () {
+      expect(activeCollege.collection('referrals'),
+          'colleges/aditya_ec/referrals');
+      expect(activeCollege.emailDomain, isNotEmpty);
+    });
+
+    test('Supported colleges includes active college config', () {
+      expect(supportedColleges, contains(activeCollege));
+    });
+
+    test('ReferralOpportunity toFirestore keeps core fields', () {
+      final opportunity = ReferralOpportunity(
+        id: 'r1',
+        alumniId: 'a1',
+        alumniName: 'Ravi',
+        company: 'Amazon',
+        role: 'SDE',
+        description: 'Referral for backend role',
+        requiredSkills: const ['Node.js', 'MongoDB'],
+        targetBranch: 'CSE',
+        targetYear: 3,
+        postedAt: DateTime(2026, 1, 1),
+        expiresAt: DateTime(2026, 2, 1),
+        isActive: true,
+        applicantCount: 0,
+        firestorePath: 'colleges/aditya_ec/referrals/r1',
+      );
+
+      final data = opportunity.toFirestore();
+      expect(data['company'], 'Amazon');
+      expect(data['role'], 'SDE');
+      expect(data['targetYear'], 3);
+      expect(data['requiredSkills'], isA<List<String>>());
     });
   });
 
