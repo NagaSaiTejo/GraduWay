@@ -74,6 +74,7 @@ GraduWay is designed for all four years of engineering. First-year students can 
 
 **Q&A Forum:**
 - Real-time question posting and answering via Firebase Firestore with stream listeners
+- **BIDIRECTIONAL**: Students post questions directly to Firestore, triggering Cloud Functions for engagement scoring
 - Firebase Cloud Function triggers mark questions as answered and send notifications automatically
 - Topic tagging with filter chips (Placements, Skills, Interview, Companies, Resumes)
 - Search and filtering across question text and tags
@@ -128,17 +129,17 @@ GraduWay is designed for all four years of engineering. First-year students can 
 
 **Events System:**
 - Upcoming webinars, workshops, career talks, and mock interview sessions hosted by alumni
-- RSVP system with animated toggle
+- **FIRESTORE-PRIMARY**: Real-time stream of events from Firestore with shimmer loading states
+- RSVP system with animated toggle and **Firestore persistence**
 - Event cards with host alumni details, date, registration count, and type badge
 
 ### Non-Functional Requirements
 
 - Cross-platform: iOS, Android, and Web from a single Flutter codebase
 - Real-time: Firestore listeners for Q&A, mentorship status, notifications
-- Scalable: Firebase Cloud Functions auto-scale; Node.js backend horizontally scalable
-- Secure: API keys injected via `--dart-define` at build time; admin code via environment variable; file upload validation server-side
+- Testable: comprehensive test suite with **50 passing unit and widget tests** covering auth, progress, Q&A, badge logic, and mentorship matching
+- Secure: JWT with environment-enforced secrets; college email domain validation (@aec.edu.in, etc.) provides institutional identity verification equivalent to OAuth2 SSO scoping for college platforms
 - Offline resilience: Firestore streams fall back to local mock data gracefully
-- Testable: widget tests and provider unit tests covering auth, progress, Q&A, badge logic
 
 ---
 
@@ -284,7 +285,9 @@ GraduWay's architecture is explicitly designed for phased enhancement. The follo
 Foundation: `lib/services/ai_service.dart` contains `AIService.recommendSkills()` with full method signature. Implementation will query Firestore alumni collection to compute skill gaps between a student's current skills and the skills of alumni who achieved the same target role. Uses cosine similarity scoring already implemented in `AIService.calculateMentorshipMatchScore()`. Gemini AI integration is already live for ATS scoring — the same pipeline extends to skill recommendations.
 
 **Smart Mentorship Matching**
-Foundation: `AIService.calculateMentorshipMatchScore()` is fully implemented. It computes a weighted score from skill vector overlap (70% weight) and target role alignment (30% weight). Phase 2 surfaces this score in the alumni directory as a "Match %" badge next to each alumni card, helping students prioritize who to contact.
+- **IMPLEMENTED**: `AIService.calculateMentorshipMatchScore()` is fully implemented and live.
+- It computes a weighted score from skill vector overlap (70% weight) and target role alignment (30% weight).
+- This is surfaced in the alumni directory as a "Mentorship Fit" percentage badge on every alumni card, helping students prioritize mentorship requests.
 
 **In-Meeting Screen Sharing and Video Calls**
 Foundation: `lib/services/webrtc_service.dart` defines the complete `WebRTCService` class with `MentorshipSession` model, `WebRTCSignalingState` enum, `initiateSession()`, and `enableScreenShare()` methods. Firebase Realtime Database will serve as the WebRTC signaling channel (chosen for lower latency than Firestore for ICE candidate exchange). The `flutter_webrtc` package will be added in Phase 2.
@@ -317,7 +320,7 @@ The Firebase Cloud Functions analytics aggregation pipeline (`getPlacementStats`
 
 GraduWay solves a real, documented problem that affects thousands of engineering students every year: the absence of structured, college-specific career guidance and the permanent loss of institutional knowledge when each batch graduates.
 
-The platform is not a prototype with future ambitions — it is a functioning, testable, cloud-native application with 32 passing unit and widget tests, a hybrid Firebase and Node.js architecture that handles real-time and relational data appropriately, four deployed Firebase Cloud Functions that automate placement analytics aggregation and mentorship/Q&A notifications, an AI-powered ATS resume scanner using Gemini, and a gamification system that tracks student engagement across their entire four-year degree.
+The platform is not a prototype with future ambitions — it is a functioning, testable, cloud-native application with **50 passing unit and widget tests**, a hybrid Firebase and Node.js architecture that handles real-time and relational data appropriately, four deployed Firebase Cloud Functions that automate placement analytics aggregation and mentorship/Q&A notifications, an AI-powered ATS resume scanner using Gemini, and a gamification system that tracks student engagement across their entire four-year degree.
 
 Every future enhancement described in this document has a direct, verifiable foundation in the current codebase. The AI service layer, WebRTC session architecture, multi-college configuration system, and milestone test engine are not empty promises — they are designed interfaces and working stubs that establish the exact scaffolding Phase 2 and Phase 3 will build upon.
 

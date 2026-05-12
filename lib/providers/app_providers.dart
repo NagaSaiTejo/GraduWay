@@ -348,6 +348,12 @@ class StudentProgressNotifier extends StateNotifier<StudentProgressState> {
     state = newState;
   }
 
+  /// Call when a mentorship request is accepted
+  void trackMentorshipAccepted(String alumniId) {
+    final newCount = state.mentorSessions + 1;
+    state = state.copyWith(mentorSessions: newCount);
+  }
+
   /// Call when student views an alumni profile
   void trackAlumniView(String alumniId) {
     if (state.viewedAlumniIds.contains(alumniId)) return; // already counted

@@ -182,6 +182,20 @@ class EventModel {
       isRsvped: data['isRsvped'] as bool? ?? false,
     );
   }
+
+  EventModel copyWith({int? registeredCount, bool? isRsvped}) {
+    return EventModel(
+      id: id,
+      title: title,
+      description: description,
+      hostAlumniName: hostAlumniName,
+      hostCompany: hostCompany,
+      eventDate: eventDate,
+      type: type,
+      registeredCount: registeredCount ?? this.registeredCount,
+      isRsvped: isRsvped ?? this.isRsvped,
+    );
+  }
 }
 
 // ─── Badge ────────────────────────────────────────────────────────────────────

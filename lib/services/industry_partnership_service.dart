@@ -93,6 +93,18 @@ class IndustryPartnershipService {
   // Firestore collection path: per-college isolation
   static const String _collection = 'colleges/aditya_ec/referrals';
 
+  /// Check if a student is eligible for a specific referral
+  static bool isEligibleForReferral({
+    required String studentBranch,
+    required int studentYear,
+    required ReferralOpportunity opportunity,
+  }) {
+    final branchMatch = opportunity.targetBranch == 'All' ||
+        opportunity.targetBranch == studentBranch;
+    final yearMatch = studentYear >= opportunity.targetYear;
+    return branchMatch && yearMatch;
+  }
+
   /// Stream of active referral opportunities for a student
   static Stream<List<ReferralOpportunity>> getActiveReferrals({
     String branch = 'All',
