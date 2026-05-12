@@ -7,6 +7,7 @@ import 'package:graduway/services/ai_service.dart';
 import 'package:graduway/services/webrtc_service.dart';
 import 'package:graduway/services/industry_partnership_service.dart';
 import 'package:graduway/core/multi_college_config.dart';
+import 'package:graduway/screens/gamification/badges_screen.dart';
 
 void main() {
   // ─── AuthNotifier Unit Tests ───────────────────────────────────────────────
@@ -539,4 +540,60 @@ void main() {
       expect(find.text('Required'), findsOneWidget);
     });
   });
+
+  // ─── Gamification & Analytics Widget Tests ────────────────────────────────
+  group('Widget Tests — BadgesScreen Rendering', () {
+    testWidgets('BadgesScreen builds without Firebase dependency errors',
+        (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: BadgesScreen(),
+          ),
+        ),
+      );
+      // Verify the screen renders (either loading or with data)
+      expect(find.byType(BadgesScreen), findsOneWidget);
+      expect(find.byType(TabBar), findsOneWidget);
+      expect(find.text('My Progress'), findsOneWidget);
+      expect(find.text('Leaderboard'), findsOneWidget);
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      // Even if Firestore is unavailable, the UI should not crash
+      expect(find.byType(SingleChildScrollView), findsWidgets);
+    });
+
+    testWidgets('BadgesScreen tab switching works correctly', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: BadgesScreen(),
+          ),
+        ),
+      );
+      expect(find.text('Leaderboard'), findsOneWidget);
+      await tester.tap(find.text('Leaderboard'));
+      await tester.pumpAndSettle();
+      // Leaderboard should be visible (either loading or with data)
+      expect(find.text('Career Ready Leaderboard'), findsOneWidget);
+    });
+
+    testWidgets('Progress stats are rendered in badges tab', (tester) async {
+      await tester.pumpWidget(
+        const ProviderScope(
+          child: MaterialApp(
+            home: BadgesScreen(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle(const Duration(milliseconds: 500));
+      // Verify progress stat labels render
+      expect(find.text('Questions Asked'), findsOneWidget);
+      expect(find.text('Events Attended'), findsOneWidget);
+      expect(find.text('Alumni Viewed'), findsOneWidget);
+    });
+  });
+
+  // Note: Analytics logEvent calls are wrapped in try-catch in production code,
+  // so they gracefully handle Firebase initialization state. Widget tests above
+  // verify that screens render correctly with analytics imports present.
 }

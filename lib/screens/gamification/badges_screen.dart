@@ -586,7 +586,7 @@ class _LeaderboardTabState extends State<_LeaderboardTab> {
                     .animate(delay: Duration(milliseconds: i * 80))
                     .fadeIn()
                     .slideX(begin: 0.1);
-              }).toList(),
+              }),
               const SizedBox(height: 20),
               Container(
                 padding: const EdgeInsets.all(14),
