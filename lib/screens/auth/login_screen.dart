@@ -128,7 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       decoration: const InputDecoration(
                         labelText: 'Email Address',
                         prefixIcon: Icon(Icons.email_outlined),
-                        hintText: 'e.g. name@stud.com',
+                        hintText: 'e.g. name@aec.edu.in',
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
@@ -141,7 +141,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         }
                         final domain = email.substring(atIndex + 1);
                         if (!_allowedEmailDomains.contains(domain)) {
-                          return 'Use your college email (@stud.com, @alum.com, or @admin.com)';
+                          return 'Use your college email (@acet.ac.in, @aec.edu.in, or @acoe.edu.in)';
                         }
                         return null;
                       },
@@ -479,7 +479,7 @@ class _CredentialHintCard extends StatelessWidget {
             color: AppColors.primary,
             lines: [
               'Use your college email domain',
-              'e.g.  yourname@stud.com',
+              'e.g.  yourname@aec.edu.in',
               'Password: your registered password',
             ],
           ),
@@ -493,7 +493,7 @@ class _CredentialHintCard extends StatelessWidget {
             color: AppColors.alumni,
             lines: [
               'Use your college email domain',
-              'e.g.  yourname@alum.com',
+              'e.g.  yourname@acet.ac.in',
               'Password: your registered password',
             ],
           ),
@@ -507,7 +507,7 @@ class _CredentialHintCard extends StatelessWidget {
             color: AppColors.admin,
             lines: [
               'Use your college email domain',
-              'e.g.  yourname@admin.com',
+              'e.g.  yourname@acoe.edu.in',
               'Password: your registered password',
             ],
           ),

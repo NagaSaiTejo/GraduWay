@@ -30,7 +30,11 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
   int _selectedYear = 1;
   bool _isLoading = false;
 
-  static const String _studentEmailDomain = 'stud.com';
+  static const Set<String> _allowedEmailDomains = {
+    'acet.ac.in',
+    'aec.edu.in',
+    'acoe.edu.in',
+  };
 
   // File picks
   XFile? _profileImage;
@@ -269,8 +273,8 @@ class _StudentRegistrationScreenState extends State<StudentRegistrationScreen> {
                       return 'Enter a valid email';
                     }
                     final domain = email.substring(atIndex + 1);
-                    if (domain != _studentEmailDomain) {
-                      return 'Student email must end with @$_studentEmailDomain';
+                    if (!_allowedEmailDomains.contains(domain)) {
+                      return 'Use college email: @acet.ac.in, @aec.edu.in, or @acoe.edu.in';
                     }
                     return null;
                   },

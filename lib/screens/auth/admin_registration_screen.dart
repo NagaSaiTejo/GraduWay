@@ -27,7 +27,11 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
   bool _isLoading = false;
   XFile? _profileImage;
   static const int _maxImageBytes = 2 * 1024 * 1024; // 2 MB
-  static const String _adminEmailDomain = 'gmail.com';
+  static const Set<String> _allowedEmailDomains = {
+    'acet.ac.in',
+    'aec.edu.in',
+    'acoe.edu.in',
+  };
 
   @override
   void dispose() {
@@ -195,8 +199,8 @@ class _AdminRegistrationScreenState extends State<AdminRegistrationScreen> {
                       return 'Enter a valid email';
                     }
                     final domain = email.substring(atIndex + 1);
-                    if (domain != _adminEmailDomain) {
-                      return 'Admin email must end with @$_adminEmailDomain';
+                    if (!_allowedEmailDomains.contains(domain)) {
+                      return 'Use college email: @acet.ac.in, @aec.edu.in, or @acoe.edu.in';
                     }
                     return null;
                   },

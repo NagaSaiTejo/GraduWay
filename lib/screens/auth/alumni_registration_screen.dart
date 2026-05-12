@@ -29,7 +29,11 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
   bool _isLoading = false;
   XFile? _profileImage;
   static const int _maxImageBytes = 2 * 1024 * 1024; // 2 MB
-  static const String _alumniEmailDomain = 'alum.com';
+  static const Set<String> _allowedEmailDomains = {
+    'acet.ac.in',
+    'aec.edu.in',
+    'acoe.edu.in',
+  };
 
   @override
   void dispose() {
@@ -191,8 +195,8 @@ class _AlumniRegistrationScreenState extends State<AlumniRegistrationScreen> {
                       return 'Enter a valid email';
                     }
                     final domain = email.substring(atIndex + 1);
-                    if (domain != _alumniEmailDomain) {
-                      return 'Alumni email must end with @$_alumniEmailDomain';
+                    if (!_allowedEmailDomains.contains(domain)) {
+                      return 'Use college email: @acet.ac.in, @aec.edu.in, or @acoe.edu.in';
                     }
                     return null;
                   },

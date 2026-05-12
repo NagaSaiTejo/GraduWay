@@ -8,9 +8,6 @@ const { uploadStudentFiles, uploadProfileImage } = require('../middleware/upload
 const router = express.Router();
 
 const allowedEmailDomains = new Set([
-  'stud.com',
-  'alum.com',
-  'admin.com',
   'acet.ac.in',
   'aec.edu.in',
   'acoe.edu.in',
@@ -82,8 +79,8 @@ router.post('/register/student', (req, res) => {
       if (!name || !email || !password || !rollNumber || !branch || !currentYear) {
         return res.status(400).json({ message: 'All required fields must be filled.' });
       }
-      if (!hasAllowedEmailDomain(email) || emailDomain(email) !== 'stud.com') {
-        return res.status(400).json({ message: 'Student email must end with @stud.com.' });
+      if (!hasAllowedEmailDomain(email)) {
+        return res.status(400).json({ message: 'Use your college email domain (@acet.ac.in, @aec.edu.in, or @acoe.edu.in).' });
       }
 
       // Check email uniqueness across ALL collections
@@ -138,8 +135,8 @@ router.post('/register/alumni', (req, res) => {
       if (!name || !email || !password || !passoutYear || !company || !role) {
         return res.status(400).json({ message: 'All required fields must be filled.' });
       }
-      if (!hasAllowedEmailDomain(email) || emailDomain(email) !== 'alum.com') {
-        return res.status(400).json({ message: 'Alumni email must end with @alum.com.' });
+      if (!hasAllowedEmailDomain(email)) {
+        return res.status(400).json({ message: 'Use your college email domain (@acet.ac.in, @aec.edu.in, or @acoe.edu.in).' });
       }
 
       // Check email uniqueness across ALL collections
@@ -186,8 +183,8 @@ router.post('/register/admin', (req, res) => {
     try {
       const { name, email, password, adminCode } = req.body;
 
-      if (!hasAllowedEmailDomain(email) || emailDomain(email) !== 'admin.com') {
-        return res.status(400).json({ message: 'Admin email must end with @admin.com.' });
+      if (!hasAllowedEmailDomain(email)) {
+        return res.status(400).json({ message: 'Use your college email domain (@acet.ac.in, @aec.edu.in, or @acoe.edu.in).' });
       }
 
       // SECURITY: Admin code is stored in environment variable, never hardcoded
@@ -240,7 +237,7 @@ router.post('/login', async (req, res) => {
     }
     if (!hasAllowedEmailDomain(email)) {
       return res.status(400).json({
-        message: 'Use your registered college email domain (@stud.com, @alum.com, or @admin.com).',
+        message: 'Use your registered college email domain (@acet.ac.in, @aec.edu.in, or @acoe.edu.in).',
       });
     }
 
