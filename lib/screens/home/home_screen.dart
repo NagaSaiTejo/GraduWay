@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
+import '../../providers/firestore_providers.dart';
 import '../../data/mock/alumni_data.dart';
 import '../../data/mock/placement_data.dart';
 import '../../widgets/custom_app_bar.dart';
@@ -188,7 +189,7 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 32),
 
-            // Top Alumni
+            // Top Alumni — reads from alumniListProvider (Firestore-backed)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -208,96 +209,120 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 12),
-            SizedBox(
-              height: 180,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: mockAlumni.length,
-                itemBuilder: (context, i) {
-                  final alu = mockAlumni[i];
-                  return GestureDetector(
-                    onTap: () => context.push('/alumni/${alu.id}'),
-                    child: Container(
-                      width: 140,
-                      margin: const EdgeInsets.only(right: 12),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.bgCard,
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                              radius: 28,
-                              backgroundImage: NetworkImage(alu.photoUrl)),
-                          const SizedBox(height: 12),
-                          Text(alu.name.split(' ').first,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.w700, fontSize: 13)),
-                          Text(alu.company,
-                              style: const TextStyle(
-                                  color: AppColors.textMuted, fontSize: 10)),
-                          const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Text('₹${alu.package}L',
-                                style: const TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.primary)),
+            Consumer(
+              builder: (context, ref, _) {
+                final alumniList = ref.watch(alumniListProvider);
+                // Use live Firestore data; fall back to mock only when empty
+                // (which happens when Firebase is not configured in dev)
+                final displayAlumni =
+                    alumniList.isEmpty ? mockAlumni : alumniList;
+                return SizedBox(
+                  height: 180,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    itemCount: displayAlumni.length,
+                    itemBuilder: (context, i) {
+                      final alu = displayAlumni[i];
+                      return GestureDetector(
+                        onTap: () => context.push('/alumni/${alu.id}'),
+                        child: Container(
+                          width: 140,
+                          margin: const EdgeInsets.only(right: 12),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.bgCard,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.border),
                           ),
-                        ],
-                      ),
-                    ),
-                  )
-                      .animate()
-                      .fadeIn(delay: Duration(milliseconds: 400 + (i * 100)));
-                },
-              ),
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                  radius: 28,
+                                  backgroundImage: NetworkImage(alu.photoUrl)),
+                              const SizedBox(height: 12),
+                              Text(alu.name.split(' ').first,
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 13)),
+                              Text(alu.company,
+                                  style: const TextStyle(
+                                      color: AppColors.textMuted,
+                                      fontSize: 10)),
+                              const Spacer(),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 8, vertical: 2),
+                                decoration: BoxDecoration(
+                                    color: AppColors.primary
+                                        .withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Text('₹${alu.package}L',
+                                    style: const TextStyle(
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w800,
+                                        color: AppColors.primary)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                          .animate()
+                          .fadeIn(
+                              delay: Duration(milliseconds: 400 + (i * 100)));
+                    },
+                  ),
+                );
+              },
             ),
 
             const SizedBox(height: 32),
 
-            // Trending Q&A
+            // Trending Q&A — reads from trendingQAProvider (Firestore-backed)
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text('Trending Q&A',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             ),
             const SizedBox(height: 16),
-            ...mockQA
-                .take(2)
-                .map((q) => Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 6),
-                      child: Card(
-                        child: ListTile(
-                          title: Text(q.question,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                  fontSize: 14, fontWeight: FontWeight.w600)),
-                          subtitle: Text(
-                              '${q.answers.length} answers • ${q.upvotes} upvotes',
-                              style: const TextStyle(fontSize: 11)),
-                          trailing: const Icon(Icons.chevron_right_rounded),
-                          onTap: () {
-                            ref.read(studentNavIndexProvider.notifier).state =
-                                2;
-                            context.go('/qa');
-                          },
-                        ),
-                      ),
-                    ))
-                .toList()
-                .animate()
-                .fadeIn(delay: 600.ms),
+            Consumer(
+              builder: (context, ref, _) {
+                final trending = ref.watch(trendingQAProvider);
+                // Use live data; fall back to mock when Firebase not configured
+                final displayQA = trending.isEmpty
+                    ? mockQA.take(2).toList()
+                    : trending.take(2).toList();
+                return Column(
+                  children: displayQA
+                      .map((q) => Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 6),
+                            child: Card(
+                              child: ListTile(
+                                title: Text(q.question,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600)),
+                                subtitle: Text(
+                                    '${q.answers.length} answers • ${q.upvotes} upvotes',
+                                    style: const TextStyle(fontSize: 11)),
+                                trailing:
+                                    const Icon(Icons.chevron_right_rounded),
+                                onTap: () {
+                                  ref
+                                      .read(studentNavIndexProvider.notifier)
+                                      .state = 2;
+                                  context.go('/qa');
+                                },
+                              ),
+                            ),
+                          ))
+                      .toList(),
+                ).animate().fadeIn(delay: 600.ms);
+              },
+            ),
 
             const SizedBox(height: 100),
           ],

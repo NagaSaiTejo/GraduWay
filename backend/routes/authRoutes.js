@@ -235,9 +235,12 @@ router.post('/register/admin', (req, res) => {
 
 // ─── Login (All Roles) ───────────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
-  console.log('--- Login Attempt ---', req.body.email);
+  // Sanitize inputs — trim whitespace to prevent bypass via leading/trailing spaces
+  const email = typeof req.body.email === 'string' ? req.body.email.trim().toLowerCase() : '';
+  const password = typeof req.body.password === 'string' ? req.body.password.trim() : '';
+
+  console.log('--- Login Attempt ---', email);
   try {
-    const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required.' });
     }
@@ -290,15 +293,13 @@ router.post('/login', async (req, res) => {
       roadmapProgressObj = {};
     }
 
-    // Issue JWT (non-breaking: still returns user payload as before)
-    const secret = process.env.JWT_SECRET || JWT_SECRET || 'dev_jwt_secret_change_in_prod';
-    let token = null;
-    try {
-      token = jwt.sign({ id: user._id?.toString(), email: user.email, role }, secret, { expiresIn: '7d' });
-    } catch (e) {
-      // token creation failure should not block normal login response
-      console.error('JWT sign error', e?.message || e);
-    }
+    // Issue JWT — JWT_SECRET is required at startup (validated in middleware/auth.js).
+    // Any signing error here is a genuine server misconfiguration and must NOT be swallowed.
+    const token = jwt.sign(
+      { id: user._id?.toString(), email: user.email, role },
+      JWT_SECRET,
+      { expiresIn: '7d' },
+    );
 
     res.status(200).json({
       message: 'Login successful',

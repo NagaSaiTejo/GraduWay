@@ -486,9 +486,9 @@ final selectedBranchProvider = StateProvider<String>((ref) => 'All');
 final alumniListProvider = Provider<List<AlumniModel>>((ref) {
   final firestoreAlumni = ref.watch(alumniStreamProvider);
   return firestoreAlumni.when(
-    data: (list) => list.isNotEmpty ? list : mockAlumni,
-    loading: () => mockAlumni,
-    error: (_, __) => mockAlumni,
+    data: (list) => list,
+    loading: () => const [],
+    error: (_, __) => const [],
   );
 });
 

@@ -5,6 +5,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:intl/intl.dart';
 import '../../providers/app_providers.dart';
 import '../../providers/firestore_providers.dart';
+import '../../services/firebase_service.dart';
 import '../../theme/app_colors.dart';
 import '../../widgets/custom_app_bar.dart';
 import '../../data/models/models.dart';
@@ -234,23 +235,44 @@ class _QAScreenState extends ConsumerState<QAScreen> {
             ),
             const SizedBox(height: 28),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 if (_questionController.text.trim().isEmpty) return;
                 final student = ref.read(authProvider).student!;
+                final tags = _selectedTags.isEmpty
+                    ? ['General']
+                    : List<String>.from(_selectedTags);
+                final questionText = _questionController.text.trim();
                 final newQ = QAModel(
                   id: 'q_${DateTime.now().millisecondsSinceEpoch}',
-                  question: _questionController.text.trim(),
+                  question: questionText,
                   askedBy: student.name,
                   askedById: student.rollNumber,
                   timestamp: DateTime.now(),
                   upvotes: 0,
-                  tags: _selectedTags.isEmpty
-                      ? ['General']
-                      : List.from(_selectedTags),
+                  tags: tags,
                   answers: [],
                   isAnswered: false,
                 );
+
+                // Add to local state immediately (optimistic update)
                 ref.read(qaProvider.notifier).addQuestion(newQ);
+
+                // Also persist to Firestore so it's visible cross-device
+                // and triggers the Cloud Function engagement score update.
+                try {
+                  await FirebaseService.postQuestion({
+                    'question': questionText,
+                    'askedBy': student.name,
+                    'askedById': student.rollNumber,
+                    'tags': tags,
+                    'upvotes': 0,
+                    'isAnswered': false,
+                  });
+                } catch (_) {
+                  // Firestore write failed — local state already updated, so
+                  // the user sees their question. Will sync on next load.
+                }
+
                 try {
                   FirebaseAnalytics.instance
                       .logEvent(name: 'question_posted', parameters: {
@@ -258,14 +280,17 @@ class _QAScreenState extends ConsumerState<QAScreen> {
                     'length': newQ.question.length,
                   });
                 } catch (_) {}
+
                 _questionController.clear();
                 _selectedTags.clear();
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text(
-                          'Question posted! Alumni will notify you once answered.')),
-                );
+                if (mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content: Text(
+                            'Question posted! Alumni will notify you once answered.')),
+                  );
+                }
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),

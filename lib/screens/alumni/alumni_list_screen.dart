@@ -6,6 +6,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../theme/app_colors.dart';
 import '../../providers/app_providers.dart';
 import '../../data/models/alumni_model.dart';
+import '../../services/ai_service.dart';
 
 class AlumniListScreen extends ConsumerStatefulWidget {
   const AlumniListScreen({super.key});
@@ -29,9 +30,20 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authProvider);
+    final student = authState.student;
     final selectedBranch = ref.watch(selectedBranchProvider);
     final alumni = ref.watch(searchedAlumniProvider);
     final query = ref.watch(alumniSearchProvider);
+    final selectedGoal = student?.targetCareer.isNotEmpty == true
+        ? student!.targetCareer
+        : ref.watch(careerGoalProvider);
+    final effectiveGoal = selectedGoal.isNotEmpty
+        ? selectedGoal
+        : _goalFromBranch(student?.branch ?? '');
+    final studentGoalSkills = student?.skills.isNotEmpty == true
+        ? student!.skills
+        : _skillsForGoal(effectiveGoal);
 
     return Scaffold(
       body: Container(
@@ -150,11 +162,31 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
                             itemCount: alumni.length,
                             separatorBuilder: (_, __) =>
                                 const SizedBox(height: 12),
-                            itemBuilder: (context, i) => _AlumniCard(
-                                    alumni: alumni[i], index: i)
-                                .animate(delay: Duration(milliseconds: i * 60))
-                                .fadeIn(duration: 350.ms)
-                                .slideX(begin: 0.15, end: 0, duration: 350.ms),
+                            itemBuilder: (context, i) {
+                              final alumniItem = alumni[i];
+                              final mentorshipScore = effectiveGoal.isEmpty
+                                  ? null
+                                  : AIService.calculateMentorshipMatchScore(
+                                      studentGoalSkills: studentGoalSkills,
+                                      alumniSkills: alumniItem.skills,
+                                      studentTargetRole: effectiveGoal,
+                                      alumniTargetRole:
+                                          alumniItem.targetRole.isNotEmpty
+                                              ? alumniItem.targetRole
+                                              : alumniItem.role,
+                                    );
+
+                              return _AlumniCard(
+                                alumni: alumniItem,
+                                index: i,
+                                mentorshipScore: mentorshipScore,
+                              )
+                                  .animate(
+                                      delay: Duration(milliseconds: i * 60))
+                                  .fadeIn(duration: 350.ms)
+                                  .slideX(
+                                      begin: 0.15, end: 0, duration: 350.ms);
+                            },
                           ),
               ),
             ],
@@ -181,13 +213,57 @@ class _AlumniListScreenState extends ConsumerState<AlumniListScreen> {
   }
 }
 
+String _goalFromBranch(String branch) {
+  switch (branch) {
+    case 'CSE':
+    case 'IT':
+      return 'Flutter';
+    case 'ECE':
+      return 'AWS Cloud';
+    case 'MECH':
+      return 'Service Sector';
+    case 'EEE':
+      return 'ServiceNow';
+    default:
+      return 'Web Dev';
+  }
+}
+
+List<String> _skillsForGoal(String goal) {
+  switch (goal.toLowerCase()) {
+    case 'flutter':
+      return ['Flutter', 'Dart', 'Firebase'];
+    case 'web dev':
+      return ['React', 'Node.js', 'JavaScript'];
+    case 'aws cloud':
+      return ['AWS', 'Docker', 'Cloud'];
+    case 'servicenow':
+      return ['ServiceNow', 'ITIL', 'Python'];
+    case 'faang':
+      return ['DSA', 'System Design', 'Java'];
+    case 'data science':
+      return ['Python', 'SQL', 'Machine Learning'];
+    case 'cybersecurity':
+      return ['Security', 'Networking', 'Linux'];
+    case 'service sector':
+      return ['Java', 'SQL', 'Aptitude'];
+    default:
+      return ['DSA', 'Projects', 'Communication'];
+  }
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Alumni Card — overflow-safe layout
 // ─────────────────────────────────────────────────────────────────────────────
 class _AlumniCard extends StatelessWidget {
   final AlumniModel alumni;
   final int index;
-  const _AlumniCard({required this.alumni, required this.index});
+  final double? mentorshipScore;
+  const _AlumniCard({
+    required this.alumni,
+    required this.index,
+    this.mentorshipScore,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -308,6 +384,25 @@ class _AlumniCard extends StatelessWidget {
                             ))
                         .toList(),
                   ),
+                  if (mentorshipScore != null) ...[
+                    const SizedBox(height: 6),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.auto_awesome_rounded,
+                            size: 11, color: AppColors.primary),
+                        const SizedBox(width: 4),
+                        Text(
+                          'Mentorship fit ${(mentorshipScore! * 100).round()}%',
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

@@ -20,7 +20,9 @@ bool _isFirebaseReady() {
 
 // ─── Alumni from Firestore ────────────────────────────────────────────────────
 /// Real-time alumni stream from Firestore.
-/// Falls back to mock data if Firestore is unavailable (dev mode).
+/// - Firebase NOT configured (dev/CI): returns mock data so UI is testable.
+/// - Firebase configured but collection empty or error: returns [] so the UI
+///   shows a genuine empty/error state rather than seeded mock content.
 final alumniStreamProvider = StreamProvider<List<AlumniModel>>((ref) {
   if (!_isFirebaseReady()) return Stream.value(mockAlumni);
 
@@ -29,15 +31,15 @@ final alumniStreamProvider = StreamProvider<List<AlumniModel>>((ref) {
       .where('isVerified', isEqualTo: true)
       .orderBy('rating', descending: true)
       .snapshots()
-      .map((snapshot) {
-    if (snapshot.docs.isEmpty) return mockAlumni; // dev fallback
-    return snapshot.docs.map((doc) => AlumniModel.fromFirestore(doc)).toList();
-  }).handleError((_) => mockAlumni);
+      .map((snapshot) =>
+          snapshot.docs.map((doc) => AlumniModel.fromFirestore(doc)).toList())
+      .handleError((Object _) => <AlumniModel>[]);
 });
 
 // ─── Q&A from Firestore ──────────────────────────────────────────────────────
 /// Real-time Q&A stream from Firestore.
-/// Falls back to mockQA in development when Firebase is not configured.
+/// - Firebase NOT configured (dev/CI): returns mockQA so UI is testable.
+/// - Firebase configured: returns live data; returns [] on error (not mock).
 final qaStreamProvider = StreamProvider<List<QAModel>>((ref) {
   if (!_isFirebaseReady()) return Stream.value(mockQA);
 
@@ -46,10 +48,9 @@ final qaStreamProvider = StreamProvider<List<QAModel>>((ref) {
       .orderBy('timestamp', descending: true)
       .limit(50)
       .snapshots()
-      .map((snapshot) {
-    if (snapshot.docs.isEmpty) return mockQA; // dev fallback
-    return snapshot.docs.map((doc) => QAModel.fromFirestore(doc)).toList();
-  }).handleError((_) => mockQA);
+      .map((snapshot) =>
+          snapshot.docs.map((doc) => QAModel.fromFirestore(doc)).toList())
+      .handleError((Object _) => <QAModel>[]);
 });
 
 // ─── Placement Statistics via Cloud Functions ────────────────────────────────
@@ -119,8 +120,9 @@ final mentorshipRequestsProvider =
 });
 
 // ─── Events from Firestore ──────────────────────────────────────────────────
-/// Real-time events stream.
-/// Falls back to mockEvents when Firestore is not available.
+/// Real-time events stream with Firestore as the primary source.
+/// - Firebase NOT configured (dev/CI): falls back to mockEvents.
+/// - Firebase configured: streams live data; returns [] on error (not mock).
 final eventsStreamProvider = StreamProvider<List<EventModel>>((ref) {
   if (!_isFirebaseReady()) return Stream.value(mockEvents);
 
@@ -128,24 +130,22 @@ final eventsStreamProvider = StreamProvider<List<EventModel>>((ref) {
       .collection('events')
       .orderBy('eventDate', descending: false)
       .snapshots()
-      .map((snapshot) {
-    if (snapshot.docs.isEmpty) return mockEvents; // dev fallback
-    return snapshot.docs.map((doc) {
-      final data = doc.data();
-      return EventModel(
-        id: doc.id,
-        title: data['title'] as String? ?? '',
-        description: data['description'] as String? ?? '',
-        hostAlumniName: data['hostAlumniName'] as String? ?? '',
-        hostCompany: data['hostCompany'] as String? ?? '',
-        eventDate:
-            (data['eventDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
-        type: data['type'] as String? ?? 'webinar',
-        registeredCount: (data['registeredCount'] as num?)?.toInt() ?? 0,
-        isRsvped: data['isRsvped'] as bool? ?? false,
-      );
-    }).toList();
-  }).handleError((_) => mockEvents);
+      .map((snapshot) => snapshot.docs.map((doc) {
+            final data = doc.data();
+            return EventModel(
+              id: doc.id,
+              title: data['title'] as String? ?? '',
+              description: data['description'] as String? ?? '',
+              hostAlumniName: data['hostAlumniName'] as String? ?? '',
+              hostCompany: data['hostCompany'] as String? ?? '',
+              eventDate:
+                  (data['eventDate'] as Timestamp?)?.toDate() ?? DateTime.now(),
+              type: data['type'] as String? ?? 'webinar',
+              registeredCount: (data['registeredCount'] as num?)?.toInt() ?? 0,
+              isRsvped: data['isRsvped'] as bool? ?? false,
+            );
+          }).toList())
+      .handleError((Object _) => <EventModel>[]);
 });
 
 // ─── Notifications ───────────────────────────────────────────────────────────

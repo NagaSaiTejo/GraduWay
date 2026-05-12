@@ -1,6 +1,10 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_jwt_secret_change_in_prod';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET is required. Set it before starting the backend.');
+}
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization || req.headers.Authorization || req.body?.token || req.query?.token;

@@ -1,3 +1,5 @@
+process.env.JWT_SECRET = process.env.JWT_SECRET || 'test_jwt_secret_for_auth_tests';
+
 const { verifyToken, JWT_SECRET } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 
@@ -35,7 +37,7 @@ test('verifyToken rejects when missing token', (done) => {
 
 test('verifyToken accepts valid Bearer token', (done) => {
   const payload = { id: 'abc123', email: 'a@acet.ac.in', role: 'admin' };
-  const token = jwt.sign(payload, JWT_SECRET || 'dev_jwt_secret_change_in_prod', { expiresIn: '1h' });
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
   const req = makeReq({ authorization: `Bearer ${token}` });
   const res = makeRes();
   const next = () => {
